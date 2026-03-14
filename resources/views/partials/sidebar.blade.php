@@ -1,8 +1,12 @@
 <aside class="sidebar">
   <div class="sidebar-brand">
+    @if(optional($business)->logo_url)
+    <img src="{{ $business->logo_url }}" alt="{{ optional($business)->company_name }}" class="sidebar-logo-img" style="max-height:40px; max-width:120px; object-fit:contain;">
+    @else
     <span class="sidebar-logo">MT</span>
+    @endif
     <div>
-      <span class="sidebar-title">Midnight Travel</span>
+      <span class="sidebar-title">{{ optional($business)->company_name ?? 'Midnight Travel' }}</span>
       <span class="sidebar-subtitle">Invoice System</span>
     </div>
   </div>

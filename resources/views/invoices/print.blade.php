@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice {{ $invoice->invoice_number }} — Midnight Travel</title>
+  <title>Invoice {{ $invoice->invoice_number }} — {{ optional($business)->company_name ?? 'Midnight Travel' }}</title>
   <link rel="stylesheet" href="{{ asset('css/style.css') }}">
   <link rel="stylesheet" href="{{ asset('css/print.css') }}">
 </head>
@@ -11,8 +11,16 @@
   <div class="invoice-print">
     <header class="invoice-print-header">
       <div class="invoice-print-brand">
-        <span class="invoice-print-logo">Midnight Travel</span>
+        @if(optional($business)->logo_url)
+        <img src="{{ $business->logo_url }}" alt="{{ optional($business)->company_name }}" class="invoice-print-logo-img" style="max-height:56px; max-width:200px; object-fit:contain;">
+        @else
+        <span class="invoice-print-logo">{{ optional($business)->company_name ?? 'Midnight Travel' }}</span>
+        @endif
+        @if(optional($business)->tagline)
+        <p class="invoice-print-tagline">{{ $business->tagline }}</p>
+        @else
         <p class="invoice-print-tagline">Where adventure meets luxury</p>
+        @endif
       </div>
       <div class="invoice-print-meta">
         <h1>INVOICE</h1>
@@ -61,7 +69,12 @@
     @if($invoice->terms)<div class="invoice-print-terms"><strong>Terms:</strong> {{ $invoice->terms }}</div>@endif
     <footer class="invoice-print-footer">
       <p>Thank you for your business.</p>
-      <p><strong>Midnight Travel</strong></p>
+      <p><strong>{{ optional($business)->company_name ?? 'Midnight Travel' }}</strong></p>
+      @if(optional($business) && (optional($business)->address || optional($business)->phone || optional($business)->email))
+      @if(optional($business)->address)<p>{{ $business->address }}</p>@endif
+      @if(optional($business)->phone)<span>{{ $business->phone }}</span>@endif
+      @if(optional($business)->email)<span>{{ $business->email }}</span>@endif
+      @endif
     </footer>
   </div>
   <script>window.onload = function() { window.print(); };</script>

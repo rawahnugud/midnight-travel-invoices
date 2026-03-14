@@ -15,7 +15,16 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer('*', function ($view) {
-        $view->with('user', auth()->user());
-    });
+            $view->with('user', auth()->user());
+            try {
+                if (class_exists(\App\Models\BusinessSetting::class) && \Illuminate\Support\Facades\Schema::hasTable('business_settings')) {
+                    $view->with('business', \App\Models\BusinessSetting::get());
+                } else {
+                    $view->with('business', null);
+                }
+            } catch (\Throwable $e) {
+                $view->with('business', null);
+            }
+        });
     }
 }

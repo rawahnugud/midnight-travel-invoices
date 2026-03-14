@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\BusinessSettingsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\SetupController;
@@ -21,7 +22,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
     Route::resource('invoices', InvoiceController::class)->names('invoices');
 
-    Route::middleware('role:admin')->resource('users', UserController::class)->except(['show', 'create', 'edit'])->names('users');
+    Route::middleware('role:admin')->group(function () {
+        Route::resource('users', UserController::class)->except(['show', 'create', 'edit'])->names('users');
+        Route::get('/settings/business', [BusinessSettingsController::class, 'edit'])->name('settings.business.edit');
+        Route::put('/settings/business', [BusinessSettingsController::class, 'update'])->name('settings.business.update');
+    });
 });
 
 Route::fallback(fn () => response()->view('404', [], 404)->header('Content-Type', 'text/html'));
