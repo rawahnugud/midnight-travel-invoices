@@ -110,11 +110,30 @@ a:hover { text-decoration: underline; }
 .table { width: 100%; border-collapse: collapse; }
 .table th, .table td { padding: 0.6rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
 .table th { font-weight: 600; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+.table th.num { text-align: right; }
 .table td.num { text-align: right; font-variant-numeric: tabular-nums; }
 .table tbody tr:hover { background: var(--mt-off-white); }
 .actions { white-space: nowrap; }
 .actions .btn { margin-right: 0.25rem; }
+.actions-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; }
+.actions-wrap .btn { margin-right: 0; }
+.actions-wrap .inline-form { display: inline; }
 .inline-form { display: inline; }
+
+/* Table responsive wrapper (horizontal scroll on small screens) */
+.table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: -0.25rem 0; }
+.table-responsive .table { min-width: 640px; }
+
+/* Invoice list table columns */
+.table-invoices .col-number { width: 120px; }
+.table-invoices .col-customer { min-width: 120px; }
+.table-invoices .col-date { width: 90px; white-space: nowrap; }
+.table-invoices .col-status { width: 90px; }
+.table-invoices .col-total { width: 100px; white-space: nowrap; }
+.table-invoices .col-author { width: 90px; color: var(--text-muted); font-size: 0.875rem; }
+.table-invoices .col-actions { width: 1%; white-space: nowrap; }
+.invoice-number-link { font-weight: 600; color: var(--mt-accent); }
+.invoice-number-link:hover { text-decoration: underline; }
 
 /* Badges */
 .badge { display: inline-block; padding: 0.2rem 0.5rem; font-size: 0.75rem; font-weight: 600; border-radius: 4px; }

@@ -20,9 +20,11 @@ class InvoiceController extends Controller
             $query->where('created_by', $user->id);
         }
 
-        $invoices = $query->latest()->get()->map(function ($inv) {
+        $symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'];
+        $invoices = $query->latest()->get()->map(function ($inv) use ($symbols) {
             $sub = $inv->lineItems->sum(fn ($li) => $li->quantity * $li->unit_price);
             $inv->total = round($sub + ($sub * $inv->tax_rate / 100) - $inv->discount_amount, 2);
+            $inv->currency_symbol = $symbols[$inv->currency ?? 'USD'] ?? ($inv->currency ?? 'USD') . ' ';
             return $inv;
         });
 
