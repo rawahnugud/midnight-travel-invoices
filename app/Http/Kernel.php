@@ -30,5 +30,6 @@ class Kernel extends HttpKernel
     protected $middlewareAliases = [
         'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
         'role' => \App\Http\Middleware\EnsureUserHasRole::class,
+        'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
     ];
 }
