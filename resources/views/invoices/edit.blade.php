@@ -27,10 +27,6 @@
           <input type="date" id="invoice_date" name="invoice_date" value="{{ \Carbon\Carbon::parse($inv->invoice_date)->format('Y-m-d') }}" required>
         </div>
         <div class="form-group">
-          <label for="due_date">Due Date</label>
-          <input type="date" id="due_date" name="due_date" value="{{ $inv->due_date ? \Carbon\Carbon::parse($inv->due_date)->format('Y-m-d') : '' }}">
-        </div>
-        <div class="form-group">
           <label for="status">Status</label>
           <select id="status" name="status">
             <option value="draft" {{ $inv->status === 'draft' ? 'selected' : '' }}>Draft</option>

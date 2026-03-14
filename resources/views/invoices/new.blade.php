@@ -5,7 +5,7 @@
   $activePage = 'invoices';
   $pageTitle = 'New Invoice';
   $defaultCurrency = optional($business)->default_currency ?? 'USD';
-  $inv = $invoice ?? (object)['invoice_number' => '', 'invoice_date' => now()->format('Y-m-d'), 'due_date' => now()->format('Y-m-d'), 'currency' => $defaultCurrency, 'tax_rate' => 0, 'discount_amount' => 0, 'customer_name' => '', 'customer_email' => '', 'customer_phone' => '', 'customer_address' => '', 'notes' => '', 'terms' => ''];
+  $inv = $invoice ?? (object)['invoice_number' => '', 'invoice_date' => now()->format('Y-m-d'), 'currency' => $defaultCurrency, 'tax_rate' => 0, 'discount_amount' => 0, 'customer_name' => '', 'customer_email' => '', 'customer_phone' => '', 'customer_address' => '', 'notes' => '', 'terms' => ''];
   $items = isset($invoice->items) ? $invoice->items : [(object)['item_name' => '', 'description' => '', 'quantity' => 1, 'unit_price' => 0]];
 @endphp
 <div class="card">
@@ -24,10 +24,6 @@
         <div class="form-group">
           <label for="invoice_date">Invoice Date</label>
           <input type="date" id="invoice_date" name="invoice_date" value="{{ $inv->invoice_date ?? '' }}" required>
-        </div>
-        <div class="form-group">
-          <label for="due_date">Due Date</label>
-          <input type="date" id="due_date" name="due_date" value="{{ $inv->due_date ?? '' }}">
         </div>
         <div class="form-group">
           <label for="currency">Currency</label>

@@ -33,10 +33,6 @@
           <dd>{{ $invoice->invoice_number }}</dd>
           <dt>Date</dt>
           <dd>{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('M j, Y') }}</dd>
-          @if($invoice->due_date)
-          <dt>Due date</dt>
-          <dd>{{ \Carbon\Carbon::parse($invoice->due_date)->format('M j, Y') }}</dd>
-          @endif
         </dl>
       </div>
     </header>

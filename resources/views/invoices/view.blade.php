@@ -40,7 +40,6 @@
       </div>
       <div>
         <p><strong>Date:</strong> {{ \Carbon\Carbon::parse($invoice->invoice_date)->format('Y-m-d') }}</p>
-        @if($invoice->due_date)<p><strong>Due:</strong> {{ \Carbon\Carbon::parse($invoice->due_date)->format('Y-m-d') }}</p>@endif
         <p><strong>Created by:</strong> {{ $invoice->creator?->username ?? '—' }}</p>
       </div>
     </div>
