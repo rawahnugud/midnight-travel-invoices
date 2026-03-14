@@ -2,7 +2,16 @@
 
 ## Part 1: Connect to GitHub
 
-### 1.1 Initialize Git and commit (if not done)
+### 1.1 Configure Git (first time only)
+
+If you haven’t set your name and email for Git, run (use your real name and GitHub email):
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your@email.com"
+```
+
+### 1.2 Initialize Git and commit (if not done)
 
 In your project folder:
 
@@ -13,7 +22,13 @@ git add .
 git commit -m "Initial commit: Midnight Travel invoice app"
 ```
 
-### 1.2 Create a repository on GitHub
+**Note:** Git is already initialized and files are staged; you only need to set `user.name` and `user.email` (above), then run:
+
+```bash
+git commit -m "Initial commit: Midnight Travel invoice app"
+```
+
+### 1.3 Create a repository on GitHub
 
 1. Go to [github.com](https://github.com) and sign in.
 2. Click **New repository** (or **+** → **New repository**).
@@ -23,7 +38,7 @@ git commit -m "Initial commit: Midnight Travel invoice app"
    - Do **not** add a README, .gitignore, or license (you already have them).
 4. Click **Create repository**.
 
-### 1.3 Push your code to GitHub
+### 1.4 Push your code to GitHub
 
 GitHub will show commands; use these (replace `YOUR_USERNAME` and `YOUR_REPO` with your repo path):
 
