@@ -1,7 +1,11 @@
 @extends('layout')
 @section('title', 'Invoices')
 @section('content')
-@php $activePage = 'invoices'; $pageTitle = 'Invoices'; @endphp
+@php
+  $activePage = 'invoices';
+  $pageTitle = 'Invoices';
+  $currencySymbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'];
+@endphp
 <div class="card">
   <div class="card-header">
     <h2>All Invoices</h2>
@@ -33,7 +37,7 @@
           <td>{{ $inv->customer_name }}</td>
           <td>{{ \Carbon\Carbon::parse($inv->invoice_date)->format('Y-m-d') }}</td>
           <td><span class="badge badge-{{ $inv->status }}">{{ $inv->status }}</span></td>
-          <td>${{ number_format($inv->total ?? 0, 2) }}</td>
+          <td>@php $sym = $currencySymbols[$inv->currency ?? 'USD'] ?? ($inv->currency ?? 'USD') . ' '; @endphp{{ $sym }}{{ number_format($inv->total ?? 0, 2) }}</td>
           <td>{{ $inv->creator?->username ?? '—' }}</td>
           <td class="actions">
             <a href="{{ route('invoices.show', $inv) }}" class="btn btn-text btn-sm">View</a>

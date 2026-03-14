@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BusinessSetting;
 use App\Models\Invoice;
 use App\Models\LineItem;
 use Illuminate\Http\Request;
@@ -30,6 +31,8 @@ class InvoiceController extends Controller
 
     public function create()
     {
+        $business = BusinessSetting::get();
+        $defaultCurrency = $business->default_currency ?? 'USD';
         $nextNumber = 'INV-' . date('Y') . '-' . str_pad((string) (Invoice::max('id') + 1), 3, '0', STR_PAD_LEFT);
         $today = now()->format('Y-m-d');
         return view('invoices.new', [
@@ -37,7 +40,7 @@ class InvoiceController extends Controller
                 'invoice_number' => $nextNumber,
                 'invoice_date' => $today,
                 'due_date' => $today,
-                'currency' => 'USD',
+                'currency' => $defaultCurrency,
                 'tax_rate' => 0,
                 'discount_amount' => 0,
                 'items' => [(object) ['item_name' => '', 'description' => '', 'quantity' => 1, 'unit_price' => 0]],

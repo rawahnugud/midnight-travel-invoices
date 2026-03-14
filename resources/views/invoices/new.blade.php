@@ -4,7 +4,8 @@
 @php
   $activePage = 'invoices';
   $pageTitle = 'New Invoice';
-  $inv = $invoice ?? (object)['invoice_number' => '', 'invoice_date' => now()->format('Y-m-d'), 'due_date' => now()->format('Y-m-d'), 'currency' => 'USD', 'tax_rate' => 0, 'discount_amount' => 0, 'customer_name' => '', 'customer_email' => '', 'customer_phone' => '', 'customer_address' => '', 'notes' => '', 'terms' => ''];
+  $defaultCurrency = optional($business)->default_currency ?? 'USD';
+  $inv = $invoice ?? (object)['invoice_number' => '', 'invoice_date' => now()->format('Y-m-d'), 'due_date' => now()->format('Y-m-d'), 'currency' => $defaultCurrency, 'tax_rate' => 0, 'discount_amount' => 0, 'customer_name' => '', 'customer_email' => '', 'customer_phone' => '', 'customer_address' => '', 'notes' => '', 'terms' => ''];
   $items = isset($invoice->items) ? $invoice->items : [(object)['item_name' => '', 'description' => '', 'quantity' => 1, 'unit_price' => 0]];
 @endphp
 <div class="card">
