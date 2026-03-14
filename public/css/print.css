@@ -197,12 +197,24 @@ body.print-body {
 }
 .invoice-print-stamp {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
 }
 .invoice-print-stamp img {
-  max-width: 48px;
-  max-height: 48px;
+  max-width: 40px;
+  max-height: 40px;
+  width: auto;
+  height: auto;
   object-fit: contain;
   display: block;
+  opacity: 0.92;
+}
+@media print {
+  .invoice-print-totals-stamp-wrap { break-inside: avoid; }
+  .invoice-print-stamp img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 .invoice-print-totals {
   width: 220px;
