@@ -109,7 +109,7 @@
       </table>
       @if(optional($business)->stamp_url)
       <div class="invoice-print-stamp">
-        <img src="{{ $business->stamp_url }}" alt="Stamp">
+        <img src="{{ $business->stamp_url }}" alt="Stamp" width="40" height="40" style="width:40px;height:40px;max-width:40px;max-height:40px;object-fit:contain;">
       </div>
       @endif
     </div>

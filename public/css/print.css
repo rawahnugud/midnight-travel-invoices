@@ -202,19 +202,35 @@ body.print-body {
   justify-content: center;
   width: 40px;
   height: 40px;
+  min-width: 40px;
+  max-width: 40px;
+  overflow: hidden;
 }
 .invoice-print-stamp img {
-  max-width: 40px;
-  max-height: 40px;
-  width: auto;
-  height: auto;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  width: 40px !important;
+  height: 40px !important;
   object-fit: contain;
   display: block;
   opacity: 0.92;
 }
 @media print {
-  .invoice-print-totals-stamp-wrap { break-inside: avoid; }
-  .invoice-print-stamp img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .invoice-print-stamp {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    overflow: hidden !important;
+  }
+  .invoice-print-stamp img {
+    width: 40px !important;
+    height: 40px !important;
+    max-width: 40px !important;
+    max-height: 40px !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }
 .invoice-print-totals {
   width: 220px;
