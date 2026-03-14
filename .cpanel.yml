@@ -1,0 +1,8 @@
+# cPanel Git deployment config (required for "Deploy HEAD Commit")
+# See: https://docs.cpanel.net/knowledge-base/web-services/guide-to-git-deployment/
+---
+deployment:
+  tasks:
+    - composer install --no-dev --optimize-autoloader --no-interaction
+    - php artisan migrate --force
+    - php artisan config:cache
