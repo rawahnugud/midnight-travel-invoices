@@ -120,21 +120,19 @@ Then log in with **admin** / **admin123**.
 
 ---
 
-## Step 7: Writable folders and storage link
+## Step 7: Writable folders
 
-Laravel needs to write to `storage` and `bootstrap/cache`.
+Laravel needs to write to `storage` and `bootstrap/cache`. The **business logo** is stored in `public/business/` (no symlink required).
 
 In Terminal:
 
 ```bash
 cd ~/midnight-travel-invoices
 chmod -R 775 storage bootstrap/cache
-php artisan storage:link
+chmod 775 public
 ```
 
-`storage:link` creates a symbolic link so uploaded files (e.g. **business logo** in Settings) are available at `/storage/...`. If your host disallows symlinks, uploads may need to be stored in `public/uploads` instead (see app docs).
-
-If your host uses a different user/group, they may ask you to use something like `chown` as well.
+So that the app can create `public/business` and save the logo there, ensure `public` is writable. If your host uses a different user/group, they may ask you to use something like `chown` as well.
 
 ---
 
@@ -162,7 +160,7 @@ If you see a blank page or 500 error:
 | 4 | Copy `.env.example` to `.env`, set `APP_URL`, then `php artisan key:generate` |
 | 5 | `touch database/database.sqlite` then `php artisan migrate --force` |
 | 6 | Visit `/setup/seed?token=...` or run `php artisan db:seed` |
-| 7 | `chmod -R 775 storage bootstrap/cache` and `php artisan storage:link` |
+| 7 | `chmod -R 775 storage bootstrap/cache` and `chmod 775 public` (for logo uploads to `public/business`) |
 | 8 | Open site and log in (admin can set **Business data & logo** under Settings) |
 
 ---

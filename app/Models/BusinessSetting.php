@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 
 class BusinessSetting extends Model
 {
@@ -30,12 +29,13 @@ class BusinessSetting extends Model
 
     /**
      * Logo URL for use in views (null if no logo).
+     * Logos are stored in public/business/ so no storage:link is needed.
      */
     public function getLogoUrlAttribute(): ?string
     {
         if (! $this->logo_path) {
             return null;
         }
-        return asset('storage/' . $this->logo_path);
+        return asset($this->logo_path);
     }
 }

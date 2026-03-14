@@ -13,6 +13,7 @@ storage/*.key
 database/database.sqlite
 database/*.sqlite
 bootstrap/cache/*.php
+/public/business/*
 
 # Logs and OS
 npm-debug.log*

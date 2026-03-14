@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\BusinessSetting;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class BusinessSettingsController extends Controller
 {
+    /**
+     * Store logo in public/business so no storage:link (symlink) is needed on shared hosts.
+     */
     public function edit()
     {
         $business = BusinessSetting::get();
@@ -31,11 +34,20 @@ class BusinessSettingsController extends Controller
         $business = BusinessSetting::get();
 
         if ($request->hasFile('logo')) {
-            if ($business->logo_path) {
-                Storage::disk('public')->delete($business->logo_path);
+            $dir = public_path('business');
+            if (! File::isDirectory($dir)) {
+                File::makeDirectory($dir, 0755, true);
             }
-            $path = $request->file('logo')->store('business', 'public');
-            $validated['logo_path'] = $path;
+            if ($business->logo_path) {
+                $oldPath = public_path($business->logo_path);
+                if (File::exists($oldPath)) {
+                    File::delete($oldPath);
+                }
+            }
+            $file = $request->file('logo');
+            $name = 'logo_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move($dir, $name);
+            $validated['logo_path'] = 'business/' . $name;
         }
 
         unset($validated['logo']);
