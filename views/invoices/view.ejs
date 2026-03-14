@@ -1,0 +1,65 @@
+<% 
+  const pageTitle = 'Invoice ' + (invoice.invoice_number || '');
+  const activePage = 'invoices';
+  const formatMoney = (n, cur) => (typeof n === 'number' ? n : 0).toLocaleString('en-US', { style: 'currency', currency: cur || 'USD' });
+  const items = invoice.items || [];
+  const subtotal = items.reduce((s, i) => s + (i.quantity * i.unit_price), 0);
+  const tax = (invoice.tax_rate / 100) * subtotal;
+  const total = subtotal + tax - (invoice.discount_amount || 0);
+%>
+<div class="card">
+  <div class="card-header">
+    <h2><%= invoice.invoice_number %></h2>
+    <div class="header-actions">
+      <span class="badge badge-<%= invoice.status %>"><%= invoice.status %></span>
+      <a href="/invoices/<%= invoice.id %>/print" target="_blank" class="btn btn-primary btn-sm">Print / PDF</a>
+      <% if (user.role === 'admin' || (user.role === 'staff' && invoice.created_by === user.id)) { %>
+      <a href="/invoices/<%= invoice.id %>/edit" class="btn btn-outline btn-sm">Edit</a>
+      <% } %>
+    </div>
+  </div>
+  <div class="card-body invoice-view">
+    <div class="invoice-meta-row">
+      <div>
+        <strong>Customer</strong>
+        <p><%= invoice.customer_name %></p>
+        <% if (invoice.customer_email) { %><p><%= invoice.customer_email %></p><% } %>
+        <% if (invoice.customer_phone) { %><p><%= invoice.customer_phone %></p><% } %>
+        <% if (invoice.customer_address) { %><p><%= invoice.customer_address %></p><% } %>
+      </div>
+      <div>
+        <p><strong>Date:</strong> <%= invoice.invoice_date %></p>
+        <% if (invoice.due_date) { %><p><strong>Due:</strong> <%= invoice.due_date %></p><% } %>
+        <p><strong>Created by:</strong> <%= invoice.created_by_name %></p>
+      </div>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th class="num">Qty</th>
+          <th class="num">Unit Price</th>
+          <th class="num">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% items.forEach(item => { %>
+        <tr>
+          <td><%= item.item_name %><% if (item.description) { %> — <%= item.description %><% } %></td>
+          <td class="num"><%= item.quantity %></td>
+          <td class="num"><%= formatMoney(item.unit_price, invoice.currency) %></td>
+          <td class="num"><%= formatMoney(item.quantity * item.unit_price, invoice.currency) %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <div class="invoice-totals">
+      <p>Subtotal: <%= formatMoney(subtotal, invoice.currency) %></p>
+      <% if (invoice.tax_rate > 0) { %><p>Tax (<%= invoice.tax_rate %>%): <%= formatMoney(tax, invoice.currency) %></p><% } %>
+      <% if (invoice.discount_amount > 0) { %><p>Discount: -<%= formatMoney(invoice.discount_amount, invoice.currency) %></p><% } %>
+      <p class="grand-total">Total: <%= formatMoney(total, invoice.currency) %></p>
+    </div>
+    <% if (invoice.notes) { %><p><strong>Notes:</strong> <%= invoice.notes %></p><% } %>
+    <% if (invoice.terms) { %><p><strong>Terms:</strong> <%= invoice.terms %></p><% } %>
+  </div>
+</div>

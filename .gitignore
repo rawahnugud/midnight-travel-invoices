@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+
+# SQLite database (optional: remove this line if you want to track a seed DB)
+data/*.db
+data/*.db-journal
+
+# Logs and OS
+npm-debug.log*
+logs/
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Backup folder (old project copy)
+rollback_backup/

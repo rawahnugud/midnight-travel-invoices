@@ -1,0 +1,22 @@
+/* Invoice print — A4, clean */
+@media print {
+  body.print-body { background: #fff; margin: 0; padding: 0; }
+  .invoice-print { max-width: 210mm; margin: 0 auto; padding: 15mm; font-size: 11pt; }
+  .invoice-print-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #1e293b; }
+  .invoice-print-brand .invoice-print-logo { font-size: 1.5rem; font-weight: 700; color: #0f172a; }
+  .invoice-print-tagline { font-size: 0.85rem; color: #64748b; margin-top: 0.25rem; }
+  .invoice-print-meta { text-align: right; }
+  .invoice-print-meta h1 { font-size: 1.25rem; margin-bottom: 0.25rem; }
+  .invoice-number { font-weight: 700; font-size: 1.1rem; }
+  .invoice-print-parties { margin-bottom: 1.5rem; }
+  .invoice-print-parties strong { display: block; margin-bottom: 0.35rem; font-size: 0.75rem; text-transform: uppercase; color: #64748b; }
+  .invoice-print-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+  .invoice-print-table th, .invoice-print-table td { padding: 0.4rem 0.5rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+  .invoice-print-table th { font-size: 0.7rem; text-transform: uppercase; color: #64748b; }
+  .invoice-print-table .num { text-align: right; }
+  .invoice-print-totals { text-align: right; margin-top: 0.5rem; }
+  .invoice-print-totals .grand-total { font-size: 1.1rem; font-weight: 700; margin-top: 0.35rem; }
+  .invoice-print-notes, .invoice-print-terms { margin-top: 1rem; font-size: 0.9rem; color: #475569; }
+  .invoice-print-footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; text-align: center; font-size: 0.9rem; color: #64748b; }
+  .badge { border: 1px solid currentColor; }
+}

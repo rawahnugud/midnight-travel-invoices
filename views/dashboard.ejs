@@ -1,0 +1,63 @@
+<% 
+  const pageTitle = 'Dashboard';
+  const activePage = 'dashboard';
+  const formatMoney = (n) => (typeof n === 'number' ? n : 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+%>
+<div class="stats-grid">
+  <div class="stat-card">
+    <span class="stat-value"><%= totalInvoices %></span>
+    <span class="stat-label">Total Invoices</span>
+  </div>
+  <div class="stat-card stat-success">
+    <span class="stat-value"><%= paidCount %></span>
+    <span class="stat-label">Paid</span>
+  </div>
+  <div class="stat-card stat-warning">
+    <span class="stat-value"><%= pendingCount %></span>
+    <span class="stat-label">Pending</span>
+  </div>
+  <div class="stat-card stat-revenue">
+    <span class="stat-value"><%= formatMoney(totalRevenue) %></span>
+    <span class="stat-label">Revenue</span>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header">
+    <h2>Recent Invoices</h2>
+    <a href="/invoices/new" class="btn btn-primary btn-sm">New Invoice</a>
+  </div>
+  <div class="card-body">
+    <% if (recent && recent.length) { %>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Number</th>
+          <th>Customer</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Total</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% recent.forEach(inv => { 
+          const subtotal = inv.subtotal || 0;
+          const tax = (inv.tax_rate / 100) * subtotal;
+          const total = subtotal + tax - (inv.discount_amount || 0);
+        %>
+        <tr>
+          <td><a href="/invoices/<%= inv.id %>"><%= inv.invoice_number %></a></td>
+          <td><%= inv.customer_name %></td>
+          <td><%= inv.invoice_date %></td>
+          <td><span class="badge badge-<%= inv.status %>"><%= inv.status %></span></td>
+          <td><%= formatMoney(total) %></td>
+          <td><a href="/invoices/<%= inv.id %>/print" target="_blank" class="btn btn-text btn-sm">Print</a></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } else { %>
+    <p class="empty-state">No invoices yet. <a href="/invoices/new">Create your first invoice</a>.</p>
+    <% } %>
+  </div>
+</div>

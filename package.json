@@ -1,0 +1,26 @@
+{
+  "name": "midnight-travel-invoices",
+  "version": "1.0.0",
+  "description": "Invoice management system for Midnight Travel",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "init-db": "node scripts/init-db.js",
+    "seed": "node scripts/seed.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.6.0",
+    "csurf": "^1.11.0",
+    "ejs": "^3.1.10",
+    "express-ejs-layouts": "^2.5.1",
+    "express": "^4.21.0",
+    "express-session": "^1.18.0",
+    "express-validator": "^7.2.0",
+    "method-override": "^3.0.0"
+  }
+}

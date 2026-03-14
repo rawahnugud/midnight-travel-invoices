@@ -1,0 +1,24 @@
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <span class="sidebar-logo">MT</span>
+    <div>
+      <span class="sidebar-title">Midnight Travel</span>
+      <span class="sidebar-subtitle">Invoice System</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="/dashboard" class="sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">Dashboard</a>
+    <a href="/invoices" class="sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'invoices' ? 'active' : '' %>">Invoices</a>
+    <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+    <a href="/users" class="sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'users' ? 'active' : '' %>">Users</a>
+    <% } %>
+    <a href="/settings" class="sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'settings' ? 'active' : '' %>">Settings</a>
+  </nav>
+  <div class="sidebar-footer">
+    <span class="sidebar-user"><%= typeof user !== 'undefined' && user ? user.username : '' %> <small>(<%= typeof user !== 'undefined' && user ? user.role : '' %>)</small></span>
+    <form action="/logout" method="post" style="display:inline;">
+      <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+      <button type="submit" class="btn btn-text">Logout</button>
+    </form>
+  </div>
+</aside>

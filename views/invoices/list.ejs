@@ -1,0 +1,57 @@
+<% 
+  const pageTitle = 'Invoices';
+  const activePage = 'invoices';
+  const formatMoney = (n) => (typeof n === 'number' ? n : 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+%>
+<div class="card">
+  <div class="card-header">
+    <h2>All Invoices</h2>
+    <% if (user.role === 'admin' || user.role === 'staff') { %>
+    <a href="/invoices/new" class="btn btn-primary btn-sm">New Invoice</a>
+    <% } %>
+  </div>
+  <div class="card-body">
+    <% if (invoices && invoices.length) { %>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Number</th>
+          <th>Customer</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Total</th>
+          <th>Created by</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% invoices.forEach(inv => { 
+          const total = inv.total != null ? inv.total : 0;
+        %>
+        <tr>
+          <td><a href="/invoices/<%= inv.id %>"><%= inv.invoice_number %></a></td>
+          <td><%= inv.customer_name %></td>
+          <td><%= inv.invoice_date %></td>
+          <td><span class="badge badge-<%= inv.status %>"><%= inv.status %></span></td>
+          <td><%= formatMoney(total) %></td>
+          <td><%= inv.created_by_name || '—' %></td>
+          <td class="actions">
+            <a href="/invoices/<%= inv.id %>" class="btn btn-text btn-sm">View</a>
+            <a href="/invoices/<%= inv.id %>/print" target="_blank" class="btn btn-text btn-sm">Print</a>
+            <% if (user.role === 'admin' || (user.role === 'staff' && inv.created_by === user.id)) { %>
+            <a href="/invoices/<%= inv.id %>/edit" class="btn btn-text btn-sm">Edit</a>
+            <form action="/invoices/<%= inv.id %>?_method=DELETE" method="post" class="inline-form" data-confirm="Delete this invoice?">
+              <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+              <button type="submit" class="btn btn-text btn-sm btn-danger">Delete</button>
+            </form>
+            <% } %>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } else { %>
+    <p class="empty-state">No invoices yet. <a href="/invoices/new">Create your first invoice</a>.</p>
+    <% } %>
+  </div>
+</div>
