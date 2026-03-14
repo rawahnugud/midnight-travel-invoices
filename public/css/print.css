@@ -185,7 +185,7 @@ body.print-body {
   .invoice-print-table tbody tr { break-inside: avoid; }
 }
 
-/* Totals box + stamp alone on the right */
+/* Totals box + stamp aligned under total section (right-aligned) */
 .invoice-print-totals-wrap,
 .invoice-print-totals-stamp-wrap {
   display: flex;
@@ -195,55 +195,41 @@ body.print-body {
   margin-top: 0.35rem;
   margin-bottom: 1rem;
 }
-/* Stamp: prominent, circular, ink-on-paper look */
+
+/* SVG business stamp: vector, sharp, real stamp look */
 .invoice-print-stamp {
+  --stamp-ink: #1f3a8a;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 72px;
-  height: 72px;
-  min-width: 72px;
-  max-width: 72px;
-  overflow: hidden;
+  width: 96px;
+  height: 96px;
+  min-width: 96px;
+  max-width: 96px;
+  overflow: visible;
   border-radius: 50%;
-  padding: 2px;
   box-sizing: border-box;
-  /* subtle hand-stamped effect */
-  transform: rotate(-1.5deg);
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(30, 58, 138, 0.12);
-  background: #fff;
+  color: var(--stamp-ink);
+  opacity: 0.82;
+  transform: rotate(-6deg);
+  /* subtle stamped-on-paper shadow */
+  filter: drop-shadow(0 1px 1px rgba(31, 58, 138, 0.15));
 }
-.invoice-print-stamp img {
-  width: 68px !important;
-  height: 68px !important;
-  max-width: 68px !important;
-  max-height: 68px !important;
-  object-fit: contain;
+.invoice-print-stamp .invoice-stamp-svg {
+  width: 100%;
+  height: 100%;
   display: block;
-  border-radius: 50%;
-  opacity: 1;
-  /* keep blue ink vivid when printing */
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
 }
 @media print {
   .invoice-print-stamp {
-    width: 72px !important;
-    height: 72px !important;
-    min-width: 72px !important;
-    max-width: 72px !important;
-    overflow: hidden !important;
-    transform: rotate(-1.5deg);
-    box-shadow: 0 0 0 1px rgba(30, 58, 138, 0.2);
-  }
-  .invoice-print-stamp img {
-    width: 68px !important;
-    height: 68px !important;
-    max-width: 68px !important;
-    max-height: 68px !important;
+    width: 96px !important;
+    height: 96px !important;
+    min-width: 96px !important;
+    max-width: 96px !important;
+    overflow: visible !important;
+    opacity: 0.8;
+    transform: rotate(-6deg);
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

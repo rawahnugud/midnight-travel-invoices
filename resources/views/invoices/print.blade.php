@@ -107,11 +107,9 @@
           <td class="num"><strong>{{ $currencySym }}{{ number_format($invoice->total, 2) }}</strong></td>
         </tr>
       </table>
-      @if(optional($business)->stamp_url)
-      <div class="invoice-print-stamp">
-        <img src="{{ $business->stamp_url }}" alt="Stamp" width="72" height="72" style="width:68px;height:68px;max-width:68px;max-height:68px;object-fit:contain;border-radius:50%;">
+      <div class="invoice-print-stamp" aria-hidden="true">
+        @include('invoices.partials.stamp', ['company' => $company, 'business' => $business])
       </div>
-      @endif
     </div>
 
     @if($invoice->notes || $invoice->terms)
