@@ -185,55 +185,73 @@ body.print-body {
   .invoice-print-table tbody tr { break-inside: avoid; }
 }
 
-/* Totals box + optional stamp */
+/* Totals box + stamp in Total row */
 .invoice-print-totals-wrap,
 .invoice-print-totals-stamp-wrap {
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-  gap: 1.25rem;
   margin-top: 0.35rem;
   margin-bottom: 1rem;
 }
+.invoice-print-stamp-cell {
+  width: 64px;
+  min-width: 64px;
+  max-width: 64px;
+  padding: 0.25rem 0 0.25rem 0.5rem !important;
+  vertical-align: middle;
+  border: none !important;
+  border-bottom: inherit;
+}
+.invoice-print-stamp-cell:empty {
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  border: none !important;
+}
+.grand-total-row .invoice-print-stamp-cell {
+  border-top: none !important;
+  padding-top: 0.45rem !important;
+  vertical-align: middle;
+}
 .invoice-print-stamp {
-  flex-shrink: 0;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  max-width: 40px;
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  max-width: 56px;
   overflow: hidden;
 }
 .invoice-print-stamp img {
-  max-width: 40px !important;
-  max-height: 40px !important;
-  width: 40px !important;
-  height: 40px !important;
+  max-width: 56px !important;
+  max-height: 56px !important;
+  width: 56px !important;
+  height: 56px !important;
   object-fit: contain;
   display: block;
-  opacity: 0.92;
+  opacity: 0.95;
 }
 @media print {
   .invoice-print-stamp {
-    width: 40px !important;
-    height: 40px !important;
-    min-width: 40px !important;
-    max-width: 40px !important;
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    max-width: 56px !important;
     overflow: hidden !important;
   }
   .invoice-print-stamp img {
-    width: 40px !important;
-    height: 40px !important;
-    max-width: 40px !important;
-    max-height: 40px !important;
+    width: 56px !important;
+    height: 56px !important;
+    max-width: 56px !important;
+    max-height: 56px !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 }
 .invoice-print-totals {
-  width: 220px;
+  width: auto;
+  min-width: 220px;
   border-collapse: collapse;
   font-size: 0.9rem;
 }
@@ -251,6 +269,9 @@ body.print-body {
   border-top: 2px solid var(--invoice-header, #0f172a);
   font-size: 1rem;
   color: var(--invoice-header, #0f172a);
+}
+.grand-total-row .invoice-print-stamp-cell {
+  border-top: none !important;
 }
 
 /* Notes / Terms */
