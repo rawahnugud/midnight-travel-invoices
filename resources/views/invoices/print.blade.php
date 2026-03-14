@@ -89,34 +89,29 @@
         <tr>
           <td>Subtotal</td>
           <td class="num">{{ $currencySym }}{{ number_format($invoice->subtotal, 2) }}</td>
-          <td class="invoice-print-stamp-cell"></td>
         </tr>
         @if($invoice->tax_rate > 0)
         <tr>
           <td>Tax ({{ number_format($invoice->tax_rate, 1) }}%)</td>
           <td class="num">{{ $currencySym }}{{ number_format($invoice->tax_amount, 2) }}</td>
-          <td class="invoice-print-stamp-cell"></td>
         </tr>
         @endif
         @if($invoice->discount_amount > 0)
         <tr>
           <td>Discount</td>
           <td class="num">−{{ $currencySym }}{{ number_format($invoice->discount_amount, 2) }}</td>
-          <td class="invoice-print-stamp-cell"></td>
         </tr>
         @endif
         <tr class="grand-total-row">
           <td><strong>Total</strong></td>
           <td class="num"><strong>{{ $currencySym }}{{ number_format($invoice->total, 2) }}</strong></td>
-          <td class="invoice-print-stamp-cell">
-            @if(optional($business)->stamp_url)
-            <div class="invoice-print-stamp">
-              <img src="{{ $business->stamp_url }}" alt="Stamp" width="56" height="56" style="width:56px;height:56px;max-width:56px;max-height:56px;object-fit:contain;">
-            </div>
-            @endif
-          </td>
         </tr>
       </table>
+      @if(optional($business)->stamp_url)
+      <div class="invoice-print-stamp">
+        <img src="{{ $business->stamp_url }}" alt="Stamp" width="56" height="56" style="width:56px;height:56px;max-width:56px;max-height:56px;object-fit:contain;">
+      </div>
+      @endif
     </div>
 
     @if($invoice->notes || $invoice->terms)
