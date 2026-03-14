@@ -2,6 +2,11 @@
 
 use Illuminate\Support\Str;
 
+$sqlitePath = env('DB_DATABASE', database_path('database.sqlite'));
+if ($sqlitePath && !str_starts_with($sqlitePath, '/') && !str_starts_with($sqlitePath, 'C:')) {
+    $sqlitePath = base_path($sqlitePath);
+}
+
 return [
     'default' => env('DB_CONNECTION', 'sqlite'),
 
@@ -9,7 +14,7 @@ return [
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DATABASE_URL'),
-            'database' => env('DB_DATABASE', database_path('database.sqlite')),
+            'database' => $sqlitePath,
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
         ],
