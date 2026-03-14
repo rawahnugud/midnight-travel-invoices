@@ -29,9 +29,27 @@ class BusinessSettingsController extends Controller
             'default_currency' => 'nullable|string|max:10',
             'tax_id' => 'nullable|string|max:64',
             'logo' => 'nullable|image|mimes:jpeg,png,gif,webp|max:2048',
+            'stamp' => 'nullable|image|mimes:jpeg,png,gif,webp|max:2048',
         ]);
 
         $business = BusinessSetting::get();
+
+        if ($request->hasFile('stamp')) {
+            $dir = public_path('business');
+            if (! File::isDirectory($dir)) {
+                File::makeDirectory($dir, 0755, true);
+            }
+            if ($business->stamp_path) {
+                $oldPath = public_path($business->stamp_path);
+                if (File::exists($oldPath)) {
+                    File::delete($oldPath);
+                }
+            }
+            $file = $request->file('stamp');
+            $name = 'stamp_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move($dir, $name);
+            $validated['stamp_path'] = 'business/' . $name;
+        }
 
         if ($request->hasFile('logo')) {
             $dir = public_path('business');
@@ -50,7 +68,7 @@ class BusinessSettingsController extends Controller
             $validated['logo_path'] = 'business/' . $name;
         }
 
-        unset($validated['logo']);
+        unset($validated['logo'], $validated['stamp']);
         $business->update($validated);
 
         return redirect()->route('settings.business.edit')

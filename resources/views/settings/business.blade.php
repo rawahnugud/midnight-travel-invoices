@@ -67,7 +67,20 @@
           <p class="text-muted" style="font-size:0.875rem; margin-top:0.25rem;">Current logo. Upload a new file to replace.</p>
         </div>
         @endif
-        <input type="file" id="logo" name="logo" accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml">
+        <input type="file" id="logo" name="logo" accept="image/jpeg,image/png,image/gif,image/webp">
+        <small class="text-muted">JPEG, PNG, GIF or WebP. Max 2 MB.</small>
+      </div>
+      <div class="form-group">
+        <label for="stamp">Invoice stamp</label>
+        @if($business->stamp_url ?? null)
+        <div class="business-logo-preview" style="margin-bottom:0.75rem;">
+          <img src="{{ $business->stamp_url }}" alt="Current stamp" style="max-height:100px; max-width:120px; object-fit:contain;">
+          <p class="text-muted" style="font-size:0.875rem; margin-top:0.25rem;">Shown on printed/PDF invoices. Upload a new file to replace.</p>
+        </div>
+        @else
+        <p class="text-muted" style="font-size:0.875rem; margin-bottom:0.5rem;">Optional. Shown on the printed invoice (e.g. bottom right).</p>
+        @endif
+        <input type="file" id="stamp" name="stamp" accept="image/jpeg,image/png,image/gif,image/webp">
         <small class="text-muted">JPEG, PNG, GIF or WebP. Max 2 MB.</small>
       </div>
       <div class="form-actions">

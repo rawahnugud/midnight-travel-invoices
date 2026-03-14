@@ -10,6 +10,7 @@ class BusinessSetting extends Model
         'company_name', 'tagline', 'address', 'phone', 'email', 'website',
         'logo_path', 'default_currency', 'tax_id',
         'primary_color', 'accent_color', 'login_logo_path', 'invoice_header_color',
+        'stamp_path',
     ];
 
     /**
@@ -70,5 +71,14 @@ class BusinessSetting extends Model
             return $value;
         }
         return $this->primary_color;
+    }
+
+    /** Stamp image URL for printed invoice (null if no stamp). */
+    public function getStampUrlAttribute(): ?string
+    {
+        if (! $this->stamp_path) {
+            return null;
+        }
+        return asset($this->stamp_path);
     }
 }

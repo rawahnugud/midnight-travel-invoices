@@ -166,12 +166,24 @@ body.print-body {
   .invoice-print-table tbody tr { break-inside: avoid; }
 }
 
-/* Totals box */
-.invoice-print-totals-wrap {
+/* Totals box + optional stamp */
+.invoice-print-totals-wrap,
+.invoice-print-totals-stamp-wrap {
   display: flex;
   justify-content: flex-end;
+  align-items: flex-end;
+  gap: 1.5rem;
   margin-top: 0.5rem;
   margin-bottom: 1.25rem;
+}
+.invoice-print-stamp {
+  flex-shrink: 0;
+}
+.invoice-print-stamp img {
+  max-width: 100px;
+  max-height: 100px;
+  object-fit: contain;
+  display: block;
 }
 .invoice-print-totals {
   width: 260px;

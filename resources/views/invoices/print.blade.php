@@ -37,8 +37,6 @@
           <dt>Due date</dt>
           <dd>{{ \Carbon\Carbon::parse($invoice->due_date)->format('M j, Y') }}</dd>
           @endif
-          <dt>Status</dt>
-          <dd><span class="badge badge-{{ $invoice->status }}">{{ ucfirst($invoice->status) }}</span></dd>
         </dl>
       </div>
     </header>
@@ -86,7 +84,7 @@
       </tbody>
     </table>
 
-    <div class="invoice-print-totals-wrap">
+    <div class="invoice-print-totals-stamp-wrap">
       <table class="invoice-print-totals">
         <tr>
           <td>Subtotal</td>
@@ -109,6 +107,11 @@
           <td class="num"><strong>{{ $currencySym }}{{ number_format($invoice->total, 2) }}</strong></td>
         </tr>
       </table>
+      @if(optional($business)->stamp_url)
+      <div class="invoice-print-stamp">
+        <img src="{{ $business->stamp_url }}" alt="Stamp">
+      </div>
+      @endif
     </div>
 
     @if($invoice->notes || $invoice->terms)

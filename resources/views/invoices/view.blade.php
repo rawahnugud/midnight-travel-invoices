@@ -12,7 +12,6 @@
     <h2>{{ $invoice->invoice_number }}</h2>
     <p class="text-muted" style="margin:0.25rem 0 0 0; font-size:0.9rem;">{{ $companyName }}</p>
     <div class="header-actions">
-      <span class="badge badge-{{ $invoice->status }}">{{ $invoice->status }}</span>
       <a href="{{ route('invoices.print', $invoice) }}" target="_blank" class="btn btn-primary btn-sm">Print / PDF</a>
       @if($user && ($user->isAdmin() || ($user->isStaff() && $invoice->created_by === $user->id)))
       <a href="{{ route('invoices.edit', $invoice) }}" class="btn btn-outline btn-sm">Edit</a>
