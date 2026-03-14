@@ -1,4 +1,4 @@
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar" role="navigation">
   <div class="sidebar-brand">
     @if(optional($business)->logo_url)
     <img src="{{ $business->logo_url }}" alt="{{ optional($business)->company_name }}" class="sidebar-logo-img" style="max-height:40px; max-width:120px; object-fit:contain;">

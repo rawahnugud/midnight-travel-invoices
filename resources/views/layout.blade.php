@@ -11,6 +11,7 @@
 </head>
 <body class="app">
   @unless(isset($noSidebar) && $noSidebar)
+  <div class="sidebar-backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
   @include('partials.sidebar')
   @endunless
   <main class="main">

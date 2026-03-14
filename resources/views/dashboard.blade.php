@@ -31,6 +31,7 @@
   </div>
   <div class="card-body">
     @if($recentInvoices->count())
+    <div class="table-responsive">
     <table class="table">
       <thead>
         <tr>
@@ -55,6 +56,7 @@
         @endforeach
       </tbody>
     </table>
+    </div>
     @else
     <p class="empty-state">No invoices yet. <a href="{{ route('invoices.create') }}">Create your first invoice</a>.</p>
     @endif

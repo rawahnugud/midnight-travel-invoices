@@ -196,9 +196,87 @@ a:hover { text-decoration: underline; }
 .muted { color: var(--text-muted); font-size: 0.85rem; }
 h3 { font-size: 1rem; margin: 1rem 0 0.5rem; color: var(--mt-dark); }
 
+/* Mobile menu button (hidden on desktop) */
+.mobile-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  margin: 0 0.5rem 0 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  color: var(--text);
+}
+.mobile-menu-icon {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: currentColor;
+  box-shadow: 0 -6px 0 currentColor, 0 6px 0 currentColor;
+}
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 998;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+body.sidebar-open .sidebar-backdrop {
+  display: block;
+  opacity: 1;
+}
+
+/* ========== Mobile & tablet responsive ========== */
 @media (max-width: 768px) {
-  .sidebar { width: 72px; padding: 0.5rem 0; }
-  .sidebar-brand > div, .sidebar-subtitle, .sidebar-user, .sidebar-link span { display: none; }
-  .sidebar-brand { justify-content: center; }
-  .main { margin-left: 72px; }
+  .mobile-menu-btn { display: flex; }
+  .topbar {
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+  }
+  .topbar-title { font-size: 1.1rem; }
+  .main { margin-left: 0; }
+  .content { padding: 1rem; }
+  .sidebar {
+    width: min(280px, 85vw);
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 999;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+  }
+  body.sidebar-open .sidebar { transform: translateX(0); }
+  body.sidebar-open { overflow: hidden; }
+  .card-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
+  .card-header .btn { align-self: flex-start; }
+  .card-body { padding: 1rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+  .stat-card { padding: 1rem; }
+  .stat-value { font-size: 1.25rem; }
+  .form-row.two-cols .form-group { min-width: 100%; }
+  .form-actions .btn { min-height: 44px; }
+  .btn { min-height: 44px; padding: 0.6rem 1rem; }
+  .table-responsive { margin-left: -1rem; margin-right: -1rem; padding: 0 1rem; }
+  .table-responsive .table { min-width: 520px; font-size: 0.875rem; }
+  .table th, .table td { padding: 0.5rem 0.5rem; }
+  .actions-wrap { flex-direction: column; align-items: flex-start; }
+  .actions-wrap .btn { min-height: 40px; }
+  .login-page { padding: 1rem; }
+  .login-card { padding: 1.5rem; }
+  .invoice-view .invoice-meta-row { gap: 1rem; }
+}
+
+@media (max-width: 480px) {
+  .content { padding: 0.75rem; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .card-header h2 { font-size: 1rem; }
 }

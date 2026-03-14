@@ -5,6 +5,28 @@
   function all(sel, el) { return (el || document).querySelectorAll(sel); }
   function one(sel, el) { return (el || document).querySelector(sel); }
 
+  // Mobile sidebar toggle
+  var sidebarToggle = byId('sidebar-toggle');
+  var sidebarBackdrop = byId('sidebar-backdrop');
+  var sidebar = byId('sidebar');
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', function () {
+      document.body.classList.toggle('sidebar-open');
+    });
+    if (sidebarBackdrop) {
+      sidebarBackdrop.addEventListener('click', function () {
+        document.body.classList.remove('sidebar-open');
+      });
+    }
+    if (sidebar) {
+      all('a', sidebar).forEach(function (link) {
+        link.addEventListener('click', function () {
+          document.body.classList.remove('sidebar-open');
+        });
+      });
+    }
+  }
+
   // Delete confirmation
   all('form[data-confirm]').forEach(function (form) {
     form.addEventListener('submit', function (e) {
