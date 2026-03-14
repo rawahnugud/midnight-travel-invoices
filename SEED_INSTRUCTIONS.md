@@ -1,11 +1,21 @@
 # How to Load Seed Data (Admin, Staff, Sample Invoices)
 
-The seed script creates:
+The seed creates:
 - **Admin user:** `admin` / `admin123`
 - **Staff user:** `staff` / `staff123`
 - **2 sample invoices** with line items
 
-Run it **once** in the environment where your app (and database) runs.
+---
+
+## On the server (easiest – no terminal Node needed)
+
+1. Deploy the app and start it (e.g. via cPanel **Setup Node.js App**).
+2. In your browser, visit (use your real domain and token):
+   ```
+   https://invoice.midnighttravel.net/setup/seed?token=midnight-travel-setup-change-me
+   ```
+3. You should see “Seed complete” and login links. Then log in with **admin** / **admin123**.
+4. For security, set `SETUP_SECRET` in your server’s `.env` to a secret value and use that in the URL instead of `midnight-travel-setup-change-me`.
 
 ---
 

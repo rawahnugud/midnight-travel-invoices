@@ -19,11 +19,12 @@ npm install
 
 ### 2. Initialize database and seed data
 
-The database file is created on first run. To create tables and seed users + sample invoices:
+The database file and tables are created when the app starts. To add users and sample invoices:
 
-```bash
-npm run seed
-```
+- **Local:** run `npm run seed`
+- **Server (no terminal needed):** after the app is running, visit  
+  `https://your-domain.com/setup/seed?token=midnight-travel-setup-change-me`  
+  (set `SETUP_SECRET` in `.env` and use that token for security.)
 
 This creates:
 
