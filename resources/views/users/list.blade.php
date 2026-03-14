@@ -17,6 +17,7 @@
     @if($errors->any())
     <div class="alert alert-error" role="alert">{{ $errors->first() }}</div>
     @endif
+    <div class="table-responsive">
     <table class="table">
       <thead>
         <tr>
@@ -50,6 +51,7 @@
         @endforeach
       </tbody>
     </table>
+    </div>
   </div>
 </div>
 

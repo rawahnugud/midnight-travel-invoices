@@ -7,14 +7,14 @@
     <h2>Settings</h2>
     <p>Application settings can be configured here.</p>
     @if($user && $user->role === 'admin')
-    <ul class="settings-links" style="list-style:none; padding:0; margin-top:1rem;">
-      <li style="margin-bottom:0.5rem;">
+    <ul class="settings-links">
+      <li>
         <a href="{{ route('settings.business.edit') }}" class="btn btn-outline btn-sm">Business data & logo</a>
-        <span class="text-muted" style="margin-left:0.5rem;">— Company name, address, contact, logo for invoices</span>
+        <span class="settings-link-desc">— Company name, address, contact, logo for invoices</span>
       </li>
-      <li style="margin-bottom:0.5rem;">
+      <li>
         <a href="{{ route('settings.design.edit') }}" class="btn btn-outline btn-sm">Design & branding</a>
-        <span class="text-muted" style="margin-left:0.5rem;">— Colours, login logo, printed invoice look</span>
+        <span class="settings-link-desc">— Colours, login logo, printed invoice look</span>
       </li>
     </ul>
     @endif

@@ -43,6 +43,7 @@
         <p><strong>Created by:</strong> {{ $invoice->creator?->username ?? '—' }}</p>
       </div>
     </div>
+    <div class="table-responsive">
     <table class="table">
       <thead>
         <tr>
@@ -63,6 +64,7 @@
         @endforeach
       </tbody>
     </table>
+    </div>
     <div class="invoice-totals">
       <p>Subtotal: {{ $currencySym }}{{ number_format($invoice->subtotal, 2) }}</p>
       @if($invoice->tax_rate > 0)<p>Tax ({{ $invoice->tax_rate }}%): {{ $currencySym }}{{ number_format($invoice->tax_amount, 2) }}</p>@endif

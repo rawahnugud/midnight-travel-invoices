@@ -55,6 +55,7 @@
         <textarea id="customer_address" name="customer_address" rows="2">{{ old('customer_address', $inv->customer_address ?? '') }}</textarea>
       </div>
       <h3>Line Items</h3>
+      <div class="table-responsive">
       <table class="table line-items-table">
         <thead>
           <tr>
@@ -80,6 +81,7 @@
           @endforeach
         </tbody>
       </table>
+      </div>
       <button type="button" id="add-line" class="btn btn-outline btn-sm">+ Add line</button>
       <div class="form-row two-cols totals-row">
         <div class="form-group">
