@@ -185,51 +185,44 @@ body.print-body {
   .invoice-print-table tbody tr { break-inside: avoid; }
 }
 
-/* Totals box + stamp aligned under total section (right-aligned) */
-.invoice-print-totals-wrap,
-.invoice-print-totals-stamp-wrap {
+/* Totals box right; stamp below on left (only when uploaded) */
+.invoice-print-totals-wrap {
+  margin-top: 0.35rem;
+  margin-bottom: 1rem;
   display: flex;
   justify-content: flex-end;
-  align-items: flex-end;
-  gap: 1.5rem;
+}
+.invoice-print-totals-stamp-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   margin-top: 0.35rem;
   margin-bottom: 1rem;
 }
-
-/* SVG business stamp: vector, sharp, real stamp look */
-.invoice-print-stamp {
-  --stamp-ink: #1f3a8a;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 96px;
-  height: 96px;
-  min-width: 96px;
-  max-width: 96px;
-  overflow: visible;
-  border-radius: 50%;
-  box-sizing: border-box;
-  color: var(--stamp-ink);
-  opacity: 0.82;
-  transform: rotate(-6deg);
-  /* subtle stamped-on-paper shadow */
-  filter: drop-shadow(0 1px 1px rgba(31, 58, 138, 0.15));
+.invoice-print-totals-stamp-wrap .invoice-print-totals {
+  align-self: flex-end;
 }
-.invoice-print-stamp .invoice-stamp-svg {
-  width: 100%;
-  height: 100%;
+/* Uploaded stamp image only: original proportions, left below total */
+.invoice-print-stamp {
+  margin-top: 0.75rem;
+  align-self: flex-start;
+}
+.invoice-print-stamp-img {
   display: block;
+  width: 100px;
+  max-width: 120px;
+  height: auto;
+  object-fit: contain;
+  image-rendering: auto;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 @media print {
-  .invoice-print-stamp {
-    width: 96px !important;
-    height: 96px !important;
-    min-width: 96px !important;
-    max-width: 96px !important;
-    overflow: visible !important;
-    opacity: 0.8;
-    transform: rotate(-6deg);
+  .invoice-print-stamp-img {
+    width: 100px;
+    max-width: 120px;
+    height: auto;
+    object-fit: contain;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
