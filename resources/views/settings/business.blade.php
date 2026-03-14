@@ -8,10 +8,10 @@
   </div>
   <div class="card-body">
     @if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
+    <div class="alert alert-success" role="alert">{{ session('success') }}</div>
     @endif
     @if($errors->any())
-    <div class="alert alert-error">{{ $errors->first() }}</div>
+    <div class="alert alert-error" role="alert">{{ $errors->first() }}</div>
     @endif
     <form method="post" action="{{ route('settings.business.update') }}" enctype="multipart/form-data">
       @csrf
@@ -68,7 +68,7 @@
         </div>
         @endif
         <input type="file" id="logo" name="logo" accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml">
-        <small class="text-muted">JPEG, PNG, GIF, WebP or SVG. Max 2 MB.</small>
+        <small class="text-muted">JPEG, PNG, GIF or WebP. Max 2 MB.</small>
       </div>
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">Save business settings</button>

@@ -28,7 +28,7 @@ class BusinessSettingsController extends Controller
             'website' => 'nullable|string|max:255',
             'default_currency' => 'nullable|string|max:10',
             'tax_id' => 'nullable|string|max:64',
-            'logo' => 'nullable|image|mimes:jpeg,png,gif,webp,svg|max:2048',
+            'logo' => 'nullable|image|mimes:jpeg,png,gif,webp|max:2048',
         ]);
 
         $business = BusinessSetting::get();

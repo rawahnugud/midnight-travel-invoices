@@ -14,6 +14,9 @@
     </div>
   </div>
   <div class="card-body invoice-view">
+    @if(session('success'))
+    <div class="alert alert-success" role="alert">{{ session('success') }}</div>
+    @endif
     <div class="invoice-meta-row">
       <div>
         <strong>Customer</strong>

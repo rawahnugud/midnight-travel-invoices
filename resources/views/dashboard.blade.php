@@ -20,7 +20,7 @@
     <span class="stat-label">Pending</span>
   </div>
   <div class="stat-card stat-revenue">
-    <span class="stat-value">${{ number_format($stats['revenue'] ?? 0, 2) }}</span>
+    <span class="stat-value">{{ $formatMoney($stats['revenue'] ?? 0) }}</span>
     <span class="stat-label">Revenue</span>
   </div>
 </div>

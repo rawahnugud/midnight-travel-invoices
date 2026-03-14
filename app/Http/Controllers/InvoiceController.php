@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\LineItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class InvoiceController extends Controller
 {
@@ -47,7 +48,7 @@ class InvoiceController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'invoice_number' => 'required|string|max:64',
+            'invoice_number' => 'required|string|max:64|unique:invoices,invoice_number',
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'nullable|email',
             'customer_phone' => 'nullable|string|max:64',
@@ -67,8 +68,9 @@ class InvoiceController extends Controller
         $validated['status'] = $validated['status'] ?? 'draft';
 
         $items = $request->input('items', []);
-        if (empty($items) || empty($items[0]['item_name'] ?? null)) {
-            return back()->withErrors(['items' => 'At least one line item is required.'])->withInput();
+        $hasItem = collect($items)->contains(fn ($row) => ! empty(trim($row['item_name'] ?? '')));
+        if (! $hasItem) {
+            return back()->withErrors(['items' => 'At least one line item with a name is required.'])->withInput();
         }
 
         $inv = Invoice::create($validated);
@@ -91,7 +93,8 @@ class InvoiceController extends Controller
 
     public function show(Request $request, Invoice $invoice)
     {
-        if (! $request->user()->isAdmin() && $invoice->created_by !== $request->user()->id) {
+        $user = $request->user();
+        if (! $user->isAdmin() && ! $user->isViewer() && $invoice->created_by !== $user->id) {
             abort(403);
         }
         $invoice->load('lineItems');
@@ -114,8 +117,14 @@ class InvoiceController extends Controller
             abort(403);
         }
 
+        $items = $request->input('items', []);
+        $hasItem = collect($items)->contains(fn ($row) => ! empty(trim($row['item_name'] ?? '')));
+        if (! $hasItem) {
+            return back()->withErrors(['items' => 'At least one line item with a name is required.'])->withInput();
+        }
+
         $validated = $request->validate([
-            'invoice_number' => 'required|string|max:64',
+            'invoice_number' => ['required', 'string', 'max:64', Rule::unique('invoices', 'invoice_number')->ignore($invoice->id)],
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'nullable|email',
             'customer_phone' => 'nullable|string|max:64',
@@ -132,23 +141,23 @@ class InvoiceController extends Controller
         $validated['tax_rate'] = (float) ($validated['tax_rate'] ?? 0);
         $validated['discount_amount'] = (float) ($validated['discount_amount'] ?? 0);
 
-        $invoice->update($validated);
-
-        $items = $request->input('items', []);
-        $invoice->lineItems()->delete();
-        foreach ($items as $i => $row) {
-            if (empty($row['item_name'] ?? null)) {
-                continue;
+        DB::transaction(function () use ($invoice, $validated, $items) {
+            $invoice->update($validated);
+            $invoice->lineItems()->delete();
+            foreach ($items as $i => $row) {
+                if (empty(trim($row['item_name'] ?? ''))) {
+                    continue;
+                }
+                LineItem::create([
+                    'invoice_id' => $invoice->id,
+                    'item_name' => $row['item_name'],
+                    'description' => $row['description'] ?? null,
+                    'quantity' => (float) ($row['quantity'] ?? 1),
+                    'unit_price' => (float) ($row['unit_price'] ?? 0),
+                    'sort_order' => $i,
+                ]);
             }
-            LineItem::create([
-                'invoice_id' => $invoice->id,
-                'item_name' => $row['item_name'],
-                'description' => $row['description'] ?? null,
-                'quantity' => (float) ($row['quantity'] ?? 1),
-                'unit_price' => (float) ($row['unit_price'] ?? 0),
-                'sort_order' => $i,
-            ]);
-        }
+        });
 
         return redirect()->route('invoices.show', $invoice)->with('success', 'Invoice updated.');
     }
@@ -164,7 +173,8 @@ class InvoiceController extends Controller
 
     public function print(Request $request, Invoice $invoice)
     {
-        if (! $request->user()->isAdmin() && $invoice->created_by !== $request->user()->id) {
+        $user = $request->user();
+        if (! $user->isAdmin() && ! $user->isViewer() && $invoice->created_by !== $user->id) {
             abort(403);
         }
         $invoice->load('lineItems');

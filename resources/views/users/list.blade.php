@@ -9,13 +9,13 @@
   </div>
   <div class="card-body">
     @if(session('error'))
-    <div class="alert alert-error">{{ session('error') }}</div>
+    <div class="alert alert-error" role="alert">{{ session('error') }}</div>
     @endif
     @if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
+    <div class="alert alert-success" role="alert">{{ session('success') }}</div>
     @endif
     @if($errors->any())
-    <div class="alert alert-error">{{ $errors->first() }}</div>
+    <div class="alert alert-error" role="alert">{{ $errors->first() }}</div>
     @endif
     <table class="table">
       <thead>

@@ -16,7 +16,9 @@ class User extends Authenticatable
 
     protected function casts(): array
     {
-        return ['password' => 'hashed'];
+        return [
+            // Password is hashed in UserController; do not use 'hashed' cast or it will double-hash
+        ];
     }
 
     public function isAdmin(): bool

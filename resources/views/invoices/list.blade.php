@@ -10,6 +10,9 @@
     @endif
   </div>
   <div class="card-body">
+    @if(session('success'))
+    <div class="alert alert-success" role="alert">{{ session('success') }}</div>
+    @endif
     @if($invoices->count())
     <table class="table">
       <thead>
