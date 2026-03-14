@@ -74,7 +74,7 @@
     if (!userModal) return;
     if (edit) {
       modalTitle.textContent = 'Edit User';
-      userForm.action = '/users/' + edit.id;
+      userForm.action = edit.url || ('/users/' + edit.id);
       if (userMethod) userMethod.value = 'PUT';
       if (userId) userId.value = edit.id;
       if (modalUsername) modalUsername.value = edit.username || '';
@@ -107,6 +107,7 @@
     btn.addEventListener('click', function () {
       showUserModal({
         id: btn.getAttribute('data-id'),
+        url: btn.getAttribute('data-url'),
         username: btn.getAttribute('data-username'),
         email: btn.getAttribute('data-email') || '',
         role: btn.getAttribute('data-role'),

@@ -1,14 +1,18 @@
-# Dependencies
+# Laravel / PHP
+/vendor/
 node_modules/
-
-# Environment and secrets
 .env
-.env.local
-.env.*.local
-
-# SQLite database (optional: remove this line if you want to track a seed DB)
-data/*.db
-data/*.db-journal
+.env.backup
+.env.production
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+storage/*.key
+database/database.sqlite
+database/*.sqlite
+bootstrap/cache/*.php
 
 # Logs and OS
 npm-debug.log*

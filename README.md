@@ -1,119 +1,134 @@
-# Midnight Travel — Invoice Management System
+# Midnight Travel — Invoice Management System (Laravel)
 
-A production-ready invoice web app with dashboard, CRUD invoices, user management, and print-ready layouts.
+Production-ready invoice web app built with **PHP Laravel 10**. Runs on any host with PHP 8.1+ and Composer (including cPanel shared hosting).
 
-## Stack
+## Features
 
-- **Backend:** Node.js, Express
-- **Database:** SQLite (single file, no separate server)
-- **Views:** EJS (server-rendered)
-- **Auth:** Session-based (express-session), bcrypt for passwords, CSRF protection
+- **Authentication:** Login with username/password, session-based
+- **Roles:** Admin (full access), Staff (create & edit own invoices), Viewer (read-only)
+- **Dashboard:** Total/paid/pending invoices, revenue, recent list
+- **Invoices:** Create, edit, view, delete, print/PDF-ready
+- **Users:** Admin can manage users (create, edit, delete)
+- **Setup URL:** Seed database via browser: `/setup/seed?token=YOUR_SETUP_SECRET`
 
-## Quick start
+## Requirements
 
-### 1. Install dependencies
+- PHP 8.1+
+- Composer
+- SQLite (default) or MySQL
+- Laravel 10
 
-```bash
-npm install
-```
-
-### 2. Initialize database and seed data
-
-The database file and tables are created when the app starts. To add users and sample invoices:
-
-- **Local:** run `npm run seed`
-- **Server (no terminal needed):** after the app is running, visit  
-  `https://your-domain.com/setup/seed?token=midnight-travel-setup-change-me`  
-  (set `SETUP_SECRET` in `.env` and use that token for security.)
-
-This creates:
-
-- **Admin:** `admin` / `admin123`
-- **Staff:** `staff` / `staff123`
-- Two sample invoices
-
-### 3. Run the app
+## Quick start (local)
 
 ```bash
-npm start
+# Install dependencies
+composer install
+
+# Copy environment file
+cp .env.example .env
+
+# Generate app key
+php artisan key:generate
+
+# Create SQLite database file (if using SQLite)
+touch database/database.sqlite
+
+# Run migrations
+php artisan migrate
+
+# Seed users and sample invoices (optional)
+php artisan db:seed
+# Or use the setup URL in the browser after starting the server (see below)
 ```
 
-Open **http://localhost:3000** and log in with `admin` / `admin123`.
+Then start the built-in server:
 
-## Environment (optional)
+```bash
+php artisan serve
+```
 
-Copy `.env.example` to `.env` and set:
+Open **http://localhost:8000**. Log in with **admin** / **admin123** (or **staff** / **staff123** if you ran the seeder).
 
-- `SESSION_SECRET` — long random string for session signing
-- `PORT` — default 3000
-- `DATABASE_PATH` — path to SQLite file (default `./data/invoices.db`)
+## Deploy to cPanel
 
-## Roles
+1. **Upload or clone** the project into a folder (e.g. `midnight-travel-invoices` or `invoice.midnighttravel.net`).
 
-| Role   | Can do |
-|--------|--------|
-| Admin  | All: manage users, all invoices, create/edit/delete any invoice, print |
-| Staff  | Create invoices, edit/delete own invoices, print, view own |
-| Viewer | Read-only: view invoices (no create/edit/delete) |
+2. **Set the document root** to the `public` folder:
+   - In cPanel → Domains → (your domain/subdomain) → Document Root: e.g. `midnight-travel-invoices/public`
+   - Or point the domain to `public` inside the app folder.
+
+3. **Install dependencies** (in the project root, not inside `public`):
+   ```bash
+   cd /home/youruser/midnight-travel-invoices
+   composer install --no-dev --optimize-autoloader
+   ```
+
+4. **Environment:**
+   - Copy `.env.example` to `.env`
+   - Run `php artisan key:generate`
+   - Set `APP_ENV=production`, `APP_DEBUG=false`, and a strong `APP_KEY`
+   - For SQLite: ensure `DB_DATABASE` points to an absolute path or `database/database.sqlite` (create the file: `touch database/database.sqlite`)
+
+5. **Run migrations:**
+   ```bash
+   php artisan migrate --force
+   ```
+
+6. **Seed data (one-time):** Either run `php artisan db:seed` or visit in the browser:
+   ```
+   https://your-domain.com/setup/seed?token=midnight-travel-setup-change-me
+   ```
+   Then set `SETUP_SECRET` in `.env` to a secret value and use that in the URL instead.
+
+7. **Permissions:** Ensure `storage` and `bootstrap/cache` are writable:
+   ```bash
+   chmod -R 775 storage bootstrap/cache
+   ```
 
 ## Routes
 
-- `/login` — Sign in
-- `/dashboard` — Summary cards + recent invoices
-- `/invoices` — List (filtered by role)
-- `/invoices/new` — Create invoice
-- `/invoices/:id` — View
-- `/invoices/:id/edit` — Edit
-- `/invoices/:id/print` — Print view (opens in new tab, browser Print → PDF)
-- `/users` — User management (admin only)
-- `/settings` — Settings placeholder
+| Route | Description |
+|-------|-------------|
+| `/login` | Login page |
+| `/dashboard` | Dashboard (stats + recent invoices) |
+| `/invoices` | Invoice list |
+| `/invoices/create` | New invoice |
+| `/invoices/{id}` | View invoice |
+| `/invoices/{id}/edit` | Edit invoice |
+| `/invoices/{id}/print` | Print view |
+| `/users` | User management (admin only) |
+| `/settings` | Settings page |
+| `/setup/seed?token=...` | One-time seed (admin, staff, sample invoices) |
 
-## Project structure
+## Default logins (after seed)
+
+- **Admin:** `admin` / `admin123`
+- **Staff:** `staff` / `staff123`
+
+Change these in production.
+
+## Project structure (Laravel)
 
 ```
-├── server.js           # Entry, session, CSRF, routes
-├── config/database.js  # SQLite connection
-├── db/
-│   ├── schema.sql      # Tables
-│   └── seed.sql        # (Seed logic in scripts/seed.js)
-├── middleware/
-│   ├── auth.js         # requireAuth, requireRole, canEditInvoice
-│   └── csrf.js         # CSRF protection
-├── routes/
-│   ├── index.js        # Mount all routes
-│   ├── auth.js         # Login, logout
-│   ├── dashboard.js   # Dashboard stats + recent
-│   ├── invoices.js     # Invoice CRUD + print
-│   └── users.js        # User CRUD (admin)
-├── views/              # EJS templates
-├── public/
-│   ├── css/style.css   # Main UI
-│   ├── css/print.css   # Invoice print
-│   └── js/app.js       # Line items, user modal, confirm
-└── scripts/
-    ├── init-db.js      # Create tables (optional; server also runs schema)
-    └── seed.js         # Seed users + sample invoices
+app/
+  Http/Controllers/   Auth, Dashboard, Invoice, User, Setup
+  Http/Middleware/   EnsureUserHasRole
+  Models/            User, Invoice, LineItem
+config/
+database/migrations/
+database/seeders/    DatabaseSeeder
+resources/views/     Blade: layout, auth, dashboard, invoices, users
+routes/web.php
+public/              index.php, css, js (document root)
 ```
-
-## Invoice printing
-
-- Use **Print** from the invoice view or list (opens `/invoices/:id/print`).
-- In the print window, use **Print** or **Save as PDF**.
-- `public/css/print.css` styles the invoice for A4.
-
-## Branding
-
-- **Midnight Travel** name and premium/luxury style are used in layout and invoice print.
-- Colors: dark navy, maroon accent, gold accent (see `:root` in `style.css`).
 
 ## Security
 
-- Passwords hashed with bcrypt.
-- Session-based auth; role checks on every protected route.
-- Staff can only edit/delete invoices they created (unless admin).
-- CSRF token on all state-changing forms.
-- Input validation via express-validator where used.
+- Passwords hashed with bcrypt
+- CSRF protection on all forms
+- Role checks on controllers (admin, staff, viewer)
+- Staff can only edit/delete their own invoices; admin can do all
 
 ## License
 
-Private use for Midnight Travel.
+Proprietary — Midnight Travel.
