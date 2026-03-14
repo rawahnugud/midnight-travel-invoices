@@ -199,8 +199,8 @@ body.print-body {
   flex-shrink: 0;
 }
 .invoice-print-stamp img {
-  max-width: 80px;
-  max-height: 80px;
+  max-width: 48px;
+  max-height: 48px;
   object-fit: contain;
   display: block;
 }
