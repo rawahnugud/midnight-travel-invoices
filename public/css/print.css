@@ -195,39 +195,55 @@ body.print-body {
   margin-top: 0.35rem;
   margin-bottom: 1rem;
 }
+/* Stamp: prominent, circular, ink-on-paper look */
 .invoice-print-stamp {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
-  min-width: 56px;
-  max-width: 56px;
+  width: 72px;
+  height: 72px;
+  min-width: 72px;
+  max-width: 72px;
   overflow: hidden;
+  border-radius: 50%;
+  padding: 2px;
+  box-sizing: border-box;
+  /* subtle hand-stamped effect */
+  transform: rotate(-1.5deg);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(30, 58, 138, 0.12);
+  background: #fff;
 }
 .invoice-print-stamp img {
-  max-width: 56px !important;
-  max-height: 56px !important;
-  width: 56px !important;
-  height: 56px !important;
+  width: 68px !important;
+  height: 68px !important;
+  max-width: 68px !important;
+  max-height: 68px !important;
   object-fit: contain;
   display: block;
-  opacity: 0.95;
+  border-radius: 50%;
+  opacity: 1;
+  /* keep blue ink vivid when printing */
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 @media print {
   .invoice-print-stamp {
-    width: 56px !important;
-    height: 56px !important;
-    min-width: 56px !important;
-    max-width: 56px !important;
+    width: 72px !important;
+    height: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
     overflow: hidden !important;
+    transform: rotate(-1.5deg);
+    box-shadow: 0 0 0 1px rgba(30, 58, 138, 0.2);
   }
   .invoice-print-stamp img {
-    width: 56px !important;
-    height: 56px !important;
-    max-width: 56px !important;
-    max-height: 56px !important;
+    width: 68px !important;
+    height: 68px !important;
+    max-width: 68px !important;
+    max-height: 68px !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
