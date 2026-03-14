@@ -33,7 +33,7 @@ body.print-body {
   }
 }
 
-/* Header: brand + doc info */
+/* Header: brand + doc info (colour from design settings) */
 .invoice-print-header {
   display: flex;
   justify-content: space-between;
@@ -41,7 +41,7 @@ body.print-body {
   gap: 1.5rem;
   margin-bottom: 1.75rem;
   padding-bottom: 1.25rem;
-  border-bottom: 2px solid #0f172a;
+  border-bottom: 2px solid var(--invoice-header, #0f172a);
 }
 
 .invoice-print-brand {
@@ -132,7 +132,7 @@ body.print-body {
   font-size: 0.9rem;
 }
 .invoice-print-table thead {
-  background: #0f172a;
+  background: var(--invoice-header, #0f172a);
   color: #fff;
 }
 .invoice-print-table th {
@@ -189,9 +189,9 @@ body.print-body {
 .invoice-print-totals .grand-total-row td {
   padding: 0.6rem 0.5rem;
   border-bottom: none;
-  border-top: 2px solid #0f172a;
+  border-top: 2px solid var(--invoice-header, #0f172a);
   font-size: 1.05rem;
-  color: #0f172a;
+  color: var(--invoice-header, #0f172a);
 }
 
 /* Notes / Terms */

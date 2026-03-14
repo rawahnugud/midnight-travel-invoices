@@ -3,14 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login — Midnight Travel</title>
+  <title>Login — {{ optional($business)->company_name ?? 'Midnight Travel' }}</title>
+  @if(optional($business)->primary_color ?? null)
+  <style>:root { --mt-accent: {{ $business->primary_color }}; --mt-gold: {{ $business->accent_color }}; }</style>
+  @endif
   <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 </head>
 <body class="login-page">
   <div class="login-card">
     <div class="login-brand">
+      @if(optional($business)->login_logo_url)
+      <img src="{{ $business->login_logo_url }}" alt="{{ optional($business)->company_name ?? 'Logo' }}" class="login-logo-img" style="max-height:56px; max-width:180px; object-fit:contain; margin-bottom:0.75rem;">
+      @else
       <span class="login-logo">MT</span>
-      <h1>Midnight Travel</h1>
+      @endif
+      <h1>{{ optional($business)->company_name ?? 'Midnight Travel' }}</h1>
       <p>Invoice System</p>
     </div>
     <form method="post" action="{{ route('login') }}" class="login-form">

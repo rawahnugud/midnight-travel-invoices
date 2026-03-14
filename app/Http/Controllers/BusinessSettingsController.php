@@ -56,4 +56,50 @@ class BusinessSettingsController extends Controller
         return redirect()->route('settings.business.edit')
             ->with('success', 'Business settings saved.');
     }
+
+    public function editDesign()
+    {
+        $business = BusinessSetting::get();
+        return view('settings.design', ['business' => $business]);
+    }
+
+    public function updateDesign(Request $request)
+    {
+        $request->merge([
+            'primary_color' => trim($request->input('primary_color', '')) ?: null,
+            'accent_color' => trim($request->input('accent_color', '')) ?: null,
+            'invoice_header_color' => trim($request->input('invoice_header_color', '')) ?: null,
+        ]);
+        $validated = $request->validate([
+            'primary_color' => 'nullable|string|max:20|regex:/^#[0-9A-Fa-f]{3,6}$/',
+            'accent_color' => 'nullable|string|max:20|regex:/^#[0-9A-Fa-f]{3,6}$/',
+            'invoice_header_color' => 'nullable|string|max:20|regex:/^#[0-9A-Fa-f]{3,6}$/',
+            'login_logo' => 'nullable|image|mimes:jpeg,png,gif,webp|max:2048',
+        ]);
+
+        $business = BusinessSetting::get();
+
+        if ($request->hasFile('login_logo')) {
+            $dir = public_path('business');
+            if (! File::isDirectory($dir)) {
+                File::makeDirectory($dir, 0755, true);
+            }
+            if ($business->login_logo_path) {
+                $oldPath = public_path($business->login_logo_path);
+                if (File::exists($oldPath)) {
+                    File::delete($oldPath);
+                }
+            }
+            $file = $request->file('login_logo');
+            $name = 'login_logo_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move($dir, $name);
+            $validated['login_logo_path'] = 'business/' . $name;
+        }
+
+        unset($validated['login_logo']);
+        $business->update($validated);
+
+        return redirect()->route('settings.design.edit')
+            ->with('success', 'Design settings saved.');
+    }
 }
