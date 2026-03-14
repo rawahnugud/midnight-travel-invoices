@@ -33,7 +33,7 @@
           <td>{{ $u->username }}</td>
           <td>{{ $u->email ?? '—' }}</td>
           <td><span class="badge badge-{{ $u->role }}">{{ $u->role }}</span></td>
-          <td>{{ $u->created_at?->format('Y-m-d') ?? '—' }}</td>
+          <td>{{ $u->created_at ? \Carbon\Carbon::parse($u->created_at)->format('Y-m-d') : '—' }}</td>
           <td>
             @if($u->id !== $user?->id)
             <button type="button" class="btn btn-text btn-sm edit-user-btn" data-id="{{ $u->id }}" data-url="{{ route('users.update', $u) }}" data-username="{{ $u->username }}" data-email="{{ $u->email ?? '' }}" data-role="{{ $u->role }}">Edit</button>

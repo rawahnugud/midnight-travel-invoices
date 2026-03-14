@@ -47,7 +47,7 @@
         <tr>
           <td><a href="{{ route('invoices.show', $inv) }}">{{ $inv->invoice_number }}</a></td>
           <td>{{ $inv->customer_name }}</td>
-          <td>{{ $inv->invoice_date->format('Y-m-d') }}</td>
+          <td>{{ \Carbon\Carbon::parse($inv->invoice_date)->format('Y-m-d') }}</td>
           <td><span class="badge badge-{{ $inv->status }}">{{ $inv->status }}</span></td>
           <td>${{ number_format($inv->total, 2) }}</td>
           <td><a href="{{ route('invoices.print', $inv) }}" target="_blank" class="btn btn-text btn-sm">Print</a></td>

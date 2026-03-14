@@ -17,8 +17,8 @@
       <div class="invoice-print-meta">
         <h1>INVOICE</h1>
         <p class="invoice-number">{{ $invoice->invoice_number }}</p>
-        <p>Date: {{ $invoice->invoice_date->format('Y-m-d') }}</p>
-        @if($invoice->due_date)<p>Due: {{ $invoice->due_date->format('Y-m-d') }}</p>@endif
+        <p>Date: {{ \Carbon\Carbon::parse($invoice->invoice_date)->format('Y-m-d') }}</p>
+        @if($invoice->due_date)<p>Due: {{ \Carbon\Carbon::parse($invoice->due_date)->format('Y-m-d') }}</p>@endif
         <p><span class="badge badge-{{ $invoice->status }}">{{ $invoice->status }}</span></p>
       </div>
     </header>

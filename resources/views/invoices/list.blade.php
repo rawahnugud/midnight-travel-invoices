@@ -28,7 +28,7 @@
         <tr>
           <td><a href="{{ route('invoices.show', $inv) }}">{{ $inv->invoice_number }}</a></td>
           <td>{{ $inv->customer_name }}</td>
-          <td>{{ $inv->invoice_date->format('Y-m-d') }}</td>
+          <td>{{ \Carbon\Carbon::parse($inv->invoice_date)->format('Y-m-d') }}</td>
           <td><span class="badge badge-{{ $inv->status }}">{{ $inv->status }}</span></td>
           <td>${{ number_format($inv->total ?? 0, 2) }}</td>
           <td>{{ $inv->creator?->username ?? '—' }}</td>
