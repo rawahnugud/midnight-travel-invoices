@@ -45,12 +45,12 @@
         var tr = document.createElement('tr');
         tr.className = 'line-item-row';
         tr.innerHTML =
-          '<td><input type="text" name="items[' + idx + '][item_name]" placeholder="Item name">' +
+          '<td data-label="Item / Description"><input type="text" name="items[' + idx + '][item_name]" placeholder="Item name">' +
           '<input type="text" name="items[' + idx + '][description]" placeholder="Description" class="input-desc"></td>' +
-          '<td class="col-qty"><input type="number" name="items[' + idx + '][quantity]" min="0" step="0.01" value="1" class="input-qty"></td>' +
-          '<td class="col-price"><input type="number" name="items[' + idx + '][unit_price]" min="0" step="0.01" value="0" class="input-price"></td>' +
-          '<td class="col-total"><span class="line-total">0</span></td>' +
-          '<td><button type="button" class="btn btn-text btn-sm remove-line">Remove</button></td>';
+          '<td class="col-qty" data-label="Qty"><input type="number" name="items[' + idx + '][quantity]" min="0" step="0.01" value="1" class="input-qty"></td>' +
+          '<td class="col-price" data-label="Unit Price"><input type="number" name="items[' + idx + '][unit_price]" min="0" step="0.01" value="0" class="input-price"></td>' +
+          '<td class="col-total" data-label="Amount"><span class="line-total">0</span></td>' +
+          '<td data-label=""><button type="button" class="btn btn-text btn-sm remove-line">Remove</button></td>';
         tbody.appendChild(tr);
         bindLineRow(tr);
       });

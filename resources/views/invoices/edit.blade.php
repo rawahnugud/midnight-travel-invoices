@@ -65,7 +65,7 @@
         <textarea id="customer_address" name="customer_address" rows="2">{{ old('customer_address', $inv->customer_address) }}</textarea>
       </div>
       <h3>Line Items</h3>
-      <div class="table-responsive">
+      <div class="table-responsive table-mobile-cards">
       <table class="table line-items-table">
         <thead>
           <tr>
@@ -79,14 +79,14 @@
         <tbody id="line-items-tbody">
           @foreach($items as $idx => $item)
           <tr class="line-item-row">
-            <td>
+            <td data-label="Item / Description">
               <input type="text" name="items[{{ $idx }}][item_name]" placeholder="Item name" value="{{ $item->item_name ?? '' }}">
               <input type="text" name="items[{{ $idx }}][description]" placeholder="Description" value="{{ $item->description ?? '' }}" class="input-desc">
             </td>
-            <td class="col-qty"><input type="number" name="items[{{ $idx }}][quantity]" min="0" step="0.01" value="{{ $item->quantity ?? 1 }}" class="input-qty"></td>
-            <td class="col-price"><input type="number" name="items[{{ $idx }}][unit_price]" min="0" step="0.01" value="{{ $item->unit_price ?? 0 }}" class="input-price"></td>
-            <td class="col-total"><span class="line-total">0</span></td>
-            <td><button type="button" class="btn btn-text btn-sm remove-line">Remove</button></td>
+            <td class="col-qty" data-label="Qty"><input type="number" name="items[{{ $idx }}][quantity]" min="0" step="0.01" value="{{ $item->quantity ?? 1 }}" class="input-qty"></td>
+            <td class="col-price" data-label="Unit Price"><input type="number" name="items[{{ $idx }}][unit_price]" min="0" step="0.01" value="{{ $item->unit_price ?? 0 }}" class="input-price"></td>
+            <td class="col-total" data-label="Amount"><span class="line-total">0</span></td>
+            <td data-label=""><button type="button" class="btn btn-text btn-sm remove-line">Remove</button></td>
           </tr>
           @endforeach
         </tbody>
