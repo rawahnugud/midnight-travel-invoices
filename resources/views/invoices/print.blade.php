@@ -1,13 +1,13 @@
 @php
-  $company = optional($business)->company_name ?? 'Midnight Travel';
+  $company = optional($business)->company_name ?? __('messages.app_name');
   $currencySym = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'][$invoice->currency ?? 'USD'] ?? ($invoice->currency ?? 'USD') . ' ';
 @endphp
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Invoice {{ $invoice->invoice_number }} — {{ $company }}</title>
+  <title>{{ __('messages.invoice') }} {{ $invoice->invoice_number }} — {{ $company }}</title>
   @php $invoiceHeaderColor = optional($business)->invoice_header_color ?? '#0f172a'; @endphp
   <style>:root { --invoice-header: {{ $invoiceHeaderColor }}; }</style>
   <link rel="stylesheet" href="{{ asset('css/style.css') }}">
@@ -15,8 +15,8 @@
 </head>
 <body class="print-body">
   <div class="print-toolbar no-print">
-    <a href="{{ route('invoices.show', $invoice) }}" class="back-link">← Back to invoice</a>
-    <button type="button" class="btn-print" onclick="window.print();">Print / Save as PDF</button>
+    <a href="{{ route('invoices.show', $invoice) }}" class="back-link">{{ __('messages.back_to_invoice') }}</a>
+    <button type="button" class="btn-print" onclick="window.print();">{{ __('messages.print_save_pdf') }}</button>
   </div>
   <div class="invoice-print">
     <header class="invoice-print-header">
@@ -31,11 +31,11 @@
         @endif
       </div>
       <div class="invoice-print-doc">
-        <h1 class="invoice-print-title">INVOICE</h1>
+        <h1 class="invoice-print-title">{{ strtoupper(__('messages.invoice')) }}</h1>
         <dl class="invoice-print-meta">
-          <dt>Invoice #</dt>
+          <dt>{{ __('messages.invoice_number') }}</dt>
           <dd>{{ $invoice->invoice_number }}</dd>
-          <dt>Date</dt>
+          <dt>{{ __('messages.date') }}</dt>
           <dd>{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('M j, Y') }}</dd>
         </dl>
       </div>
@@ -43,16 +43,16 @@
 
     <div class="invoice-print-parties">
       <div class="invoice-print-from">
-        <strong class="invoice-print-label">From</strong>
+        <strong class="invoice-print-label">{{ __('messages.from') }}</strong>
         <p class="invoice-print-company">{{ $company }}</p>
         @if(optional($business)->address)<p>{{ $business->address }}</p>@endif
         @if(optional($business)->phone)<p>{{ $business->phone }}</p>@endif
         @if(optional($business)->email)<p>{{ $business->email }}</p>@endif
         @if(optional($business)->website)<p>{{ $business->website }}</p>@endif
-        @if(optional($business)->tax_id)<p>Tax ID: {{ $business->tax_id }}</p>@endif
+        @if(optional($business)->tax_id)<p>{{ __('messages.tax_id') }}: {{ $business->tax_id }}</p>@endif
       </div>
       <div class="invoice-print-to">
-        <strong class="invoice-print-label">Bill to</strong>
+        <strong class="invoice-print-label">{{ __('messages.bill_to') }}</strong>
         <p class="invoice-print-customer">{{ $invoice->customer_name }}</p>
         @if($invoice->customer_email)<p>{{ $invoice->customer_email }}</p>@endif
         @if($invoice->customer_phone)<p>{{ $invoice->customer_phone }}</p>@endif
@@ -63,10 +63,10 @@
     <table class="invoice-print-table">
       <thead>
         <tr>
-          <th class="col-item">Item / Description</th>
-          <th class="col-qty">Qty</th>
-          <th class="col-price">Unit price</th>
-          <th class="col-amount">Amount</th>
+          <th class="col-item">{{ __('messages.item_description') }}</th>
+          <th class="col-qty">{{ __('messages.qty') }}</th>
+          <th class="col-price">{{ __('messages.unit_price_print') }}</th>
+          <th class="col-amount">{{ __('messages.amount') }}</th>
         </tr>
       </thead>
       <tbody>
@@ -87,23 +87,23 @@
     <div class="invoice-print-totals-stamp-wrap">
       <table class="invoice-print-totals">
         <tr>
-          <td>Subtotal</td>
+          <td>{{ __('messages.subtotal') }}</td>
           <td class="num">{{ $currencySym }}{{ number_format($invoice->subtotal, 2) }}</td>
         </tr>
         @if($invoice->tax_rate > 0)
         <tr>
-          <td>Tax ({{ number_format($invoice->tax_rate, 1) }}%)</td>
+          <td>{{ __('messages.tax') }} ({{ number_format($invoice->tax_rate, 1) }}%)</td>
           <td class="num">{{ $currencySym }}{{ number_format($invoice->tax_amount, 2) }}</td>
         </tr>
         @endif
         @if($invoice->discount_amount > 0)
         <tr>
-          <td>Discount</td>
+          <td>{{ __('messages.discount') }}</td>
           <td class="num">−{{ $currencySym }}{{ number_format($invoice->discount_amount, 2) }}</td>
         </tr>
         @endif
         <tr class="grand-total-row">
-          <td><strong>Total</strong></td>
+          <td><strong>{{ __('messages.total') }}</strong></td>
           <td class="num"><strong>{{ $currencySym }}{{ number_format($invoice->total, 2) }}</strong></td>
         </tr>
       </table>
@@ -118,19 +118,19 @@
     <div class="invoice-print-extra">
       @if($invoice->notes)
       <div class="invoice-print-notes">
-        <strong>Notes</strong><br>{{ $invoice->notes }}
+        <strong>{{ __('messages.notes') }}</strong><br>{{ $invoice->notes }}
       </div>
       @endif
       @if($invoice->terms)
       <div class="invoice-print-terms">
-        <strong>Terms</strong><br>{{ $invoice->terms }}
+        <strong>{{ __('messages.terms') }}</strong><br>{{ $invoice->terms }}
       </div>
       @endif
     </div>
     @endif
 
     <footer class="invoice-print-footer">
-      <p class="thanks">Thank you for your business.</p>
+      <p class="thanks">{{ __('messages.thank_you') }}</p>
       <p class="company">{{ $company }}</p>
       @if(optional($business)->address || optional($business)->phone || optional($business)->email)
       <p class="contact">

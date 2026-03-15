@@ -78,8 +78,14 @@ button, .btn, .fab, .sidebar-link, input, select, textarea {
 .topbar {
   background: var(--mt-white); border-bottom: 1px solid var(--border);
   padding: 1rem 1.5rem; position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 0.75rem;
 }
-.topbar-title { font-size: 1.25rem; font-weight: 700; color: var(--mt-dark); }
+.topbar-title { font-size: 1.25rem; font-weight: 700; color: var(--mt-dark); flex: 1; min-width: 0; }
+.locale-switcher { flex-shrink: 0; font-size: 0.9rem; }
+.locale-switcher .locale-link { color: var(--text-muted); text-decoration: none; }
+.locale-switcher .locale-link:hover { color: var(--mt-accent); }
+.locale-switcher .locale-link.active { font-weight: 700; color: var(--mt-accent); }
+.locale-switcher .locale-sep { color: var(--border); margin: 0 0.25rem; }
 .content { padding: 1.5rem; flex: 1; }
 
 /* Login */
@@ -88,6 +94,12 @@ button, .btn, .fab, .sidebar-link, input, select, textarea {
   width: 100%; max-width: 400px; background: var(--mt-white);
   border-radius: 12px; box-shadow: var(--shadow); padding: 2rem;
 }
+.locale-switcher-login { position: absolute; top: 1rem; right: 1rem; font-size: 0.9rem; }
+.locale-switcher-login .locale-link { color: var(--text-muted); text-decoration: none; }
+.locale-switcher-login .locale-link:hover { color: var(--mt-accent); }
+.locale-switcher-login .locale-link.active { font-weight: 700; color: var(--mt-accent); }
+.locale-switcher-login .locale-sep { color: var(--border); margin: 0 0.25rem; }
+[dir="rtl"] .locale-switcher-login { right: auto; left: 1rem; }
 .login-brand { text-align: center; margin-bottom: 1.5rem; }
 .login-logo {
   width: 56px; height: 56px; margin: 0 auto 0.75rem;
@@ -455,4 +467,28 @@ body.sidebar-open .sidebar-backdrop {
   .form-actions .btn { width: 100%; }
   .table-responsive.table-mobile-cards .table tbody tr { padding: 12px; }
   .fab { bottom: calc(12px + env(safe-area-inset-bottom, 0)); right: calc(12px + env(safe-area-inset-right, 0)); }
+}
+
+/* ========== RTL (Arabic) ========== */
+[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--border); }
+[dir="rtl"] .main { margin-left: 0; margin-right: var(--sidebar-width); }
+[dir="rtl"] .sidebar-nav { padding: 1rem 0; }
+[dir="rtl"] .topbar-title { text-align: right; }
+[dir="rtl"] .content { text-align: right; }
+[dir="rtl"] .card-header { flex-direction: row-reverse; }
+[dir="rtl"] .table th, [dir="rtl"] .table td { text-align: right; }
+[dir="rtl"] .table th.num, [dir="rtl"] .table td.num { text-align: left; }
+[dir="rtl"] .form-group label { text-align: right; }
+[dir="rtl"] .locale-switcher { order: -1; }
+[dir="rtl"] .fab { right: auto; left: calc(12px + env(safe-area-inset-left, 0)); }
+@media (max-width: 992px) {
+  [dir="rtl"] .sidebar { transform: translateX(100%) !important; right: 0; left: auto; }
+  [dir="rtl"] body.sidebar-open .sidebar { transform: translateX(0) !important; }
+  [dir="rtl"] .main { margin-right: 0 !important; }
+}
+@media (max-width: 768px) {
+  [dir="rtl"] .fab { right: auto; left: calc(12px + env(safe-area-inset-left, 0)); }
+}
+@media (max-width: 480px) {
+  [dir="rtl"] .fab { left: calc(12px + env(safe-area-inset-left, 0)); }
 }

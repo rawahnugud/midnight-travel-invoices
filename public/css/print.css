@@ -383,3 +383,12 @@ body.print-body {
   .badge-paid { background: #d1fae5 !important; color: #065f46 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .badge-cancelled { background: #fee2e2 !important; color: #991b1b !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* RTL (Arabic) print preview */
+[dir="rtl"] .invoice-print-header { flex-direction: row-reverse; }
+[dir="rtl"] .invoice-print-doc { text-align: left; }
+[dir="rtl"] .invoice-print-meta dd { text-align: left; }
+[dir="rtl"] .invoice-print-table th, [dir="rtl"] .invoice-print-table td { text-align: right; }
+[dir="rtl"] .invoice-print-table th.num, [dir="rtl"] .invoice-print-table td.num { text-align: left; }
+[dir="rtl"] .invoice-print-totals td.num { text-align: left; }
+[dir="rtl"] .print-toolbar { flex-direction: row-reverse; }

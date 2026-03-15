@@ -75,7 +75,7 @@ class InvoiceController extends Controller
         $items = $request->input('items', []);
         $hasItem = collect($items)->contains(fn ($row) => ! empty(trim($row['item_name'] ?? '')));
         if (! $hasItem) {
-            return back()->withErrors(['items' => 'At least one line item with a name is required.'])->withInput();
+            return back()->withErrors(['items' => __('messages.validation_line_item_required')])->withInput();
         }
 
         $inv = Invoice::create($validated);
@@ -93,7 +93,7 @@ class InvoiceController extends Controller
             ]);
         }
 
-        return redirect()->route('invoices.show', $inv)->with('success', 'Invoice created.');
+        return redirect()->route('invoices.show', $inv)->with('success', __('messages.invoice_created'));
     }
 
     public function show(Request $request, Invoice $invoice)
@@ -125,7 +125,7 @@ class InvoiceController extends Controller
         $items = $request->input('items', []);
         $hasItem = collect($items)->contains(fn ($row) => ! empty(trim($row['item_name'] ?? '')));
         if (! $hasItem) {
-            return back()->withErrors(['items' => 'At least one line item with a name is required.'])->withInput();
+            return back()->withErrors(['items' => __('messages.validation_line_item_required')])->withInput();
         }
 
         $validated = $request->validate([
@@ -164,7 +164,7 @@ class InvoiceController extends Controller
             }
         });
 
-        return redirect()->route('invoices.show', $invoice)->with('success', 'Invoice updated.');
+        return redirect()->route('invoices.show', $invoice)->with('success', __('messages.invoice_updated'));
     }
 
     public function destroy(Request $request, Invoice $invoice)
@@ -173,7 +173,7 @@ class InvoiceController extends Controller
             abort(403);
         }
         $invoice->delete();
-        return redirect()->route('invoices.index')->with('success', 'Invoice deleted.');
+        return redirect()->route('invoices.index')->with('success', __('messages.invoice_deleted'));
     }
 
     public function print(Request $request, Invoice $invoice)

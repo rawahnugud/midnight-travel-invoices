@@ -1,20 +1,20 @@
 @extends('layout')
-@section('title', 'Dashboard')
+@section('title', __('messages.dashboard'))
 @section('content')
 @php
   $activePage = 'dashboard';
-  $pageTitle = 'Dashboard';
+  $pageTitle = __('messages.dashboard');
 @endphp
 <div class="stats-grid">
   <div class="stat-card">
     <span class="stat-value">{{ $stats['total_invoices'] ?? 0 }}</span>
-    <span class="stat-label">Total Invoices</span>
+    <span class="stat-label">{{ __('messages.total_invoices') }}</span>
   </div>
 </div>
 <div class="card">
   <div class="card-header">
-    <h2>Recent Invoices</h2>
-    <a href="{{ route('invoices.create') }}" class="btn btn-primary btn-sm">New Invoice</a>
+    <h2>{{ __('messages.recent_invoices') }}</h2>
+    <a href="{{ route('invoices.create') }}" class="btn btn-primary btn-sm">{{ __('messages.new_invoice') }}</a>
   </div>
   <div class="card-body">
     @if($recentInvoices->count())
@@ -22,28 +22,28 @@
     <table class="table">
       <thead>
         <tr>
-          <th>Number</th>
-          <th>Customer</th>
-          <th>Date</th>
-          <th>Total</th>
+          <th>{{ __('messages.number') }}</th>
+          <th>{{ __('messages.customer') }}</th>
+          <th>{{ __('messages.date') }}</th>
+          <th>{{ __('messages.total') }}</th>
           <th></th>
         </tr>
       </thead>
       <tbody>
         @foreach($recentInvoices as $inv)
         <tr>
-          <td data-label="Number"><a href="{{ route('invoices.show', $inv) }}">{{ $inv->invoice_number }}</a></td>
-          <td data-label="Customer">{{ $inv->customer_name }}</td>
-          <td data-label="Date">{{ \Carbon\Carbon::parse($inv->invoice_date)->format('Y-m-d') }}</td>
-          <td data-label="Total">${{ number_format($inv->total, 2) }}</td>
-          <td data-label=""><a href="{{ route('invoices.print', $inv) }}" target="_blank" class="btn btn-text btn-sm">Print</a></td>
+          <td data-label="{{ __('messages.number') }}"><a href="{{ route('invoices.show', $inv) }}">{{ $inv->invoice_number }}</a></td>
+          <td data-label="{{ __('messages.customer') }}">{{ $inv->customer_name }}</td>
+          <td data-label="{{ __('messages.date') }}">{{ \Carbon\Carbon::parse($inv->invoice_date)->format('Y-m-d') }}</td>
+          <td data-label="{{ __('messages.total') }}">${{ number_format($inv->total, 2) }}</td>
+          <td data-label=""><a href="{{ route('invoices.print', $inv) }}" target="_blank" class="btn btn-text btn-sm">{{ __('messages.print') }}</a></td>
         </tr>
         @endforeach
       </tbody>
     </table>
     </div>
     @else
-    <p class="empty-state">No invoices yet. <a href="{{ route('invoices.create') }}">Create your first invoice</a>.</p>
+    <p class="empty-state">{{ __('messages.no_invoices_yet') }} <a href="{{ route('invoices.create') }}">{{ __('messages.create_first_invoice') }}</a>.</p>
     @endif
   </div>
 </div>

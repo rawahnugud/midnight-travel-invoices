@@ -1,11 +1,11 @@
 @extends('layout')
-@section('title', 'Users')
+@section('title', __('messages.users'))
 @section('content')
-@php $activePage = 'users'; $pageTitle = 'Users'; @endphp
+@php $activePage = 'users'; $pageTitle = __('messages.users'); @endphp
 <div class="card">
   <div class="card-header">
-    <h2>Users</h2>
-    <button type="button" class="btn btn-primary btn-sm" id="open-add-user">Add User</button>
+    <h2>{{ __('messages.users') }}</h2>
+    <button type="button" class="btn btn-primary btn-sm" id="open-add-user">{{ __('messages.add_user') }}</button>
   </div>
   <div class="card-body">
     @if(session('error'))
@@ -21,30 +21,30 @@
     <table class="table">
       <thead>
         <tr>
-          <th>Username</th>
-          <th>Email</th>
-          <th>Role</th>
-          <th>Created</th>
+          <th>{{ __('messages.username') }}</th>
+          <th>{{ __('messages.email') }}</th>
+          <th>{{ __('messages.role') }}</th>
+          <th>{{ __('messages.created') }}</th>
           <th></th>
         </tr>
       </thead>
       <tbody>
         @foreach($users as $u)
         <tr>
-          <td data-label="Username">{{ $u->username }}</td>
-          <td data-label="Email">{{ $u->email ?? '—' }}</td>
-          <td data-label="Role"><span class="badge badge-{{ $u->role }}">{{ $u->role }}</span></td>
-          <td data-label="Created">{{ $u->created_at ? \Carbon\Carbon::parse($u->created_at)->format('Y-m-d') : '—' }}</td>
-          <td data-label="Actions">
+          <td data-label="{{ __('messages.username') }}">{{ $u->username }}</td>
+          <td data-label="{{ __('messages.email') }}">{{ $u->email ?? '—' }}</td>
+          <td data-label="{{ __('messages.role') }}"><span class="badge badge-{{ $u->role }}">{{ __("messages.{$u->role}") }}</span></td>
+          <td data-label="{{ __('messages.created') }}">{{ $u->created_at ? \Carbon\Carbon::parse($u->created_at)->format('Y-m-d') : '—' }}</td>
+          <td data-label="{{ __('messages.actions') }}">
             @if($u->id !== $user?->id)
-            <button type="button" class="btn btn-text btn-sm edit-user-btn" data-id="{{ $u->id }}" data-url="{{ route('users.update', $u) }}" data-username="{{ $u->username }}" data-email="{{ $u->email ?? '' }}" data-role="{{ $u->role }}">Edit</button>
-            <form action="{{ route('users.destroy', $u) }}" method="post" class="inline-form" data-confirm="Delete this user?">
+            <button type="button" class="btn btn-text btn-sm edit-user-btn" data-id="{{ $u->id }}" data-url="{{ route('users.update', $u) }}" data-username="{{ $u->username }}" data-email="{{ $u->email ?? '' }}" data-role="{{ $u->role }}">{{ __('messages.edit') }}</button>
+            <form action="{{ route('users.destroy', $u) }}" method="post" class="inline-form" data-confirm="{{ __('messages.delete_user_confirm') }}">
               @csrf
               @method('DELETE')
-              <button type="submit" class="btn btn-text btn-sm btn-danger">Delete</button>
+              <button type="submit" class="btn btn-text btn-sm btn-danger">{{ __('messages.delete') }}</button>
             </form>
             @else
-            <span class="muted">(you)</span>
+            <span class="muted">{{ __('messages.you') }}</span>
             @endif
           </td>
         </tr>
@@ -55,40 +55,40 @@
   </div>
 </div>
 
-<div id="user-modal" class="modal" style="display:none;">
+<div id="user-modal" class="modal" style="display:none;" data-title-add="{{ __('messages.add_user') }}" data-title-edit="{{ __('messages.edit_user') }}">
   <div class="modal-backdrop"></div>
   <div class="modal-content">
-    <h3 id="user-modal-title">Add User</h3>
+    <h3 id="user-modal-title">{{ __('messages.add_user') }}</h3>
     <form method="post" action="{{ route('users.store') }}" id="user-form">
       @csrf
       <input type="hidden" name="_method" id="user-method" value="POST">
       <div class="form-group">
-        <label for="modal-username">Username</label>
+        <label for="modal-username">{{ __('messages.username') }}</label>
         <input type="text" id="modal-username" name="username" required>
       </div>
       <div class="form-group">
-        <label for="modal-email">Email</label>
+        <label for="modal-email">{{ __('messages.email') }}</label>
         <input type="email" id="modal-email" name="email">
       </div>
       <div class="form-group" id="modal-password-group">
-        <label for="modal-password">Password</label>
+        <label for="modal-password">{{ __('messages.password') }}</label>
         <input type="password" id="modal-password" name="password">
       </div>
       <div class="form-group" id="modal-new-password-group" style="display:none;">
-        <label for="modal-new-password">New password (leave blank to keep)</label>
+        <label for="modal-new-password">{{ __('messages.new_password_placeholder') }}</label>
         <input type="password" id="modal-new-password" name="password">
       </div>
       <div class="form-group">
-        <label for="modal-role">Role</label>
+        <label for="modal-role">{{ __('messages.role') }}</label>
         <select id="modal-role" name="role">
-          <option value="admin">Admin</option>
-          <option value="staff">Staff</option>
-          <option value="viewer">Viewer</option>
+          <option value="admin">{{ __('messages.admin') }}</option>
+          <option value="staff">{{ __('messages.staff') }}</option>
+          <option value="viewer">{{ __('messages.viewer') }}</option>
         </select>
       </div>
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Save</button>
-        <button type="button" class="btn btn-outline close-modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">{{ __('messages.save') }}</button>
+        <button type="button" class="btn btn-outline close-modal">{{ __('messages.cancel') }}</button>
       </div>
     </form>
   </div>

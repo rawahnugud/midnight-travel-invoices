@@ -28,7 +28,7 @@ class UserController extends Controller
         $validated['password'] = Hash::make($validated['password']);
         User::create($validated);
 
-        return redirect()->route('users.index')->with('success', 'User created.');
+        return redirect()->route('users.index')->with('success', __('messages.user_created'));
     }
 
     public function update(Request $request, User $user)
@@ -41,7 +41,7 @@ class UserController extends Controller
         ]);
 
         if ($user->id === $request->user()->id && ($validated['role'] ?? null) !== 'admin') {
-            return redirect()->route('users.index')->with('error', 'You cannot demote yourself.');
+            return redirect()->route('users.index')->with('error', __('messages.cannot_demote_self'));
         }
 
         if (! empty($validated['password'])) {
@@ -52,15 +52,15 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        return redirect()->route('users.index')->with('success', 'User updated.');
+        return redirect()->route('users.index')->with('success', __('messages.user_updated'));
     }
 
     public function destroy(Request $request, User $user)
     {
         if ($user->id === $request->user()->id) {
-            return redirect()->route('users.index')->with('error', 'You cannot delete yourself.');
+            return redirect()->route('users.index')->with('error', __('messages.cannot_delete_self'));
         }
         $user->delete();
-        return redirect()->route('users.index')->with('success', 'User deleted.');
+        return redirect()->route('users.index')->with('success', __('messages.user_deleted'));
     }
 }

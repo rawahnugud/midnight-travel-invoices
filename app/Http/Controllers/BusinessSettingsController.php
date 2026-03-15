@@ -72,7 +72,7 @@ class BusinessSettingsController extends Controller
         $business->update($validated);
 
         return redirect()->route('settings.business.edit')
-            ->with('success', 'Business settings saved.');
+            ->with('success', __('messages.business_saved'));
     }
 
     public function editDesign()
@@ -118,6 +118,6 @@ class BusinessSettingsController extends Controller
         $business->update($validated);
 
         return redirect()->route('settings.design.edit')
-            ->with('success', 'Design settings saved.');
+            ->with('success', __('messages.design_saved'));
     }
 }

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>@yield('title', 'Midnight Travel') — Invoices</title>
+  <title>@yield('title', __('messages.app_name')) — {{ __('messages.invoice_system') }}</title>
   @if(optional($business)->primary_color ?? null)
   <style>:root { --mt-accent: {{ $business->primary_color }}; --mt-gold: {{ $business->accent_color }}; }</style>
   @endif
@@ -24,7 +24,7 @@
   </main>
   @unless(isset($noSidebar) && $noSidebar)
   @if(isset($user) && in_array($user->role ?? '', ['admin', 'staff']))
-  <a href="{{ route('invoices.create') }}" class="fab" aria-label="Create new invoice" title="New Invoice">
+  <a href="{{ route('invoices.create') }}" class="fab" aria-label="{{ __('messages.create_invoice') }}" title="{{ __('messages.new_invoice') }}">
     <span class="fab-icon" aria-hidden="true">+</span>
   </a>
   @endif
