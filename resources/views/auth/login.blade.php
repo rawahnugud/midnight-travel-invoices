@@ -13,7 +13,7 @@
   <div class="login-card">
     <div class="login-brand">
       @if(optional($business)->login_logo_url)
-      <img src="{{ $business->login_logo_url }}" alt="{{ optional($business)->company_name ?? 'Logo' }}" class="login-logo-img" style="max-height:56px; max-width:180px; object-fit:contain; margin-bottom:0.75rem;">
+      <img src="{{ $business->login_logo_url }}" alt="{{ optional($business)->company_name ?? 'Logo' }}" class="login-logo-img" style="max-height:56px; max-width:180px; object-fit:contain; margin-bottom:0.75rem;" loading="lazy">
       @else
       <span class="login-logo">MT</span>
       @endif

@@ -34,7 +34,7 @@
         <label for="login_logo">Login page logo</label>
         @if($business->login_logo_url ?? null)
         <div class="business-logo-preview" style="margin-bottom:0.75rem;">
-          <img src="{{ $business->login_logo_url }}" alt="Login logo" style="max-height:56px; max-width:180px; object-fit:contain;">
+          <img src="{{ $business->login_logo_url }}" alt="Login logo" style="max-height:56px; max-width:180px; object-fit:contain;" loading="lazy">
           <p class="text-muted" style="font-size:0.875rem; margin-top:0.25rem;">Upload a new file to replace. If empty, company logo is used.</p>
         </div>
         @else

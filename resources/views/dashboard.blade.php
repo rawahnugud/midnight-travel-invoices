@@ -18,7 +18,7 @@
   </div>
   <div class="card-body">
     @if($recentInvoices->count())
-    <div class="table-responsive">
+    <div class="table-responsive table-mobile-cards">
     <table class="table">
       <thead>
         <tr>
@@ -32,11 +32,11 @@
       <tbody>
         @foreach($recentInvoices as $inv)
         <tr>
-          <td><a href="{{ route('invoices.show', $inv) }}">{{ $inv->invoice_number }}</a></td>
-          <td>{{ $inv->customer_name }}</td>
-          <td>{{ \Carbon\Carbon::parse($inv->invoice_date)->format('Y-m-d') }}</td>
-          <td>${{ number_format($inv->total, 2) }}</td>
-          <td><a href="{{ route('invoices.print', $inv) }}" target="_blank" class="btn btn-text btn-sm">Print</a></td>
+          <td data-label="Number"><a href="{{ route('invoices.show', $inv) }}">{{ $inv->invoice_number }}</a></td>
+          <td data-label="Customer">{{ $inv->customer_name }}</td>
+          <td data-label="Date">{{ \Carbon\Carbon::parse($inv->invoice_date)->format('Y-m-d') }}</td>
+          <td data-label="Total">${{ number_format($inv->total, 2) }}</td>
+          <td data-label=""><a href="{{ route('invoices.print', $inv) }}" target="_blank" class="btn btn-text btn-sm">Print</a></td>
         </tr>
         @endforeach
       </tbody>

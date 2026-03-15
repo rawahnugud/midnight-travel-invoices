@@ -17,7 +17,7 @@
     @if($errors->any())
     <div class="alert alert-error" role="alert">{{ $errors->first() }}</div>
     @endif
-    <div class="table-responsive">
+    <div class="table-responsive table-mobile-cards">
     <table class="table">
       <thead>
         <tr>
@@ -31,11 +31,11 @@
       <tbody>
         @foreach($users as $u)
         <tr>
-          <td>{{ $u->username }}</td>
-          <td>{{ $u->email ?? '—' }}</td>
-          <td><span class="badge badge-{{ $u->role }}">{{ $u->role }}</span></td>
-          <td>{{ $u->created_at ? \Carbon\Carbon::parse($u->created_at)->format('Y-m-d') : '—' }}</td>
-          <td>
+          <td data-label="Username">{{ $u->username }}</td>
+          <td data-label="Email">{{ $u->email ?? '—' }}</td>
+          <td data-label="Role"><span class="badge badge-{{ $u->role }}">{{ $u->role }}</span></td>
+          <td data-label="Created">{{ $u->created_at ? \Carbon\Carbon::parse($u->created_at)->format('Y-m-d') : '—' }}</td>
+          <td data-label="Actions">
             @if($u->id !== $user?->id)
             <button type="button" class="btn btn-text btn-sm edit-user-btn" data-id="{{ $u->id }}" data-url="{{ route('users.update', $u) }}" data-username="{{ $u->username }}" data-email="{{ $u->email ?? '' }}" data-role="{{ $u->role }}">Edit</button>
             <form action="{{ route('users.destroy', $u) }}" method="post" class="inline-form" data-confirm="Delete this user?">

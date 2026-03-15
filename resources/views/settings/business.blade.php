@@ -63,7 +63,7 @@
         <label for="logo">Logo</label>
         @if($business->logo_url ?? null)
         <div class="business-logo-preview" style="margin-bottom:0.75rem;">
-          <img src="{{ $business->logo_url }}" alt="Current logo" style="max-height:80px; max-width:200px; object-fit:contain;">
+          <img src="{{ $business->logo_url }}" alt="Current logo" style="max-height:80px; max-width:200px; object-fit:contain;" loading="lazy">
           <p class="text-muted" style="font-size:0.875rem; margin-top:0.25rem;">Current logo. Upload a new file to replace.</p>
         </div>
         @endif
@@ -74,7 +74,7 @@
         <label for="stamp">Invoice stamp</label>
         @if($business->stamp_url ?? null)
         <div class="business-logo-preview" style="margin-bottom:0.75rem;">
-          <img src="{{ $business->stamp_url }}" alt="Current stamp" style="max-height:100px; max-width:120px; object-fit:contain;">
+          <img src="{{ $business->stamp_url }}" alt="Current stamp" style="max-height:100px; max-width:120px; object-fit:contain;" loading="lazy">
           <p class="text-muted" style="font-size:0.875rem; margin-top:0.25rem;">Shown on printed/PDF invoices. Upload a new file to replace.</p>
         </div>
         @else

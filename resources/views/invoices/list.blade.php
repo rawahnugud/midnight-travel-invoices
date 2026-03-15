@@ -14,7 +14,7 @@
     <div class="alert alert-success" role="alert">{{ session('success') }}</div>
     @endif
     @if($invoices->count())
-    <div class="table-responsive">
+    <div class="table-responsive table-mobile-cards">
       <table class="table table-invoices">
         <thead>
           <tr>
@@ -31,16 +31,16 @@
         <tbody>
           @foreach($invoices as $inv)
           <tr>
-            <td class="col-number">
+            <td class="col-number" data-label="Number">
               <a href="{{ route('invoices.show', $inv) }}" class="invoice-number-link">{{ $inv->invoice_number }}</a>
             </td>
-            <td class="col-customer">{{ $inv->customer_name }}</td>
-            <td class="col-date">{{ \Carbon\Carbon::parse($inv->invoice_date)->format('M j, Y') }}</td>
-            <td class="col-total num">{{ $inv->currency_symbol }}{{ number_format($inv->total ?? 0, 2) }}</td>
+            <td class="col-customer" data-label="Customer">{{ $inv->customer_name }}</td>
+            <td class="col-date" data-label="Date">{{ \Carbon\Carbon::parse($inv->invoice_date)->format('M j, Y') }}</td>
+            <td class="col-total num" data-label="Total">{{ $inv->currency_symbol }}{{ number_format($inv->total ?? 0, 2) }}</td>
             @if($user && $user->role === 'admin')
-            <td class="col-author">{{ $inv->creator?->username ?? '—' }}</td>
+            <td class="col-author" data-label="Author">{{ $inv->creator?->username ?? '—' }}</td>
             @endif
-            <td class="col-actions">
+            <td class="col-actions" data-label="Actions">
               <div class="actions-wrap">
                 <a href="{{ route('invoices.show', $inv) }}" class="btn btn-text btn-sm">View</a>
                 <a href="{{ route('invoices.print', $inv) }}" target="_blank" class="btn btn-text btn-sm">Print</a>
