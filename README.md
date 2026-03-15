@@ -2,6 +2,8 @@
 
 Production-ready invoice web app built with **PHP Laravel 10**. Runs on any host with PHP 8.1+ and Composer (including cPanel shared hosting).
 
+**Project state:** App and mobile UX are in a complete, production-ready state. The only area not yet optimized is the **print page** (invoice print/PDF view). All other pages (dashboard, invoices, users, settings, forms, tables) are mobile-friendly with sidebar, FAB, card layouts, and single-column forms.
+
 ## Features
 
 - **Authentication:** Login with username/password, session-based

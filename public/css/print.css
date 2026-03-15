@@ -6,7 +6,7 @@
   margin: 12mm;
 }
 
-/* Screen preview (before print) — A4 proportion */
+/* Screen preview (before print) — same invoice layout on mobile and desktop */
 body.print-body {
   background: #e2e8f0;
   margin: 0;
@@ -19,8 +19,8 @@ body.print-body {
 }
 .invoice-print {
   width: 210mm;
-  min-height: 297mm;
   max-width: 100%;
+  min-height: 297mm;
   margin: 0 auto;
   background: #fff;
   padding: 10mm 12mm;
