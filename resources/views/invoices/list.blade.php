@@ -21,7 +21,6 @@
             <th class="col-number">Number</th>
             <th class="col-customer">Customer</th>
             <th class="col-date">Date</th>
-            <th class="col-status">Status</th>
             <th class="col-total num">Total</th>
             @if($user && $user->role === 'admin')
             <th class="col-author">Author</th>
@@ -37,7 +36,6 @@
             </td>
             <td class="col-customer">{{ $inv->customer_name }}</td>
             <td class="col-date">{{ \Carbon\Carbon::parse($inv->invoice_date)->format('M j, Y') }}</td>
-            <td class="col-status"><span class="badge badge-{{ $inv->status }}">{{ ucfirst($inv->status) }}</span></td>
             <td class="col-total num">{{ $inv->currency_symbol }}{{ number_format($inv->total ?? 0, 2) }}</td>
             @if($user && $user->role === 'admin')
             <td class="col-author">{{ $inv->creator?->username ?? '—' }}</td>
