@@ -6,7 +6,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Invoice {{ $invoice->invoice_number }} — {{ $company }}</title>
   @php $invoiceHeaderColor = optional($business)->invoice_header_color ?? '#0f172a'; @endphp
   <style>:root { --invoice-header: {{ $invoiceHeaderColor }}; }</style>
@@ -14,6 +14,10 @@
   <link rel="stylesheet" href="{{ asset('css/print.css') }}">
 </head>
 <body class="print-body">
+  <div class="print-toolbar no-print">
+    <a href="{{ route('invoices.show', $invoice) }}" class="back-link">← Back to invoice</a>
+    <button type="button" class="btn-print" onclick="window.print();">Print / Save as PDF</button>
+  </div>
   <div class="invoice-print">
     <header class="invoice-print-header">
       <div class="invoice-print-brand">
@@ -137,6 +141,5 @@
       @endif
     </footer>
   </div>
-  <script>window.onload = function() { window.print(); };</script>
 </body>
 </html>

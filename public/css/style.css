@@ -15,13 +15,31 @@
   --sidebar-width: 260px;
 }
 
+/* Safari/iOS: prevent text resize in landscape, smooth scrolling */
+html {
+  -webkit-text-size-adjust: 100%;
+  height: 100%;
+}
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; color: var(--text); background: var(--mt-off-white); line-height: 1.5; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--mt-off-white);
+  line-height: 1.5;
+  min-height: 100%;
+  min-height: -webkit-fill-available;
+}
 a { color: var(--mt-accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-/* Layout */
-.app { display: flex; min-height: 100vh; }
+/* Tap highlight: subtle on iOS Safari */
+button, .btn, .fab, .sidebar-link, input, select, textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Layout — use dvh on Safari for correct viewport when UI shows/hides */
+.app { display: flex; min-height: 100vh; min-height: 100dvh; }
 .sidebar {
   width: var(--sidebar-width);
   background: var(--mt-white);
@@ -56,7 +74,7 @@ a:hover { text-decoration: underline; }
 }
 .sidebar-user { display: block; margin-bottom: 0.25rem; }
 
-.main { flex: 1; margin-left: var(--sidebar-width); display: flex; flex-direction: column; min-height: 100vh; }
+.main { flex: 1; margin-left: var(--sidebar-width); display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
 .topbar {
   background: var(--mt-white); border-bottom: 1px solid var(--border);
   padding: 1rem 1.5rem; position: sticky; top: 0; z-index: 10;
@@ -65,7 +83,7 @@ a:hover { text-decoration: underline; }
 .content { padding: 1.5rem; flex: 1; }
 
 /* Login */
-.login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, var(--mt-off-white) 0%, var(--mt-white) 100%); }
+.login-page { min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, var(--mt-off-white) 0%, var(--mt-white) 100%); }
 .login-card {
   width: 100%; max-width: 400px; background: var(--mt-white);
   border-radius: 12px; box-shadow: var(--shadow); padding: 2rem;
@@ -267,20 +285,25 @@ body.sidebar-open .sidebar-backdrop {
   .sidebar {
     transform: translateX(-100%) !important;
     width: min(280px, 85vw);
+    max-width: calc(100vw - env(safe-area-inset-left, 0) - env(safe-area-inset-right, 0));
+    padding-top: env(safe-area-inset-top, 0);
     transition: transform 0.25s ease;
     z-index: 999;
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+    -webkit-overflow-scrolling: touch;
   }
   body.sidebar-open .sidebar { transform: translateX(0) !important; }
   .mobile-menu-btn { display: flex !important; }
 }
 
 @media (max-width: 768px) {
-  body { overflow-x: hidden; padding-bottom: env(safe-area-inset-bottom, 0); }
+  body { overflow-x: hidden; padding-bottom: env(safe-area-inset-bottom, 0); -webkit-overflow-scrolling: touch; }
   .app { overflow-x: hidden; min-width: 0; }
   .main { margin-left: 0 !important; min-width: 0; width: 100%; max-width: 100%; }
   .content {
     padding: 16px;
+    padding-left: calc(16px + env(safe-area-inset-left, 0));
+    padding-right: calc(16px + env(safe-area-inset-right, 0));
     padding-bottom: calc(80px + env(safe-area-inset-bottom, 0));
     min-width: 0;
     max-width: 100%;
@@ -288,11 +311,19 @@ body.sidebar-open .sidebar-backdrop {
   .mobile-menu-btn { display: flex !important; }
   .topbar {
     padding: 0.75rem 1rem;
+    padding-left: calc(1rem + env(safe-area-inset-left, 0));
+    padding-right: calc(1rem + env(safe-area-inset-right, 0));
     display: flex;
     align-items: center;
     min-width: 0;
     width: 100%;
   }
+  /* Prevent Safari zoom on input focus (16px minimum) */
+  input[type="text"], input[type="email"], input[type="number"], input[type="tel"],
+  input[type="date"], input[type="password"], input[type="search"], textarea {
+    font-size: 16px;
+  }
+  select { font-size: 16px; }
   .topbar-title { font-size: 1.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
   .sidebar {
     width: min(280px, 85vw);
@@ -390,9 +421,9 @@ body.sidebar-open .sidebar-backdrop {
   .table th, .table td { padding: 0.5rem 0.5rem; }
   .actions-wrap { flex-direction: column; align-items: stretch; gap: 8px; }
   .actions-wrap .btn { min-height: 44px; width: 100%; }
-  .modal { padding: 0.75rem; align-items: flex-start; }
-  .modal-content { max-height: 90vh; overflow-y: auto; }
-  .login-page { padding: 1rem; }
+  .modal { padding: 0.75rem; align-items: flex-start; -webkit-overflow-scrolling: touch; }
+  .modal-content { max-height: 90vh; max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .login-page { padding: 1rem; padding-left: calc(1rem + env(safe-area-inset-left, 0)); padding-right: calc(1rem + env(safe-area-inset-right, 0)); }
   .login-card { padding: 1.5rem; max-width: 100%; }
   .invoice-view .invoice-meta-row { gap: 1rem; }
   .invoice-view .invoice-from-row { margin-bottom: 0.75rem; padding-bottom: 0.75rem; }
@@ -407,7 +438,12 @@ body.sidebar-open .sidebar-backdrop {
 }
 
 @media (max-width: 480px) {
-  .content { padding: 12px; padding-bottom: calc(80px + env(safe-area-inset-bottom, 0)); }
+  .content {
+    padding: 12px;
+    padding-left: calc(12px + env(safe-area-inset-left, 0));
+    padding-right: calc(12px + env(safe-area-inset-right, 0));
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0));
+  }
   .card-body { padding: 12px; }
   .card-header { padding: 12px; }
   .card-header h2 { font-size: 1rem; }
