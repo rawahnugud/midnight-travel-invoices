@@ -26,6 +26,7 @@
       <div class="invoice-print-brand">
         @if($logoUrl)
         <img src="{{ $logoUrl }}" alt="{{ $company }}" class="invoice-print-logo-img" width="160" height="44" fetchpriority="high">
+        <p class="invoice-print-company-name">{{ $company }}</p>
         @else
         <span class="invoice-print-logo">{{ $company }}</span>
         @endif

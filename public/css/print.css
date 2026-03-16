@@ -10,7 +10,7 @@
   widows: 2;
 }
 
-/* ----- Screen preview: document card with subtle shadow ----- */
+/* ----- Screen preview: full A4 document centered, white ----- */
 body.print-body {
   background: #e8ecf1;
   margin: 0;
@@ -28,7 +28,7 @@ body.print-body {
 .print-toolbar {
   flex-shrink: 0;
   width: 100%;
-  max-width: 210mm;
+  max-width: 800px;
   margin: 0 auto;
   padding: 0.75rem 1rem;
   padding-left: calc(1rem + env(safe-area-inset-left, 0));
@@ -61,10 +61,9 @@ body.print-body {
 .print-toolbar .back-link:hover { color: #0f172a; text-decoration: underline; }
 
 .invoice-print {
-  width: 210mm;
-  max-width: 100%;
-  min-height: 297mm;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
   padding: 12mm 14mm;
   background: #fff;
   font-size: 10pt;
@@ -75,6 +74,13 @@ body.print-body {
   box-sizing: border-box;
   flex-shrink: 0;
 }
+.invoice-print-company-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--invoice-header, #0f172a);
+  margin: 0.25rem 0 0 0;
+}
+
 /* Mobile preview: fit width, readable, no overflow — Safari safe areas */
 @media screen and (max-width: 480px) {
   body.print-body { padding: 0; }
@@ -98,7 +104,7 @@ body.print-body {
   .invoice-print-table { font-size: 0.8rem; }
   .invoice-print-table th,
   .invoice-print-table td { padding: 0.4rem 0.5rem; }
-  .invoice-print-totals-stamp-wrap { flex-direction: column; align-items: stretch; }
+  .invoice-print-totals-stamp-wrap { flex-direction: column; align-items: flex-end; }
   .invoice-print-totals-block { margin-left: 0; }
   .invoice-print-totals { width: 100%; max-width: 260px; margin-left: auto; margin-right: 0; }
   .invoice-print-stamp { align-self: center; margin-top: 0.5rem; }
@@ -107,7 +113,9 @@ body.print-body {
 @media print {
   .no-print,
   .print-toolbar,
-  .print-toolbar * { display: none !important; visibility: hidden !important; }
+  .print-toolbar *,
+  .print-toolbar .back-link,
+  .print-toolbar .btn-print { display: none !important; visibility: hidden !important; }
   body.print-body {
     background: #fff !important;
     margin: 0;
@@ -117,30 +125,34 @@ body.print-body {
   }
   .invoice-print {
     width: 100% !important;
+    max-width: 100% !important;
     min-height: auto;
-    max-width: none;
     box-shadow: none !important;
     border-radius: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    padding: 0 2mm !important;
+    margin: 0 auto !important;
     orphans: 2;
     widows: 2;
+    break-inside: avoid;
   }
 }
 
-/* ----- 1. Header: premium hierarchy, logo left / meta right ----- */
+/* ----- 1 & 2. Header: logo/company/tagline left, INVOICE/number/date right; vertical alignment ----- */
 .invoice-print-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 2rem;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #e2e8f0;
 }
 
 .invoice-print-brand {
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .invoice-print-logo-img {
   max-height: 48px;
@@ -164,6 +176,10 @@ body.print-body {
 .invoice-print-doc {
   text-align: right;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
 }
 .invoice-print-title {
   font-size: 1.75rem;
@@ -228,7 +244,7 @@ body.print-body {
   color: #475569;
 }
 
-/* ----- 2. Table: refined, thinner header, consistent padding, right-align numbers ----- */
+/* ----- 3. Table: slightly thinner maroon header, better padding, right-align QTY/PRICE/AMOUNT ----- */
 .invoice-print-table {
   width: 100%;
   border-collapse: collapse;
@@ -242,7 +258,7 @@ body.print-body {
   print-color-adjust: exact;
 }
 .invoice-print-table th {
-  padding: 0.5rem 0.65rem;
+  padding: 0.4rem 0.75rem;
   font-weight: 600;
   font-size: 0.65rem;
   text-transform: uppercase;
@@ -253,7 +269,7 @@ body.print-body {
 .invoice-print-table th.col-price,
 .invoice-print-table th.col-amount { text-align: right; }
 .invoice-print-table td {
-  padding: 0.5rem 0.65rem;
+  padding: 0.55rem 0.75rem;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: top;
 }
@@ -274,13 +290,14 @@ body.print-body {
 .item-name { font-weight: 500; color: #1e293b; }
 .item-desc { display: block; font-size: 0.9em; color: #64748b; margin-top: 0.15rem; }
 
-/* ----- 6 & 7. Print-only: only invoice content, no toolbar, no shadow/radius, A4 fit ----- */
+/* ----- 7 & 8. Print: only invoice content; A4 single-page fit (avoid breaks where possible) ----- */
 @media print {
   .invoice-print-header {
     break-after: avoid;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+  .invoice-print-parties { break-inside: avoid; }
   .invoice-print-table thead {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
@@ -288,6 +305,7 @@ body.print-body {
   .invoice-print-table thead tr { display: table-row; }
   .invoice-print-table tbody tr { break-inside: avoid; }
   .invoice-print-totals-stamp-wrap { break-inside: avoid; }
+  .invoice-print-extra { break-inside: avoid; }
   .invoice-print-totals .grand-total-row td {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
@@ -295,15 +313,14 @@ body.print-body {
   .invoice-print-footer { break-inside: avoid; }
 }
 
-/* ----- 3 & 4. Totals: right-aligned block, divider above TOTAL, brand color; stamp official position ----- */
+/* ----- 4 & 5. Totals: more spacing above, right-aligned; TOTAL larger/bold/brand; stamp right under totals ----- */
 .invoice-print-totals-stamp-wrap {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: flex-end;
-  justify-content: space-between;
-  gap: 1.5rem 2rem;
-  margin-top: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
 }
 .invoice-print-totals-block {
   flex-shrink: 0;
@@ -333,20 +350,20 @@ body.print-body {
   border-top: 1px solid #e2e8f0;
 }
 .invoice-print-totals .grand-total-row td.label {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--invoice-header, #0f172a);
 }
 .invoice-print-totals .grand-total-row td.num {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--invoice-header, #0f172a);
 }
 
 .invoice-print-stamp {
   flex-shrink: 0;
-  align-self: flex-end;
-  margin-bottom: 0.15rem;
+  margin-left: auto;
+  margin-right: 0.5rem;
 }
 .invoice-print-stamp-img {
   display: block;
@@ -381,10 +398,10 @@ body.print-body {
   color: #94a3b8;
 }
 
-/* ----- 5. Footer: less space, elegant thank-you, centered contact ----- */
+/* ----- 6. Footer: closer to content, less empty space ----- */
 .invoice-print-footer {
-  margin-top: 0.75rem;
-  padding-top: 0.6rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
   border-top: 1px solid #f1f5f9;
   text-align: center;
   font-size: 0.75rem;
@@ -429,7 +446,8 @@ body.print-body {
 [dir="rtl"] .invoice-print-table td.col-qty,
 [dir="rtl"] .invoice-print-table td.col-price,
 [dir="rtl"] .invoice-print-table td.col-amount { text-align: left; }
-[dir="rtl"] .invoice-print-totals-block { margin-left: auto; margin-right: 0; }
+[dir="rtl"] .invoice-print-totals-block { margin-left: 0; margin-right: auto; }
 [dir="rtl"] .invoice-print-totals td.num { text-align: left; }
 [dir="rtl"] .invoice-print-totals .grand-total-row td.num { text-align: left; }
+[dir="rtl"] .invoice-print-stamp { margin-left: 0.5rem; margin-right: auto; }
 [dir="rtl"] .print-toolbar { flex-direction: row-reverse; }
