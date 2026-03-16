@@ -88,28 +88,30 @@
     </table>
 
     <div class="invoice-print-totals-stamp-wrap">
-      <table class="invoice-print-totals">
-        <tr>
-          <td>{{ __('messages.subtotal') }}</td>
-          <td class="num">{{ $currencySym }}{{ number_format($invoice->subtotal, 2) }}</td>
-        </tr>
-        @if($invoice->tax_rate > 0)
-        <tr>
-          <td>{{ __('messages.tax') }} ({{ number_format($invoice->tax_rate, 1) }}%)</td>
-          <td class="num">{{ $currencySym }}{{ number_format($invoice->tax_amount, 2) }}</td>
-        </tr>
-        @endif
-        @if($invoice->discount_amount > 0)
-        <tr>
-          <td>{{ __('messages.discount') }}</td>
-          <td class="num">−{{ $currencySym }}{{ number_format($invoice->discount_amount, 2) }}</td>
-        </tr>
-        @endif
-        <tr class="grand-total-row">
-          <td><strong>{{ __('messages.total') }}</strong></td>
-          <td class="num"><strong>{{ $currencySym }}{{ number_format($invoice->total, 2) }}</strong></td>
-        </tr>
-      </table>
+      <div class="invoice-print-totals-block">
+        <table class="invoice-print-totals">
+          <tr>
+            <td class="label">{{ __('messages.subtotal') }}</td>
+            <td class="num">{{ $currencySym }}{{ number_format($invoice->subtotal, 2) }}</td>
+          </tr>
+          @if($invoice->tax_rate > 0)
+          <tr>
+            <td class="label">{{ __('messages.tax') }} ({{ number_format($invoice->tax_rate, 1) }}%)</td>
+            <td class="num">{{ $currencySym }}{{ number_format($invoice->tax_amount, 2) }}</td>
+          </tr>
+          @endif
+          @if($invoice->discount_amount > 0)
+          <tr>
+            <td class="label">{{ __('messages.discount') }}</td>
+            <td class="num">−{{ $currencySym }}{{ number_format($invoice->discount_amount, 2) }}</td>
+          </tr>
+          @endif
+          <tr class="grand-total-row">
+            <td class="label">{{ __('messages.total') }}</td>
+            <td class="num">{{ $currencySym }}{{ number_format($invoice->total, 2) }}</td>
+          </tr>
+        </table>
+      </div>
       @if($stampUrl)
       <div class="invoice-print-stamp">
         <img src="{{ $stampUrl }}" alt="Stamp" class="invoice-print-stamp-img" width="100" height="80">
