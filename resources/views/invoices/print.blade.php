@@ -25,7 +25,7 @@
     <header class="invoice-print-header">
       <div class="invoice-print-brand">
         @if($logoUrl)
-        <img src="{{ $logoUrl }}" alt="{{ $company }}" class="invoice-print-logo-img" fetchpriority="high">
+        <img src="{{ $logoUrl }}" alt="{{ $company }}" class="invoice-print-logo-img" width="160" height="44" fetchpriority="high">
         @else
         <span class="invoice-print-logo">{{ $company }}</span>
         @endif
@@ -112,7 +112,7 @@
       </table>
       @if($stampUrl)
       <div class="invoice-print-stamp">
-        <img src="{{ $stampUrl }}" alt="Stamp" class="invoice-print-stamp-img">
+        <img src="{{ $stampUrl }}" alt="Stamp" class="invoice-print-stamp-img" width="100" height="80">
       </div>
       @endif
     </div>

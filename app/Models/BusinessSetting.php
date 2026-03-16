@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class BusinessSetting extends Model
 {
@@ -13,20 +14,32 @@ class BusinessSetting extends Model
         'stamp_path',
     ];
 
+    const CACHE_KEY = 'business_settings';
+
     /**
-     * Get the singleton business settings instance.
+     * Get the singleton business settings instance (cached).
      */
     public static function get(): self
     {
-        $settings = static::first();
-        if (! $settings) {
-            $settings = static::create([
-                'company_name' => 'Midnight Travel',
-                'tagline' => 'Where adventure meets luxury',
-                'default_currency' => 'USD',
-            ]);
-        }
-        return $settings;
+        return Cache::rememberForever(static::CACHE_KEY, function () {
+            $settings = static::first();
+            if (! $settings) {
+                $settings = static::create([
+                    'company_name' => 'Midnight Travel',
+                    'tagline' => 'Where adventure meets luxury',
+                    'default_currency' => 'USD',
+                ]);
+            }
+            return $settings;
+        });
+    }
+
+    /**
+     * Clear cached business settings (call after update).
+     */
+    public static function clearCache(): void
+    {
+        Cache::forget(static::CACHE_KEY);
     }
 
     /**

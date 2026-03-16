@@ -549,3 +549,22 @@ body.sidebar-open .sidebar-backdrop {
 @media (max-width: 480px) {
   [dir="rtl"] .fab { left: calc(12px + env(safe-area-inset-left, 0)); }
 }
+
+/* Pagination */
+.pagination-nav { margin-top: 1rem; }
+.pagination {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.35rem;
+  list-style: none; margin: 0; padding: 0;
+}
+.pagination-item { display: inline-block; }
+.pagination-link {
+  display: inline-block; padding: 0.4rem 0.65rem; font-size: 0.9rem;
+  color: var(--mt-accent); text-decoration: none; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--mt-white);
+  transition: background 0.15s, color 0.15s;
+}
+.pagination-link:hover { background: var(--mt-off-white); color: var(--mt-dark); }
+.pagination-item.active .pagination-link {
+  background: var(--mt-accent); color: var(--mt-white); border-color: var(--mt-accent); cursor: default;
+}
+.pagination-item.disabled .pagination-link { color: var(--text-muted); cursor: not-allowed; pointer-events: none; }

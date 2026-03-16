@@ -70,6 +70,7 @@ class BusinessSettingsController extends Controller
 
         unset($validated['logo'], $validated['stamp']);
         $business->update($validated);
+        BusinessSetting::clearCache();
 
         return redirect()->route('settings.business.edit')
             ->with('success', __('messages.business_saved'));
@@ -116,6 +117,7 @@ class BusinessSettingsController extends Controller
 
         unset($validated['login_logo']);
         $business->update($validated);
+        BusinessSetting::clearCache();
 
         return redirect()->route('settings.design.edit')
             ->with('success', __('messages.design_saved'));

@@ -7,6 +7,7 @@
   @if(optional($business)->primary_color ?? null)
   <style>:root { --mt-accent: {{ $business->primary_color }}; --mt-gold: {{ $business->accent_color }}; }</style>
   @endif
+  <link rel="preload" href="{{ asset('css/style.css') }}" as="style">
   <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 </head>
 <body class="app">
@@ -29,6 +30,6 @@
   </a>
   @endif
   @endunless
-  <script src="{{ asset('js/app.js') }}"></script>
+  <script src="{{ asset('js/app.js') }}" defer></script>
 </body>
 </html>

@@ -69,6 +69,7 @@ Open **http://localhost:8000**. Log in with **admin** / **admin123** (or **staff
    - Copy `.env.example` to `.env`
    - Run `php artisan key:generate`
    - Set `APP_ENV=production`, `APP_DEBUG=false`, and a strong `APP_KEY`
+   - Set `APP_URL` to your public URL (e.g. `https://invoice.yourdomain.com`) so links and assets use clean URLs
    - For SQLite: ensure `DB_DATABASE` points to an absolute path or `database/database.sqlite` (create the file: `touch database/database.sqlite`)
 
 5. **Run migrations:**
@@ -86,6 +87,14 @@ Open **http://localhost:8000**. Log in with **admin** / **admin123** (or **staff
    ```bash
    chmod -R 775 storage bootstrap/cache
    ```
+
+8. **Performance (recommended for production):** Cache config, routes, and views so the app runs faster:
+   ```bash
+   php artisan config:cache
+   php artisan route:cache
+   php artisan view:cache
+   ```
+   Re-run these after changing config, routes, or Blade templates. Use `config:clear`, `route:clear`, or `view:clear` to clear each cache.
 
 ## Routes
 

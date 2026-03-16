@@ -6,6 +6,7 @@ use App\Models\BusinessSetting;
 use App\Models\Invoice;
 use App\Models\LineItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
@@ -21,7 +22,8 @@ class InvoiceController extends Controller
         }
 
         $symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'];
-        $invoices = $query->latest()->get()->map(function ($inv) use ($symbols) {
+        $invoices = $query->latest()->paginate(20);
+        $invoices->getCollection()->transform(function ($inv) use ($symbols) {
             $sub = $inv->lineItems->sum(fn ($li) => $li->quantity * $li->unit_price);
             $inv->total = round($sub + ($sub * $inv->tax_rate / 100) - $inv->discount_amount, 2);
             $inv->currency_symbol = $symbols[$inv->currency ?? 'USD'] ?? ($inv->currency ?? 'USD') . ' ';
@@ -93,6 +95,7 @@ class InvoiceController extends Controller
             ]);
         }
 
+        Cache::forget('dashboard.stats.' . $request->user()->id);
         return redirect()->route('invoices.show', $inv)->with('success', __('messages.invoice_created'));
     }
 
@@ -102,7 +105,7 @@ class InvoiceController extends Controller
         if (! $user->isAdmin() && ! $user->isViewer() && $invoice->created_by !== $user->id) {
             abort(403);
         }
-        $invoice->load('lineItems');
+        $invoice->load(['lineItems', 'creator']);
         return view('invoices.view', ['invoice' => $invoice]);
     }
 
@@ -164,6 +167,7 @@ class InvoiceController extends Controller
             }
         });
 
+        Cache::forget('dashboard.stats.' . $request->user()->id);
         return redirect()->route('invoices.show', $invoice)->with('success', __('messages.invoice_updated'));
     }
 
@@ -173,6 +177,7 @@ class InvoiceController extends Controller
             abort(403);
         }
         $invoice->delete();
+        Cache::forget('dashboard.stats.' . $request->user()->id);
         return redirect()->route('invoices.index')->with('success', __('messages.invoice_deleted'));
     }
 

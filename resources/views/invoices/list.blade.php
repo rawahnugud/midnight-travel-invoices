@@ -59,6 +59,11 @@
         </tbody>
       </table>
     </div>
+    @if($invoices->hasPages())
+    <div class="pagination-wrap" style="margin-top:1rem; display:flex; justify-content:center;">
+      {{ $invoices->links('pagination.default') }}
+    </div>
+    @endif
     @else
     <p class="empty-state">
       @if($user && in_array($user->role, ['admin', 'staff']))
