@@ -1,6 +1,9 @@
 @php
   $company = optional($business)->company_name ?? __('messages.app_name');
   $currencySym = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'][$invoice->currency ?? 'USD'] ?? ($invoice->currency ?? 'USD') . ' ';
+  $invoiceHeaderColor = optional($business)->invoice_header_color ?? '#0f172a';
+  $logoUrl = !empty(optional($business)->logo_path) ? url($business->logo_path) : null;
+  $stampUrl = !empty(optional($business)->stamp_path) ? url($business->stamp_path) : null;
 @endphp
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
@@ -8,21 +11,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>{{ __('messages.invoice') }} {{ $invoice->invoice_number }} — {{ $company }}</title>
-  @php $invoiceHeaderColor = optional($business)->invoice_header_color ?? '#0f172a'; @endphp
   <style>:root { --invoice-header: {{ $invoiceHeaderColor }}; }</style>
-  <link rel="stylesheet" href="{{ asset('css/style.css') }}">
   <link rel="stylesheet" href="{{ asset('css/print.css') }}">
+  @if($logoUrl)<link rel="preload" as="image" href="{{ $logoUrl }}">@endif
+  @if($stampUrl)<link rel="preload" as="image" href="{{ $stampUrl }}">@endif
 </head>
 <body class="print-body">
   <div class="print-toolbar no-print">
     <a href="{{ route('invoices.show', $invoice) }}" class="back-link">{{ __('messages.back_to_invoice') }}</a>
-    <button type="button" class="btn-print" onclick="window.print();">{{ __('messages.print_save_pdf') }}</button>
+    <button type="button" class="btn-print" id="btn-print">{{ __('messages.print_save_pdf') }}</button>
   </div>
   <div class="invoice-print">
     <header class="invoice-print-header">
       <div class="invoice-print-brand">
-        @if(optional($business)->logo_url)
-        <img src="{{ $business->logo_url }}" alt="{{ $company }}" class="invoice-print-logo-img">
+        @if($logoUrl)
+        <img src="{{ $logoUrl }}" alt="{{ $company }}" class="invoice-print-logo-img" fetchpriority="high">
         @else
         <span class="invoice-print-logo">{{ $company }}</span>
         @endif
@@ -107,9 +110,9 @@
           <td class="num"><strong>{{ $currencySym }}{{ number_format($invoice->total, 2) }}</strong></td>
         </tr>
       </table>
-      @if(optional($business)->stamp_url)
+      @if($stampUrl)
       <div class="invoice-print-stamp">
-        <img src="{{ $business->stamp_url }}" alt="Stamp" class="invoice-print-stamp-img">
+        <img src="{{ $stampUrl }}" alt="Stamp" class="invoice-print-stamp-img">
       </div>
       @endif
     </div>
@@ -141,5 +144,16 @@
       @endif
     </footer>
   </div>
+  <script>
+    (function() {
+      var btn = document.getElementById('btn-print');
+      if (btn) btn.addEventListener('click', function() { window.print(); });
+      if (window.location.search.indexOf('auto=1') !== -1) {
+        window.addEventListener('load', function() {
+          window.requestAnimationFrame(function() { window.print(); });
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

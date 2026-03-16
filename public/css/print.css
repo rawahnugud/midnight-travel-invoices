@@ -5,6 +5,10 @@
   size: A4;
   margin: 12mm;
 }
+@page {
+  orphans: 2;
+  widows: 2;
+}
 
 /* ----- Screen preview (before print) ----- */
 body.print-body {
@@ -114,6 +118,8 @@ body.print-body {
     border-radius: 0;
     padding: 0;
     margin: 0;
+    orphans: 2;
+    widows: 2;
   }
 }
 
@@ -299,16 +305,6 @@ body.print-body {
   image-rendering: auto;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
-}
-@media print {
-  .invoice-print-stamp-img {
-    width: 100px;
-    max-width: 120px;
-    height: auto;
-    object-fit: contain;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
 }
 .invoice-print-totals {
   width: 220px;

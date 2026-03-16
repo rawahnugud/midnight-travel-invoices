@@ -183,6 +183,8 @@ class InvoiceController extends Controller
             abort(403);
         }
         $invoice->load('lineItems');
-        return view('invoices.print', ['invoice' => $invoice]);
+        return response()
+            ->view('invoices.print', ['invoice' => $invoice])
+            ->header('Cache-Control', 'no-store');
     }
 }
