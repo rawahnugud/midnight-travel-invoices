@@ -68,6 +68,8 @@
   data-title-edit="{{ __('messages.edit_user') }}"
   data-label-password="{{ __('messages.password') }}"
   data-label-new-password="{{ __('messages.new_password') }}"
+  data-label-confirm-password="{{ __('messages.confirm_password') }}"
+  data-label-confirm-new-password="{{ __('messages.confirm_new_password') }}"
   data-section-password-add="{{ __('messages.password_section_add') }}"
   data-section-password-edit="{{ __('messages.password_section_edit') }}">
   <div class="modal-backdrop"></div>
@@ -78,14 +80,14 @@
       <input type="hidden" name="_method" id="user-method" value="POST">
       <div class="form-group">
         <label for="modal-username">{{ __('messages.username') }}</label>
-        <input type="text" id="modal-username" name="username" required>
+        <input type="text" id="modal-username" name="username" required autocomplete="username">
       </div>
       <div class="form-group">
         <label for="modal-email">{{ __('messages.email') }}</label>
-        <input type="email" id="modal-email" name="email">
+        <input type="email" id="modal-email" name="email" autocomplete="email">
       </div>
-      <div class="modal-password-wrap" id="modal-password-group" role="group" aria-labelledby="modal-password-section-title">
-        <p class="modal-password-section-title" id="modal-password-section-title">{{ __('messages.password_section_add') }}</p>
+      <fieldset class="modal-password-wrap" id="modal-password-group">
+        <legend class="modal-password-section-title" id="modal-password-section-title">{{ __('messages.password_section_add') }}</legend>
         <div class="form-group">
           <label for="modal-password" id="modal-password-label">{{ __('messages.password') }}</label>
           <input type="password" id="modal-password" name="password" autocomplete="new-password">
@@ -94,8 +96,8 @@
           <label for="modal-password-confirmation" id="modal-password-confirm-label">{{ __('messages.confirm_password') }}</label>
           <input type="password" id="modal-password-confirmation" name="password_confirmation" autocomplete="new-password">
         </div>
-        <p id="modal-password-hint" class="form-hint modal-password-hint">{{ __('messages.password_keep_hint') }}</p>
-      </div>
+        <p id="modal-password-hint" class="form-hint modal-password-hint" hidden>{{ __('messages.password_keep_hint') }}</p>
+      </fieldset>
       <div class="form-group">
         <label for="modal-role">{{ __('messages.role') }}</label>
         <select id="modal-role" name="role">
