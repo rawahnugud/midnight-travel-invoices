@@ -15,7 +15,13 @@
     <div class="alert alert-success" role="alert">{{ session('success') }}</div>
     @endif
     @if($errors->any())
-    <div class="alert alert-error" role="alert">{{ $errors->first() }}</div>
+    <div class="alert alert-error" role="alert">
+      <ul style="margin:0;padding-left:1.25rem;">
+        @foreach($errors->all() as $err)
+        <li>{{ $err }}</li>
+        @endforeach
+      </ul>
+    </div>
     @endif
     <div class="table-responsive table-mobile-cards">
     <table class="table">
@@ -36,8 +42,9 @@
           <td data-label="{{ __('messages.role') }}"><span class="badge badge-{{ $u->role }}">{{ __("messages.{$u->role}") }}</span></td>
           <td data-label="{{ __('messages.created') }}">{{ $u->created_at ? \Carbon\Carbon::parse($u->created_at)->format('Y-m-d') : '—' }}</td>
           <td data-label="{{ __('messages.actions') }}">
-            @if($u->id !== $user?->id)
+            <div class="actions-wrap">
             <button type="button" class="btn btn-text btn-sm edit-user-btn" data-id="{{ $u->id }}" data-url="{{ route('users.update', $u) }}" data-username="{{ $u->username }}" data-email="{{ $u->email ?? '' }}" data-role="{{ $u->role }}">{{ __('messages.edit') }}</button>
+            @if($u->id !== $user?->id)
             <form action="{{ route('users.destroy', $u) }}" method="post" class="inline-form" data-confirm="{{ __('messages.delete_user_confirm') }}">
               @csrf
               @method('DELETE')
@@ -46,6 +53,7 @@
             @else
             <span class="muted">{{ __('messages.you') }}</span>
             @endif
+            </div>
           </td>
         </tr>
         @endforeach
@@ -59,7 +67,7 @@
   <div class="modal-backdrop"></div>
   <div class="modal-content">
     <h3 id="user-modal-title">{{ __('messages.add_user') }}</h3>
-    <form method="post" action="{{ route('users.store') }}" id="user-form">
+    <form method="post" action="{{ route('users.store') }}" id="user-form" data-store-url="{{ route('users.store') }}">
       @csrf
       <input type="hidden" name="_method" id="user-method" value="POST">
       <div class="form-group">
@@ -72,11 +80,11 @@
       </div>
       <div class="form-group" id="modal-password-group">
         <label for="modal-password">{{ __('messages.password') }}</label>
-        <input type="password" id="modal-password" name="password">
+        <input type="password" id="modal-password" name="password" autocomplete="new-password">
       </div>
       <div class="form-group" id="modal-new-password-group" style="display:none;">
         <label for="modal-new-password">{{ __('messages.new_password_placeholder') }}</label>
-        <input type="password" id="modal-new-password" name="password">
+        <input type="password" id="modal-new-password" name="password" disabled autocomplete="new-password">
       </div>
       <div class="form-group">
         <label for="modal-role">{{ __('messages.role') }}</label>

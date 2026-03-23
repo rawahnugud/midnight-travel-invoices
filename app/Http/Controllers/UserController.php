@@ -20,7 +20,7 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'username' => 'required|string|max:64|unique:users,username',
-            'email' => 'nullable|email',
+            'email' => 'nullable|email|max:255',
             'password' => ['required', 'string', Password::defaults()],
             'role' => 'required|in:admin,staff,viewer',
         ]);
@@ -33,18 +33,22 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        $validated = $request->validate([
+        $rules = [
             'username' => ['required', 'string', 'max:64', Rule::unique('users')->ignore($user->id)],
-            'email' => 'nullable|email',
-            'password' => ['nullable', 'string', Password::defaults()],
+            'email' => 'nullable|email|max:255',
             'role' => 'required|in:admin,staff,viewer',
-        ]);
+        ];
+        if ($request->filled('password')) {
+            $rules['password'] = ['string', Password::defaults()];
+        }
+
+        $validated = $request->validate($rules);
 
         if ($user->id === $request->user()->id && ($validated['role'] ?? null) !== 'admin') {
             return redirect()->route('users.index')->with('error', __('messages.cannot_demote_self'));
         }
 
-        if (! empty($validated['password'])) {
+        if (! empty($validated['password'] ?? null)) {
             $validated['password'] = Hash::make($validated['password']);
         } else {
             unset($validated['password']);

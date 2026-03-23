@@ -103,6 +103,9 @@
     if (!userModal) return;
     var titleAdd = userModal.getAttribute('data-title-add') || 'Add User';
     var titleEdit = userModal.getAttribute('data-title-edit') || 'Edit User';
+    var storeUrl = (userForm && userForm.getAttribute('data-store-url')) || '/users';
+    if (modalPassword) modalPassword.value = '';
+    if (modalNewPassword) modalNewPassword.value = '';
     if (edit) {
       modalTitle.textContent = titleEdit;
       userForm.action = edit.url || ('/users/' + edit.id);
@@ -112,18 +115,31 @@
       if (modalEmail) modalEmail.value = edit.email || '';
       if (modalPasswordGroup) modalPasswordGroup.style.display = 'none';
       if (modalNewPasswordGroup) modalNewPasswordGroup.style.display = 'block';
-      if (modalPassword) modalPassword.removeAttribute('required');
+      if (modalPassword) {
+        modalPassword.removeAttribute('required');
+        modalPassword.setAttribute('disabled', 'disabled');
+      }
+      if (modalNewPassword) {
+        modalNewPassword.removeAttribute('disabled');
+        modalNewPassword.removeAttribute('required');
+      }
       if (modalRole) modalRole.value = edit.role || 'staff';
     } else {
       modalTitle.textContent = titleAdd;
-      userForm.action = '/users';
+      userForm.action = storeUrl;
       if (userMethod) userMethod.value = 'POST';
       if (userId) userId.value = '';
       if (modalUsername) modalUsername.value = '';
       if (modalEmail) modalEmail.value = '';
       if (modalPasswordGroup) modalPasswordGroup.style.display = 'block';
       if (modalNewPasswordGroup) modalNewPasswordGroup.style.display = 'none';
-      if (modalPassword) modalPassword.setAttribute('required', 'required');
+      if (modalPassword) {
+        modalPassword.removeAttribute('disabled');
+        modalPassword.setAttribute('required', 'required');
+      }
+      if (modalNewPassword) {
+        modalNewPassword.setAttribute('disabled', 'disabled');
+      }
       if (modalRole) modalRole.value = 'staff';
     }
     userModal.style.display = 'flex';
