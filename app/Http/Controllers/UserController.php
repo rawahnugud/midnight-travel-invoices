@@ -21,7 +21,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'username' => 'required|string|max:64|unique:users,username',
             'email' => 'nullable|email|max:255',
-            'password' => ['required', 'string', Password::defaults()],
+            'password' => ['required', 'string', 'confirmed', Password::defaults()],
             'role' => 'required|in:admin,staff,viewer',
         ]);
 
@@ -38,8 +38,8 @@ class UserController extends Controller
             'email' => 'nullable|email|max:255',
             'role' => 'required|in:admin,staff,viewer',
         ];
-        if ($request->filled('password')) {
-            $rules['password'] = ['string', Password::defaults()];
+        if ($request->filled('password') || $request->filled('password_confirmation')) {
+            $rules['password'] = ['required', 'string', 'confirmed', Password::defaults()];
         }
 
         $validated = $request->validate($rules);

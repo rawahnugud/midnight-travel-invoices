@@ -67,9 +67,11 @@
   data-title-add="{{ __('messages.add_user') }}"
   data-title-edit="{{ __('messages.edit_user') }}"
   data-label-password="{{ __('messages.password') }}"
-  data-label-new-password="{{ __('messages.new_password') }}">
+  data-label-new-password="{{ __('messages.new_password') }}"
+  data-section-password-add="{{ __('messages.password_section_add') }}"
+  data-section-password-edit="{{ __('messages.password_section_edit') }}">
   <div class="modal-backdrop"></div>
-  <div class="modal-content">
+  <div class="modal-content modal-content--user">
     <h3 id="user-modal-title">{{ __('messages.add_user') }}</h3>
     <form method="post" action="{{ route('users.store') }}" id="user-form" data-store-url="{{ route('users.store') }}">
       @csrf
@@ -82,10 +84,17 @@
         <label for="modal-email">{{ __('messages.email') }}</label>
         <input type="email" id="modal-email" name="email">
       </div>
-      <div class="form-group" id="modal-password-group">
-        <label for="modal-password" id="modal-password-label">{{ __('messages.password') }}</label>
-        <input type="password" id="modal-password" name="password" autocomplete="new-password">
-        <p id="modal-password-hint" class="form-hint" style="display:none;margin:0.35rem 0 0;font-size:0.85rem;color:#64748b;">{{ __('messages.password_keep_hint') }}</p>
+      <div class="modal-password-wrap" id="modal-password-group" role="group" aria-labelledby="modal-password-section-title">
+        <p class="modal-password-section-title" id="modal-password-section-title">{{ __('messages.password_section_add') }}</p>
+        <div class="form-group">
+          <label for="modal-password" id="modal-password-label">{{ __('messages.password') }}</label>
+          <input type="password" id="modal-password" name="password" autocomplete="new-password">
+        </div>
+        <div class="form-group" id="modal-password-confirm-group">
+          <label for="modal-password-confirmation" id="modal-password-confirm-label">{{ __('messages.confirm_password') }}</label>
+          <input type="password" id="modal-password-confirmation" name="password_confirmation" autocomplete="new-password">
+        </div>
+        <p id="modal-password-hint" class="form-hint modal-password-hint">{{ __('messages.password_keep_hint') }}</p>
       </div>
       <div class="form-group">
         <label for="modal-role">{{ __('messages.role') }}</label>
