@@ -376,6 +376,15 @@ body.print-body {
   print-color-adjust: exact;
 }
 
+/* Laptop / desktop screen preview only: slightly larger stamp.
+   Do not change mobile (see max-width: 480px above) — this starts at 1024px. */
+@media screen and (min-width: 1024px) {
+  .invoice-print-stamp-img {
+    width: 118px;
+    max-width: 142px;
+  }
+}
+
 /* Notes / Terms */
 .invoice-print-extra {
   margin-top: 0.6rem;
