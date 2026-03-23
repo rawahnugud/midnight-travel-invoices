@@ -48,15 +48,19 @@ class UserController extends Controller
             return redirect()->route('users.index')->with('error', __('messages.cannot_demote_self'));
         }
 
-        if (! empty($validated['password'] ?? null)) {
+        $passwordChanged = isset($validated['password']);
+        if ($passwordChanged) {
             $validated['password'] = Hash::make($validated['password']);
-        } else {
-            unset($validated['password']);
         }
 
         $user->update($validated);
 
-        return redirect()->route('users.index')->with('success', __('messages.user_updated'));
+        $msg = __('messages.user_updated');
+        if ($passwordChanged) {
+            $msg .= ' ' . __('messages.user_password_set');
+        }
+
+        return redirect()->route('users.index')->with('success', $msg);
     }
 
     public function destroy(Request $request, User $user)

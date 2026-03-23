@@ -92,9 +92,9 @@
   var modalUsername = byId('modal-username');
   var modalEmail = byId('modal-email');
   var modalPassword = byId('modal-password');
-  var modalNewPassword = byId('modal-new-password');
+  var modalPasswordLabel = byId('modal-password-label');
+  var modalPasswordHint = byId('modal-password-hint');
   var modalPasswordGroup = byId('modal-password-group');
-  var modalNewPasswordGroup = byId('modal-new-password-group');
   var modalRole = byId('modal-role');
   var userId = byId('user-id');
   var userMethod = byId('user-method');
@@ -103,9 +103,10 @@
     if (!userModal) return;
     var titleAdd = userModal.getAttribute('data-title-add') || 'Add User';
     var titleEdit = userModal.getAttribute('data-title-edit') || 'Edit User';
+    var labelPw = userModal.getAttribute('data-label-password') || 'Password';
+    var labelNewPw = userModal.getAttribute('data-label-new-password') || 'New password';
     var storeUrl = (userForm && userForm.getAttribute('data-store-url')) || '/users';
     if (modalPassword) modalPassword.value = '';
-    if (modalNewPassword) modalNewPassword.value = '';
     if (edit) {
       modalTitle.textContent = titleEdit;
       userForm.action = edit.url || ('/users/' + edit.id);
@@ -113,15 +114,13 @@
       if (userId) userId.value = edit.id;
       if (modalUsername) modalUsername.value = edit.username || '';
       if (modalEmail) modalEmail.value = edit.email || '';
-      if (modalPasswordGroup) modalPasswordGroup.style.display = 'none';
-      if (modalNewPasswordGroup) modalNewPasswordGroup.style.display = 'block';
+      if (modalPasswordGroup) modalPasswordGroup.style.display = 'block';
+      if (modalPasswordLabel) modalPasswordLabel.textContent = labelNewPw;
+      if (modalPasswordHint) modalPasswordHint.style.display = 'block';
       if (modalPassword) {
+        modalPassword.removeAttribute('disabled');
         modalPassword.removeAttribute('required');
-        modalPassword.setAttribute('disabled', 'disabled');
-      }
-      if (modalNewPassword) {
-        modalNewPassword.removeAttribute('disabled');
-        modalNewPassword.removeAttribute('required');
+        modalPassword.setAttribute('name', 'password');
       }
       if (modalRole) modalRole.value = edit.role || 'staff';
     } else {
@@ -132,13 +131,12 @@
       if (modalUsername) modalUsername.value = '';
       if (modalEmail) modalEmail.value = '';
       if (modalPasswordGroup) modalPasswordGroup.style.display = 'block';
-      if (modalNewPasswordGroup) modalNewPasswordGroup.style.display = 'none';
+      if (modalPasswordLabel) modalPasswordLabel.textContent = labelPw;
+      if (modalPasswordHint) modalPasswordHint.style.display = 'none';
       if (modalPassword) {
         modalPassword.removeAttribute('disabled');
         modalPassword.setAttribute('required', 'required');
-      }
-      if (modalNewPassword) {
-        modalNewPassword.setAttribute('disabled', 'disabled');
+        modalPassword.setAttribute('name', 'password');
       }
       if (modalRole) modalRole.value = 'staff';
     }

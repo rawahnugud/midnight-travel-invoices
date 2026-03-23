@@ -63,7 +63,11 @@
   </div>
 </div>
 
-<div id="user-modal" class="modal" style="display:none;" data-title-add="{{ __('messages.add_user') }}" data-title-edit="{{ __('messages.edit_user') }}">
+<div id="user-modal" class="modal" style="display:none;"
+  data-title-add="{{ __('messages.add_user') }}"
+  data-title-edit="{{ __('messages.edit_user') }}"
+  data-label-password="{{ __('messages.password') }}"
+  data-label-new-password="{{ __('messages.new_password') }}">
   <div class="modal-backdrop"></div>
   <div class="modal-content">
     <h3 id="user-modal-title">{{ __('messages.add_user') }}</h3>
@@ -79,12 +83,9 @@
         <input type="email" id="modal-email" name="email">
       </div>
       <div class="form-group" id="modal-password-group">
-        <label for="modal-password">{{ __('messages.password') }}</label>
+        <label for="modal-password" id="modal-password-label">{{ __('messages.password') }}</label>
         <input type="password" id="modal-password" name="password" autocomplete="new-password">
-      </div>
-      <div class="form-group" id="modal-new-password-group" style="display:none;">
-        <label for="modal-new-password">{{ __('messages.new_password_placeholder') }}</label>
-        <input type="password" id="modal-new-password" name="password" disabled autocomplete="new-password">
+        <p id="modal-password-hint" class="form-hint" style="display:none;margin:0.35rem 0 0;font-size:0.85rem;color:#64748b;">{{ __('messages.password_keep_hint') }}</p>
       </div>
       <div class="form-group">
         <label for="modal-role">{{ __('messages.role') }}</label>
