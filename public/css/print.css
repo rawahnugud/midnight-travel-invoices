@@ -380,8 +380,8 @@ body.print-body {
    Do not change mobile (see max-width: 480px above) — this starts at 1024px. */
 @media screen and (min-width: 1024px) {
   .invoice-print-stamp-img {
-    width: 148px;
-    max-width: 178px;
+    width: 158px;
+    max-width: 188px;
   }
 }
 
