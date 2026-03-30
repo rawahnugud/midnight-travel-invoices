@@ -8,11 +8,11 @@
   $currencySym = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'][$invoice->currency ?? 'USD'] ?? ($invoice->currency ?? 'USD') . ' ';
 @endphp
 <div class="card">
-  <div class="card-header">
+    <div class="card-header">
     <h2>{{ $invoice->invoice_number }}</h2>
     <p class="text-muted" style="margin:0.25rem 0 0 0; font-size:0.9rem;">{{ $companyName }}</p>
     <div class="header-actions">
-      <a href="{{ route('invoices.print', $invoice) }}?auto=1" target="_blank" class="btn btn-primary btn-sm">{{ __('messages.print_pdf') }}</a>
+      <a href="{{ route('invoices.print', $invoice) }}" target="_blank" class="btn btn-primary btn-sm">{{ __('messages.print_pdf') }}</a>
       @if($user && ($user->isAdmin() || ($user->isStaff() && $invoice->created_by === $user->id)))
       <a href="{{ route('invoices.edit', $invoice) }}" class="btn btn-outline btn-sm">{{ __('messages.edit') }}</a>
       @endif

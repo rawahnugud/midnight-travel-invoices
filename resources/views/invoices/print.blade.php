@@ -10,7 +10,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  @php
+    $printUrl = url(route('invoices.print', $invoice));
+    $ogImageUrl = $logoUrl ?: $stampUrl;
+  @endphp
   <title>{{ __('messages.invoice') }} {{ $invoice->invoice_number }} — {{ $company }}</title>
+  @if($ogImageUrl)
+    <link rel="icon" href="{{ $ogImageUrl }}">
+  @endif
+  <link rel="canonical" href="{{ $printUrl }}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ __('messages.invoice') }} {{ $invoice->invoice_number }} — {{ $company }}">
+  <meta property="og:description" content="Invoice from {{ $company }} to {{ $invoice->customer_name }}.">
+  <meta property="og:url" content="{{ $printUrl }}">
+  @if($ogImageUrl)
+    <meta property="og:image" content="{{ $ogImageUrl }}">
+    <meta name="twitter:image" content="{{ $ogImageUrl }}">
+  @endif
+  <meta name="twitter:title" content="{{ __('messages.invoice') }} {{ $invoice->invoice_number }} — {{ $company }}">
+  <meta name="twitter:description" content="Invoice from {{ $company }} to {{ $invoice->customer_name }}.">
+  <meta name="twitter:card" content="summary_large_image">
   <style>:root { --invoice-header: {{ $invoiceHeaderColor }}; }</style>
   <link rel="stylesheet" href="{{ asset('css/print.css') }}">
   @if($logoUrl)<link rel="preload" as="image" href="{{ $logoUrl }}">@endif
