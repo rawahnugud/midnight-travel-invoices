@@ -14,6 +14,29 @@ class BusinessSetting extends Model
         'stamp_path',
     ];
 
+    protected $casts = ['branch_branding' => 'array'];
+
+    public function invoiceLogoPath(?string $branch): ?string
+    {
+        $profile = $this->branch_branding[$branch] ?? [];
+        return ($profile['logo_mode'] ?? 'shared') === 'custom'
+            ? ($profile['logo_path'] ?? null)
+            : $this->logo_path;
+    }
+
+    public function invoiceStampPath(?string $branch): ?string
+    {
+        if ($branch === null) {
+            return $this->stamp_path;
+        }
+        $profile = $this->branch_branding[$branch] ?? [];
+        return match ($profile['stamp_mode'] ?? 'none') {
+            'shared' => $this->stamp_path,
+            'custom' => $profile['stamp_path'] ?? null,
+            default => null,
+        };
+    }
+
     const CACHE_KEY = 'business_settings';
 
     /**

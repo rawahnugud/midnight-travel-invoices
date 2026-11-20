@@ -2,8 +2,10 @@
   $company = $invoice->branch ? __('messages.branch_'.$invoice->branch) : (optional($business)->company_name ?? __('messages.app_name'));
   $currencySym = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'][$invoice->currency ?? 'USD'] ?? ($invoice->currency ?? 'USD') . ' ';
   $invoiceHeaderColor = optional($business)->invoice_header_color ?? '#0f172a';
-  $logoUrl = !empty(optional($business)->logo_path) ? url($business->logo_path) : null;
-  $stampUrl = !$invoice->branch && !empty(optional($business)->stamp_path) ? url($business->stamp_path) : null;
+  $logoPath = $business?->invoiceLogoPath($invoice->branch);
+  $stampPath = $business?->invoiceStampPath($invoice->branch);
+  $logoUrl = $logoPath ? url($logoPath) : null;
+  $stampUrl = $stampPath ? url($stampPath) : null;
 @endphp
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
@@ -31,7 +33,7 @@
   <meta name="twitter:description" content="Invoice from {{ $company }} to {{ $invoice->customer_name }}.">
   <meta name="twitter:card" content="summary_large_image">
   <style>:root { --invoice-header: {{ $invoiceHeaderColor }}; }</style>
-  <link rel="stylesheet" href="{{ asset('css/print.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/print.css') }}?v={{ filemtime(public_path('css/print.css')) }}">
   @if($logoUrl)<link rel="preload" as="image" href="{{ $logoUrl }}">@endif
   @if($stampUrl)<link rel="preload" as="image" href="{{ $stampUrl }}">@endif
 </head>
@@ -156,29 +158,29 @@
     </div>
     @endif
 
-    @if($invoice->branch === 'AE')
-    <div class="verification">
+    <footer class="invoice-print-footer{{ $invoice->branch === 'AE' ? ' with-verification' : '' }}">
+      <div>
+        <p class="thanks">{{ __('messages.thank_you') }}</p>
+        <p class="company">{{ $company }}</p>
+        @if(!$invoice->branch && (optional($business)->address || optional($business)->phone || optional($business)->email))
+        <p class="contact">
+          @if(optional($business)->address){{ $business->address }}@endif
+          @if(optional($business)->phone) · {{ $business->phone }}@endif
+          @if(optional($business)->email) · {{ $business->email }}@endif
+        </p>
+        @endif
+      </div>
+      @if($invoice->branch === 'AE')
       <a id="verify-invoice" href="{{ url(\Illuminate\Support\Facades\URL::signedRoute('invoice.verify', ['id' => $invoice->id], null, false)) }}">
         <span id="verification-qr" aria-hidden="true"></span>{{ __('messages.verify_invoice') }}
       </a>
-    </div>
-    <script src="{{ asset('js/vendor/qrcode-2.0.4.js') }}"></script>
-    <script>
-      const code = qrcode(0, 'M');
-      code.addData(document.getElementById('verify-invoice').href);
-      code.make();
-      document.getElementById('verification-qr').innerHTML = code.createSvgTag({cellSize: 2, margin: 8, scalable: true});
-    </script>
-    @endif
-    <footer class="invoice-print-footer">
-      <p class="thanks">{{ __('messages.thank_you') }}</p>
-      <p class="company">{{ $company }}</p>
-      @if(!$invoice->branch && (optional($business)->address || optional($business)->phone || optional($business)->email))
-      <p class="contact">
-        @if(optional($business)->address){{ $business->address }}@endif
-        @if(optional($business)->phone) · {{ $business->phone }}@endif
-        @if(optional($business)->email) · {{ $business->email }}@endif
-      </p>
+      <script src="{{ asset('js/vendor/qrcode-2.0.4.js') }}"></script>
+      <script>
+        const code = qrcode(0, 'M');
+        code.addData(document.getElementById('verify-invoice').href);
+        code.make();
+        document.getElementById('verification-qr').innerHTML = code.createSvgTag(2, 8);
+      </script>
       @endif
     </footer>
   </div>

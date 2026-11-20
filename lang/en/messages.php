@@ -1,6 +1,17 @@
 <?php
 
 return [
+    'branch_branding' => 'Invoice branding by branch',
+    'branch_logo' => 'Invoice logo',
+    'branch_stamp' => 'Invoice stamp',
+    'branding_shared' => 'Use shared image',
+    'branding_custom' => 'Use branch image',
+    'branding_none' => 'No stamp',
+    'upload_branch_logo' => 'Upload branch logo',
+    'upload_branch_stamp' => 'Upload branch stamp',
+    'save_branch_branding' => 'Save branch settings',
+    'select_custom_upload' => 'Select Use branch image to save this upload.',
+    'choose_branch_image' => 'Choose an image for this branch.',
     'verify_invoice' => 'Verify invoice',
     'verify_compare' => 'Compare these current details with the invoice you received.',
     'issuing_branch' => 'Issuing branch',
