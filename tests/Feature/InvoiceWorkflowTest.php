@@ -75,6 +75,7 @@ class InvoiceWorkflowTest extends TestCase
         $admin = User::where('role', 'admin')->firstOrFail();
         $this->actingAs($admin);
         $payload = [
+            'branch' => 'SD',
             'customer_name' => 'Test customer',
             'invoice_date' => '2026-11-20',
             'currency' => 'SDG',
@@ -89,6 +90,18 @@ class InvoiceWorkflowTest extends TestCase
 
         $this->post(route('invoices.store'), $payload)->assertSessionHasNoErrors()->assertRedirect();
         $this->post(route('invoices.store'), $payload)->assertSessionHasNoErrors()->assertRedirect();
+        $invoice = Invoice::where('customer_name', 'Test customer')->firstOrFail();
+        foreach (['AE', 'GB', 'SD'] as $code) {
+            $payload['branch'] = $code;
+            $this->put(route('invoices.update', $invoice), $payload)->assertSessionHasNoErrors();
+            $this->assertSame($code, $invoice->fresh()->branch);
+            foreach (['show', 'print'] as $page) {
+                $this->get(route('invoices.'.$page, $invoice))->assertOk()->assertSee(__('messages.branch_'.$code));
+            }
+        }
+        $this->post(route('invoices.store'), array_merge($payload, ['branch' => 'XX']))->assertSessionHasErrors('branch');
+        unset($payload['branch']);
+        $this->post(route('invoices.store'), $payload)->assertSessionHasErrors('branch');
         $numbers = Invoice::where('customer_name', 'Test customer')->pluck('invoice_number');
         $this->assertCount(2, $numbers->unique());
         $this->get(route('dashboard'))->assertOk()->assertSee('USD 345.00')->assertSee('SDG 501.00');

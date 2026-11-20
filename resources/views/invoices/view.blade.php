@@ -4,7 +4,7 @@
 @php
   $activePage = 'invoices';
   $pageTitle = __('messages.invoice') . ' ' . $invoice->invoice_number;
-  $companyName = optional($business)->company_name ?? __('messages.app_name');
+  $companyName = $invoice->branch ? __('messages.branch_'.$invoice->branch) : (optional($business)->company_name ?? __('messages.app_name'));
   $currencySym = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'][$invoice->currency ?? 'USD'] ?? ($invoice->currency ?? 'USD') . ' ';
 @endphp
 <div class="card">
@@ -25,10 +25,12 @@
     <div class="invoice-from-row" style="margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--border);">
       <strong style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">{{ __('messages.from') }}</strong>
       <p style="margin:0.25rem 0 0 0; font-weight:600;">{{ $companyName }}</p>
+      @unless($invoice->branch)
       @if(optional($business)->address)<p style="margin:0.15rem 0 0 0; font-size:0.9rem; color:var(--text-muted);">{{ $business->address }}</p>@endif
       @if(optional($business)->phone || optional($business)->email)
       <p style="margin:0.15rem 0 0 0; font-size:0.9rem; color:var(--text-muted);">@if($business->phone){{ $business->phone }}@endif @if($business->phone && $business->email) · @endif @if($business->email){{ $business->email }}@endif</p>
       @endif
+      @endunless
     </div>
     <div class="invoice-meta-row">
       <div>

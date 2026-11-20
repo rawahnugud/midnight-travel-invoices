@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BusinessSetting;
 use App\Models\Invoice;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -78,6 +79,10 @@ class InvoiceController extends Controller
     private function validatedInvoice(Request $request): array
     {
         return $request->validate([
+            'branch' => [
+                $request->isMethod('post') || $request->route('invoice')?->branch ? 'required' : 'nullable',
+                Rule::in(Invoice::BRANCHES),
+            ],
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'nullable|email',
             'customer_phone' => 'nullable|string|max:64',
