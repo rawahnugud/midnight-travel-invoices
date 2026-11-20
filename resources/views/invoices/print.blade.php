@@ -156,6 +156,20 @@
     </div>
     @endif
 
+    @if($invoice->branch === 'AE')
+    <div class="verification">
+      <a id="verify-invoice" href="{{ url(\Illuminate\Support\Facades\URL::signedRoute('invoice.verify', ['id' => $invoice->id], null, false)) }}">
+        <span id="verification-qr" aria-hidden="true"></span>{{ __('messages.verify_invoice') }}
+      </a>
+    </div>
+    <script src="{{ asset('js/vendor/qrcode-2.0.4.js') }}"></script>
+    <script>
+      const code = qrcode(0, 'M');
+      code.addData(document.getElementById('verify-invoice').href);
+      code.make();
+      document.getElementById('verification-qr').innerHTML = code.createSvgTag({cellSize: 2, margin: 8, scalable: true});
+    </script>
+    @endif
     <footer class="invoice-print-footer">
       <p class="thanks">{{ __('messages.thank_you') }}</p>
       <p class="company">{{ $company }}</p>

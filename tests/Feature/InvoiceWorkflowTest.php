@@ -37,6 +37,31 @@ class InvoiceWorkflowTest extends TestCase
         $this->seed(DatabaseSeeder::class);
     }
 
+    public function test_guest_can_verify_only_a_signed_uae_invoice(): void
+    {
+        $invoice = Invoice::firstOrFail();
+        $invoice->update(['branch' => 'AE']);
+        $link = \Illuminate\Support\Facades\URL::signedRoute('invoice.verify', ['id' => $invoice->id], null, false);
+        $admin = User::where('role', 'admin')->firstOrFail();
+        $this->actingAs($admin)->get(route('invoices.print', $invoice))
+            ->assertOk()->assertSee(url($link))->assertSee('verification-qr');
+        auth()->logout();
+        $this->get($link)->assertOk()->assertSee($invoice->invoice_number)
+            ->assertSee($invoice->currency.' '.number_format($invoice->total, 2))
+            ->assertDontSee($invoice->customer_name);
+        $this->get(route('invoice.verify', ['id' => $invoice->id]))->assertNotFound();
+        $this->get($link.'0')->assertNotFound();
+        $invoice->update(['status' => 'cancelled']);
+        $this->get($link)->assertOk()->assertSee(__('messages.cancelled'));
+        foreach (['SD', 'GB', null] as $branch) {
+            $invoice->update(['branch' => $branch]);
+            $this->get($link)->assertNotFound();
+            $this->actingAs($admin)->get(route('invoices.print', $invoice))
+                ->assertOk()->assertDontSee('verification-qr');
+            auth()->logout();
+        }
+    }
+
     public function test_admin_can_deactivate_staff_without_losing_invoice_history(): void
     {
         $admin = User::where('role', 'admin')->firstOrFail();

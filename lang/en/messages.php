@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'verify_invoice' => 'Verify invoice',
+    'verify_compare' => 'Compare these current details with the invoice you received.',
     'issuing_branch' => 'Issuing branch',
     'choose_branch' => 'Choose a branch',
     'branch_SD' => 'Midnight Travel & Tourism Agency · Sudan',
