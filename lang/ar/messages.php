@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'issuing_branch' => 'الفرع المُصدِر',
+    'choose_branch' => 'اختر الفرع',
+    'branch_SD' => 'ميدنايت ترافل للسفر والسياحة · السودان',
+    'branch_AE' => 'Midnight Travel FZE · الإمارات',
+    'branch_GB' => 'Midnight Travel LTD · المملكة المتحدة',
     'deactivate_user' => 'تعطيل الحساب',
     'number_on_save' => 'يُحدّد عند الحفظ',
     'paid_revenue' => 'إجمالي الفواتير المدفوعة',

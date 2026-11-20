@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'issuing_branch' => 'Issuing branch',
+    'choose_branch' => 'Choose a branch',
+    'branch_SD' => 'Midnight Travel & Tourism Agency · Sudan',
+    'branch_AE' => 'Midnight Travel FZE · UAE',
+    'branch_GB' => 'Midnight Travel LTD · UK',
     'deactivate_user' => 'Deactivate account',
     'number_on_save' => 'Assigned when saved',
     'paid_revenue' => 'Paid invoice total',

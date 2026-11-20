@@ -1,9 +1,9 @@
 @php
-  $company = optional($business)->company_name ?? __('messages.app_name');
+  $company = $invoice->branch ? __('messages.branch_'.$invoice->branch) : (optional($business)->company_name ?? __('messages.app_name'));
   $currencySym = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'][$invoice->currency ?? 'USD'] ?? ($invoice->currency ?? 'USD') . ' ';
   $invoiceHeaderColor = optional($business)->invoice_header_color ?? '#0f172a';
   $logoUrl = !empty(optional($business)->logo_path) ? url($business->logo_path) : null;
-  $stampUrl = !empty(optional($business)->stamp_path) ? url($business->stamp_path) : null;
+  $stampUrl = !$invoice->branch && !empty(optional($business)->stamp_path) ? url($business->stamp_path) : null;
 @endphp
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
@@ -68,11 +68,13 @@
       <div class="invoice-print-from">
         <strong class="invoice-print-label">{{ __('messages.from') }}</strong>
         <p class="invoice-print-company">{{ $company }}</p>
+        @unless($invoice->branch)
         @if(optional($business)->address)<p>{{ $business->address }}</p>@endif
         @if(optional($business)->phone)<p>{{ $business->phone }}</p>@endif
         @if(optional($business)->email)<p>{{ $business->email }}</p>@endif
         @if(optional($business)->website)<p>{{ $business->website }}</p>@endif
         @if(optional($business)->tax_id)<p>{{ __('messages.tax_id') }}: {{ $business->tax_id }}</p>@endif
+        @endunless
       </div>
       <div class="invoice-print-to">
         <strong class="invoice-print-label">{{ __('messages.bill_to') }}</strong>
@@ -157,7 +159,7 @@
     <footer class="invoice-print-footer">
       <p class="thanks">{{ __('messages.thank_you') }}</p>
       <p class="company">{{ $company }}</p>
-      @if(optional($business)->address || optional($business)->phone || optional($business)->email)
+      @if(!$invoice->branch && (optional($business)->address || optional($business)->phone || optional($business)->email))
       <p class="contact">
         @if(optional($business)->address){{ $business->address }}@endif
         @if(optional($business)->phone) · {{ $business->phone }}@endif

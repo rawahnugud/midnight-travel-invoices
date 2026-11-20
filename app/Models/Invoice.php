@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Invoice extends Model
 {
+    public const BRANCHES = ['SD', 'AE', 'GB'];
+
     protected $fillable = [
-        'invoice_number', 'status', 'customer_name', 'customer_email', 'customer_phone', 'customer_address',
+        'branch', 'invoice_number', 'status', 'customer_name', 'customer_email', 'customer_phone', 'customer_address',
         'invoice_date', 'due_date', 'currency', 'tax_rate', 'discount_amount', 'notes', 'terms', 'created_by',
     ];
 

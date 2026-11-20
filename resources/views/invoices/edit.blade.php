@@ -28,6 +28,7 @@
       <div class="alert alert-error">{{ $errors->first() }}</div>
       @endif
       <div class="form-row two-cols">
+        @include('invoices.branch-field', ['requireBranch' => filled($inv->branch)])
         <div class="form-group">
           <label>{{ __('messages.invoice_number') }}</label>
           <input type="text" value="{{ $inv->invoice_number }}" readonly class="readonly">
