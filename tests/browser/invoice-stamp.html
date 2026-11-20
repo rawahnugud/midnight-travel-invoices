@@ -1,0 +1,32 @@
+<!doctype html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../public/css/print.css">
+<div class="invoice-print-stamp"><img class="invoice-print-stamp-img" alt="Sample seal"></div>
+<script>
+const source = document.createElement('canvas');
+source.width = 400;
+source.height = 300;
+const ctx = source.getContext('2d');
+if (location.search === '?white') {
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, 400, 300);
+}
+ctx.fillStyle = 'navy';
+ctx.fillRect(245, 90, 100, 80);
+const stamp = document.querySelector('img');
+stamp.src = source.toDataURL();
+</script>
+<script src="../../public/js/invoice-stamp.js"></script>
+<script>
+window.addEventListener('load', () => {
+    const image = stamp.getBoundingClientRect();
+    const frame = stamp.parentElement.getBoundingClientRect();
+    const visibleWidth = image.width * 100 / 400;
+    const centerX = image.left + image.width * 295 / 400;
+    const centerY = image.top + image.height * 130 / 300;
+    const fits = visibleWidth / frame.width > 0.93 && visibleWidth / frame.width < 0.96;
+    const centered = Math.abs(centerX - frame.left - frame.width / 2) < 1 &&
+        Math.abs(centerY - frame.top - frame.height / 2) < 1;
+    document.title = fits && centered ? 'Stamp fitted' : 'Stamp size mismatch';
+});
+</script>
