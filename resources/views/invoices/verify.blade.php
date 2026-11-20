@@ -1,9 +1,10 @@
+@php($issuer = $invoice->issuerName($business))
 <!doctype html>
 <html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ __('messages.verify_invoice') }} · Midnight Travel FZE</title>
+  <title>{{ __('messages.verify_invoice') }} · {{ $issuer }}</title>
   <style>
     body { margin: 0; background: #faf7f8; color: #292228; font: 1rem/1.5 system-ui, sans-serif; }
     main { max-width: 28rem; margin: 8vh auto; padding: 2rem; background: white; border-top: 4px solid #85144b; }
@@ -14,7 +15,7 @@
 </head>
 <body>
   <main>
-    <strong>{{ __('messages.branch_AE') }}</strong>
+    <strong>{{ $issuer }}</strong>
     <h1>{{ __('messages.verify_invoice') }}</h1>
     <p>{{ __('messages.verify_compare') }}</p>
     <dl>
