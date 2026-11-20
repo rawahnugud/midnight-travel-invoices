@@ -461,3 +461,7 @@ body.print-body {
 [dir="rtl"] .invoice-print-totals .grand-total-row td.num { text-align: left; }
 [dir="rtl"] .invoice-print-stamp { margin-left: 0.5rem; margin-right: auto; }
 [dir="rtl"] .print-toolbar { flex-direction: row-reverse; }
+
+.verification { text-align: center; break-inside: avoid; margin: 4mm 0; }
+.verification a { color: inherit; font-size: 10pt; }
+#verification-qr svg { display: block; margin: auto; width: 34mm; height: 34mm; }
