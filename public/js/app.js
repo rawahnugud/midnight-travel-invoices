@@ -40,8 +40,9 @@
     var tbody = byId('line-items-tbody');
     var addBtn = byId('add-line');
     if (tbody && addBtn) {
+      var nextItemIndex = tbody.querySelectorAll('.line-item-row').length;
       addBtn.addEventListener('click', function () {
-        var idx = tbody.querySelectorAll('.line-item-row').length;
+        var idx = nextItemIndex++;
         var lab = form.getAttribute('data-label-item-desc') || 'Item / Description';
         var phItem = form.getAttribute('data-placeholder-item') || 'Item name';
         var phDesc = form.getAttribute('data-placeholder-desc') || 'Description';
@@ -52,10 +53,10 @@
         var tr = document.createElement('tr');
         tr.className = 'line-item-row';
         tr.innerHTML =
-          '<td data-label="' + lab.replace(/"/g, '&quot;') + '"><input type="text" name="items[' + idx + '][item_name]" placeholder="' + phItem.replace(/"/g, '&quot;') + '">' +
+          '<td data-label="' + lab.replace(/"/g, '&quot;') + '"><input type="text" name="items[' + idx + '][item_name]" required placeholder="' + phItem.replace(/"/g, '&quot;') + '">' +
           '<input type="text" name="items[' + idx + '][description]" placeholder="' + phDesc.replace(/"/g, '&quot;') + '" class="input-desc"></td>' +
-          '<td class="col-qty" data-label="' + labQty.replace(/"/g, '&quot;') + '"><input type="number" name="items[' + idx + '][quantity]" min="0" step="0.01" value="1" class="input-qty"></td>' +
-          '<td class="col-price" data-label="' + labPrice.replace(/"/g, '&quot;') + '"><input type="number" name="items[' + idx + '][unit_price]" min="0" step="0.01" value="0" class="input-price"></td>' +
+          '<td class="col-qty" data-label="' + labQty.replace(/"/g, '&quot;') + '"><input type="number" name="items[' + idx + '][quantity]" required min="0.01" step="0.01" value="1" class="input-qty"></td>' +
+          '<td class="col-price" data-label="' + labPrice.replace(/"/g, '&quot;') + '"><input type="number" name="items[' + idx + '][unit_price]" required min="0" step="0.01" class="input-price"></td>' +
           '<td class="col-total" data-label="' + labAmount.replace(/"/g, '&quot;') + '"><span class="line-total">0</span></td>' +
           '<td data-label=""><button type="button" class="btn btn-text btn-sm remove-line">' + removeTxt.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</button></td>';
         tbody.appendChild(tr);

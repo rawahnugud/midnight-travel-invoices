@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        if (User::count() > 0) {
+        if (! app()->environment(['local', 'testing']) || User::count() > 0) {
             return;
         }
 

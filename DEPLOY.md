@@ -1,3 +1,5 @@
+> The Node.js implementation below is legacy. Use [CPANEL_DEPLOY.md](CPANEL_DEPLOY.md) for the Laravel production application.
+
 # Deploy Midnight Travel Invoices — GitHub + cPanel
 
 ## Part 1: Connect to GitHub

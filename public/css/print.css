@@ -2,7 +2,7 @@
 
 /* Page definition for print/PDF */
 @page {
-  size: A4;
+  size: auto;
   margin: 12mm;
 }
 @page {
@@ -111,6 +111,7 @@ body.print-body {
 }
 
 @media print {
+  html, body.print-body { height: auto; min-height: 0; overflow: visible; }
   .no-print,
   .print-toolbar,
   .print-toolbar *,
@@ -133,7 +134,7 @@ body.print-body {
     margin: 0 auto !important;
     orphans: 2;
     widows: 2;
-    break-inside: avoid;
+    break-inside: auto;
   }
 }
 

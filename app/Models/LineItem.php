@@ -9,13 +9,10 @@ class LineItem extends Model
 {
     protected $fillable = ['invoice_id', 'item_name', 'description', 'quantity', 'unit_price', 'sort_order'];
 
-    protected function casts(): array
-    {
-        return [
-            'quantity' => 'decimal:2',
-            'unit_price' => 'decimal:2',
-        ];
-    }
+    protected $casts = [
+        'quantity' => 'decimal:2',
+        'unit_price' => 'decimal:2',
+    ];
 
     public function invoice(): BelongsTo
     {
