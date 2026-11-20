@@ -1,0 +1,48 @@
+name: PHP 8.1 invoice checks
+on: [pull_request]
+permissions:
+  contents: read
+jobs:
+  invoice-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1.34'
+          extensions: mbstring, pdo_sqlite, dom, xml, xmlwriter
+          tools: composer:2.11.2
+          coverage: none
+      - name: Reproduce the existing hosting runtime in this disposable checkout
+        run: |
+          composer require laravel/framework:10.50.2 --no-update --no-interaction
+          composer require --dev mockery/mockery:^1.6 --no-update --no-interaction
+          php -r '$p = "composer.json"; $c = json_decode(file_get_contents($p), true, flags: JSON_THROW_ON_ERROR); foreach (["PKSA-yxbx-3c9s-cjt9","PKSA-b41t-wbzk-9q51","PKSA-d5tc-s1qs-h781","PKSA-3r5d-mb8f-1qw9","PKSA-m5cs-t1y6-qpcs","PKSA-mdq4-51ck-6kdq"] as $id) { $c["config"]["policy"]["advisories"]["ignore-id"][$id] = ["on-block" => true, "on-audit" => false, "reason" => "Exact installed Laravel version in isolated compatibility tests only"]; } file_put_contents($p, json_encode($c, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));'
+          composer update --no-audit --prefer-dist --no-scripts --no-interaction
+          php artisan package:discover
+      - name: Verify invoice workflows
+        run: vendor/bin/phpunit tests/Feature
+      - name: Rehearse the cPanel update on disposable SQLite
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/hosting-check.sqlite
+        run: |
+          touch "$DB_DATABASE"
+          mkdir database/previous-migrations
+          cp database/migrations/201*.php database/migrations/2024*.php database/previous-migrations/
+          php artisan migrate --path=database/previous-migrations --force
+          sqlite3 "$DB_DATABASE" <<'SQL'
+          INSERT INTO users (username, password) VALUES ('fixture', 'disabled');
+          INSERT INTO invoices (invoice_number, customer_name, invoice_date, created_by) VALUES ('TEST-001', 'Fixture', '2026-01-01', 1);
+          INSERT INTO line_items (invoice_id, item_name, quantity, unit_price) VALUES (1, 'Service', 2, 12.50);
+          SQL
+          snapshot() { php -r '$db = new PDO("sqlite:".getenv("DB_DATABASE")); foreach (["invoices", "line_items"] as $table) { $rows = $db->query("SELECT * FROM $table ORDER BY id")->fetchAll(PDO::FETCH_ASSOC); if (!$rows) { exit(1); } echo hash("sha256", serialize($rows)); }'; }
+          before=$(snapshot)
+          sh scripts/update-cpanel.sh
+          sh scripts/update-cpanel.sh
+          after=$(snapshot)
+          test "$before" = "$after"
+          php artisan view:cache
+      - name: Report upstream dependency advisories
+        run: composer audit --no-dev

@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'deactivate_user' => 'Deactivate account',
+    'number_on_save' => 'Assigned when saved',
+    'paid_revenue' => 'Paid invoice total',
     'app_name' => 'Midnight Travel',
     'invoice_system' => 'Invoice System',
 
@@ -148,7 +151,7 @@ return [
     'password_section_edit' => 'Change password',
     'password_keep_hint' => 'Leave blank to keep the current password.',
     'new_password_placeholder' => 'New password (leave blank to keep)',
-    'delete_user_confirm' => 'Delete this user?',
+    'delete_user_confirm' => 'Deactivate this account and keep its invoices?',
     'you' => '(you)',
 
     // 404
@@ -169,8 +172,8 @@ return [
     'user_created' => 'User created.',
     'user_updated' => 'User updated.',
     'user_password_set' => 'Password was updated.',
-    'user_deleted' => 'User deleted.',
+    'user_deleted' => 'Account deactivated.',
     'cannot_demote_self' => 'You cannot demote yourself.',
-    'cannot_delete_self' => 'You cannot delete yourself.',
+    'cannot_delete_self' => 'You cannot deactivate your own account.',
     'validation_line_item_required' => 'At least one line item with a name is required.',
 ];

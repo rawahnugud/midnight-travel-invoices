@@ -1,8 +1,6 @@
 # Midnight Travel — Invoice Management System (Laravel)
 
-Production-ready invoice web app built with **PHP Laravel 10**. Runs on any host with PHP 8.1+ and Composer (including cPanel shared hosting).
-
-**Project state:** App and mobile UX are in a complete, production-ready state. The only area not yet optimized is the **print page** (invoice print/PDF view). All other pages (dashboard, invoices, users, settings, forms, tables) are mobile-friendly with sidebar, FAB, card layouts, and single-column forms.
+The Laravel application serves English and Arabic invoices. Start here for local development. Use [the cPanel guide](CPANEL_DEPLOY.md) when preparing a release. The Node.js implementation is legacy.
 
 ## Features
 
@@ -10,22 +8,18 @@ Production-ready invoice web app built with **PHP Laravel 10**. Runs on any host
 - **Roles:** Admin (full access), Staff (create & edit own invoices), Viewer (read-only)
 - **Dashboard:** Total/paid/pending invoices, revenue, recent list
 - **Invoices:** Create, edit, view, delete, print/PDF-ready
-- **Users:** Admin can manage users (create, edit, delete)
-- **Setup URL:** Seed database via browser: `/setup/seed?token=YOUR_SETUP_SECRET`
+- **Users:** Admin can manage users (create, edit, deactivate). Deactivation keeps the original invoice author and all line items.
 
 ## Requirements
 
-- PHP 8.1+
+- PHP 8.1.34 on the existing cPanel installation
 - Composer
 - SQLite (default) or MySQL
-- Laravel 10
+- Laravel 10 (tested against the installed 10.50.2 version)
 
-## Quick start (local)
+## Local development with existing dependencies
 
 ```bash
-# Install dependencies
-composer install
-
 # Copy environment file
 cp .env.example .env
 
@@ -40,7 +34,6 @@ php artisan migrate
 
 # Seed users and sample invoices (optional)
 php artisan db:seed
-# Or use the setup URL in the browser after starting the server (see below)
 ```
 
 Then start the built-in server:
@@ -51,50 +44,11 @@ php artisan serve
 
 Open **http://localhost:8000**. Log in with **admin** / **admin123** (or **staff** / **staff123** if you ran the seeder).
 
-## Deploy to cPanel
+## Release checks
 
-1. **Upload or clone** the project into a folder (e.g. `midnight-travel-invoices` or `invoice.midnighttravel.net`).
+GitHub Actions reproduces the installed hosting versions, runs invoice regression tests, and reports dependency advisories. Use `composer audit` to inspect the installed packages. The tests create their own in-memory SQLite database.
 
-2. **Set the document root** to the `public` folder:
-   - In cPanel → Domains → (your domain/subdomain) → Document Root: e.g. `midnight-travel-invoices/public`
-   - Or point the domain to `public` inside the app folder.
-
-3. **Install dependencies** (in the project root, not inside `public`):
-   ```bash
-   cd /home/youruser/midnight-travel-invoices
-   composer install --no-dev --optimize-autoloader
-   ```
-
-4. **Environment:**
-   - Copy `.env.example` to `.env`
-   - Run `php artisan key:generate`
-   - Set `APP_ENV=production`, `APP_DEBUG=false`, and a strong `APP_KEY`
-   - Set `APP_URL` to your public URL (e.g. `https://invoice.yourdomain.com`) so links and assets use clean URLs
-   - For SQLite: ensure `DB_DATABASE` points to an absolute path or `database/database.sqlite` (create the file: `touch database/database.sqlite`)
-
-5. **Run migrations:**
-   ```bash
-   php artisan migrate --force
-   ```
-
-6. **Seed data (one-time):** Either run `php artisan db:seed` or visit in the browser:
-   ```
-   https://your-domain.com/setup/seed?token=midnight-travel-setup-change-me
-   ```
-   Then set `SETUP_SECRET` in `.env` to a secret value and use that in the URL instead.
-
-7. **Permissions:** Ensure `storage` and `bootstrap/cache` are writable:
-   ```bash
-   chmod -R 775 storage bootstrap/cache
-   ```
-
-8. **Performance (recommended for production):** Cache config, routes, and views so the app runs faster:
-   ```bash
-   php artisan config:cache
-   php artisan route:cache
-   php artisan view:cache
-   ```
-   Re-run these after changing config, routes, or Blade templates. Use `config:clear`, `route:clear`, or `view:clear` to clear each cache.
+Use [the cPanel deployment guide](CPANEL_DEPLOY.md) for hosting and backup instructions.
 
 ## Routes
 
@@ -109,20 +63,19 @@ Open **http://localhost:8000**. Log in with **admin** / **admin123** (or **staff
 | `/invoices/{id}/print` | Print view |
 | `/users` | User management (admin only) |
 | `/settings` | Settings page |
-| `/setup/seed?token=...` | One-time seed (admin, staff, sample invoices) |
 
-## Default logins (after seed)
+## Local demo logins
 
 - **Admin:** `admin` / `admin123`
 - **Staff:** `staff` / `staff123`
 
-Change these in production.
+Use the administrator setup command for production.
 
 ## Project structure (Laravel)
 
 ```
 app/
-  Http/Controllers/   Auth, Dashboard, Invoice, User, Setup
+  Http/Controllers/   Auth, Dashboard, Invoice, User
   Http/Middleware/   EnsureUserHasRole
   Models/            User, Invoice, LineItem
 config/

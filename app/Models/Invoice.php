@@ -13,19 +13,16 @@ class Invoice extends Model
         'invoice_date', 'due_date', 'currency', 'tax_rate', 'discount_amount', 'notes', 'terms', 'created_by',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'invoice_date' => 'date',
-            'due_date' => 'date',
-            'tax_rate' => 'decimal:2',
-            'discount_amount' => 'decimal:2',
-        ];
-    }
+    protected $casts = [
+        'invoice_date' => 'date',
+        'due_date' => 'date',
+        'tax_rate' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+    ];
 
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by')->withTrashed();
     }
 
     public function lineItems(): HasMany

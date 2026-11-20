@@ -48,7 +48,7 @@
             <form action="{{ route('users.destroy', $u) }}" method="post" class="inline-form" data-confirm="{{ __('messages.delete_user_confirm') }}">
               @csrf
               @method('DELETE')
-              <button type="submit" class="btn btn-text btn-sm btn-danger">{{ __('messages.delete') }}</button>
+              <button type="submit" class="btn btn-text btn-sm btn-danger">{{ __('messages.deactivate_user') }}</button>
             </form>
             @else
             <span class="muted">{{ __('messages.you') }}</span>
