@@ -30,7 +30,10 @@ class InvoiceWorkflowTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->artisan('migrate', ['--force' => true])->assertSuccessful();
+        $connection = $this->app['db']->connection();
+        $this->assertSame('sqlite', $connection->getDriverName());
+        $this->assertSame('', $connection->selectOne('PRAGMA database_list')->file);
+        $this->artisan('migrate:fresh', ['--force' => true])->assertSuccessful();
         $this->seed(DatabaseSeeder::class);
     }
 
