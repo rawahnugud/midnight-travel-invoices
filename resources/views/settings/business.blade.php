@@ -88,6 +88,45 @@
         <a href="{{ route('settings') }}" class="btn btn-outline">{{ __('messages.back_to_settings') }}</a>
       </div>
     </form>
+    <h3>{{ __('messages.branch_branding') }}</h3>
+    @foreach(\App\Models\Invoice::BRANCHES as $branch)
+      @php
+        $profile = $business->branch_branding[$branch] ?? [];
+        $retry = old('editing_branch') === $branch;
+      @endphp
+      <details class="form-group" @if($retry) open @endif>
+        <summary>{{ __('messages.branch_'.$branch) }}</summary>
+        <form method="post" action="{{ route('settings.branch.update', $branch) }}" enctype="multipart/form-data">
+          @csrf
+          @method('PUT')
+          <input type="hidden" name="editing_branch" value="{{ $branch }}">
+          <div class="form-row two-cols">
+            @foreach(['logo', 'stamp'] as $type)
+              @php
+                $modes = $type === 'logo' ? ['shared', 'custom'] : ['none', 'shared', 'custom'];
+                $saved = $profile[$type.'_mode'] ?? $modes[0];
+                $selected = $retry ? old($type.'_mode', $saved) : $saved;
+                $path = $type === 'logo' ? $business->invoiceLogoPath($branch) : $business->invoiceStampPath($branch);
+              @endphp
+              <div class="form-group">
+                <label for="{{ $branch }}-{{ $type }}">{{ __('messages.branch_'.$type) }}</label>
+                @if($path)
+                  <img src="{{ asset($path) }}" alt="{{ __('messages.branch_'.$type) }}" style="max-width:120px;max-height:60px;object-fit:contain">
+                @endif
+                <select id="{{ $branch }}-{{ $type }}" name="{{ $type }}_mode">
+                  @foreach($modes as $mode)
+                    <option value="{{ $mode }}" @selected($selected === $mode)>{{ __('messages.branding_'.$mode) }}</option>
+                  @endforeach
+                </select>
+                <label for="{{ $branch }}-{{ $type }}-file">{{ __('messages.upload_branch_'.$type) }}</label>
+                <input id="{{ $branch }}-{{ $type }}-file" type="file" name="{{ $type }}" accept="image/jpeg,image/png,image/gif,image/webp">
+              </div>
+            @endforeach
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm">{{ __('messages.save_branch_branding') }}</button>
+        </form>
+      </details>
+    @endforeach
   </div>
 </div>
 @endsection

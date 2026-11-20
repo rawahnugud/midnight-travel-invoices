@@ -37,6 +37,41 @@ class InvoiceWorkflowTest extends TestCase
         $this->seed(DatabaseSeeder::class);
     }
 
+    public function test_branch_artwork_on_printed_invoices(): void
+    {
+        $settings = \App\Models\BusinessSetting::get();
+        $settings->update(['logo_path' => 'business/group.png', 'stamp_path' => 'business/stamp.png']);
+        \App\Models\BusinessSetting::clearCache();
+        $admin = User::where('role', 'admin')->firstOrFail();
+        $invoice = Invoice::firstOrFail();
+        $print = route('invoices.print', $invoice);
+        $settingsUrl = route('settings.branch.update', 'AE');
+        $this->actingAs($admin)->get(route('settings.business.edit'))->assertOk()->assertSee($settingsUrl);
+        $this->get($print)->assertOk()->assertSee('business/stamp.png');
+        $invoice->update(['branch' => 'AE']);
+        $this->get($print)->assertOk()->assertSee('business/group.png')->assertDontSee('business/stamp.png');
+        $this->put($settingsUrl, ['logo_mode' => 'shared', 'stamp_mode' => 'shared'])->assertSessionHasNoErrors();
+        $this->get($print)->assertOk()->assertSee('business/stamp.png');
+        $this->put($settingsUrl, ['logo_mode' => 'custom', 'stamp_mode' => 'none'])->assertSessionHasErrors('logo');
+
+        $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/r0kAAAAASUVORK5CYII=');
+        $this->put($settingsUrl, [
+            'logo_mode' => 'custom', 'stamp_mode' => 'none',
+            'logo' => \Illuminate\Http\UploadedFile::fake()->createWithContent('branch.png', $png),
+        ])->assertSessionHasNoErrors();
+        $logo = $settings->fresh()->invoiceLogoPath('AE');
+        try {
+            $this->assertStringStartsWith('business/AE_logo_', $logo);
+            $this->assertFileExists(public_path($logo));
+            $this->get($print)->assertOk()->assertSee($logo)->assertDontSee('business/stamp.png');
+            $invoice->update(['branch' => 'SD']);
+            $this->get($print)->assertOk()->assertSee('business/group.png')->assertDontSee($logo);
+            $this->actingAs(User::where('role', 'staff')->firstOrFail())->put($settingsUrl, [])->assertForbidden();
+        } finally {
+            \Illuminate\Support\Facades\File::delete(public_path($logo));
+        }
+    }
+
     public function test_guest_can_verify_only_a_signed_uae_invoice(): void
     {
         $invoice = Invoice::firstOrFail();

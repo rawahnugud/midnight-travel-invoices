@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\BusinessSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class BusinessSettingsController extends Controller
 {
@@ -46,7 +49,7 @@ class BusinessSettingsController extends Controller
                 }
             }
             $file = $request->file('stamp');
-            $name = 'stamp_' . time() . '.' . $file->getClientOriginalExtension();
+            $name = 'stamp_' . Str::uuid() . '.' . $file->guessExtension();
             $file->move($dir, $name);
             $validated['stamp_path'] = 'business/' . $name;
         }
@@ -63,7 +66,7 @@ class BusinessSettingsController extends Controller
                 }
             }
             $file = $request->file('logo');
-            $name = 'logo_' . time() . '.' . $file->getClientOriginalExtension();
+            $name = 'logo_' . Str::uuid() . '.' . $file->guessExtension();
             $file->move($dir, $name);
             $validated['logo_path'] = 'business/' . $name;
         }
@@ -74,6 +77,61 @@ class BusinessSettingsController extends Controller
 
         return redirect()->route('settings.business.edit')
             ->with('success', __('messages.business_saved'));
+    }
+
+    public function updateBranch(Request $request, string $branch)
+    {
+        $imageRule = 'nullable|image|mimes:jpeg,png,gif,webp|max:2048';
+        $data = $request->validate([
+            'logo_mode' => 'required|in:shared,custom',
+            'stamp_mode' => 'required|in:none,shared,custom',
+            'logo' => $imageRule,
+            'stamp' => $imageRule,
+        ]);
+
+        $id = BusinessSetting::get()->id;
+        $added = [];
+        $replaced = [];
+        try {
+            DB::transaction(function () use ($id, $branch, $data, &$added, &$replaced) {
+                $business = BusinessSetting::lockForUpdate()->findOrFail($id);
+                $profiles = $business->branch_branding ?? [];
+                $profile = $profiles[$branch] ?? [];
+                foreach (['logo', 'stamp'] as $type) {
+                    $mode = $data[$type.'_mode'];
+                    $pathKey = $type.'_path';
+                    $file = $data[$type] ?? null;
+                    if ($file && $mode !== 'custom') {
+                        throw ValidationException::withMessages([$type => __('messages.select_custom_upload')]);
+                    }
+                    if ($mode === 'custom' && !$file && empty($profile[$pathKey])) {
+                        throw ValidationException::withMessages([$type => __('messages.choose_branch_image')]);
+                    }
+                    if ($file) {
+                        $dir = public_path('business');
+                        File::ensureDirectoryExists($dir);
+                        $name = $branch.'_'.$type.'_'.Str::uuid().'.'.$file->guessExtension();
+                        $file->move($dir, $name);
+                        $added[] = $dir.'/'.$name;
+                        if (!empty($profile[$pathKey])) {
+                            $replaced[] = public_path($profile[$pathKey]);
+                        }
+                        $profile[$pathKey] = 'business/'.$name;
+                    }
+                    $profile[$type.'_mode'] = $mode;
+                }
+                $profiles[$branch] = $profile;
+                $business->branch_branding = $profiles;
+                $business->save();
+            });
+        } catch (\Throwable $error) {
+            File::delete($added);
+            throw $error;
+        }
+        BusinessSetting::clearCache();
+        File::delete($replaced);
+
+        return redirect()->route('settings.business.edit')->with('success', __('messages.business_saved'));
     }
 
     public function editDesign()
@@ -110,7 +168,7 @@ class BusinessSettingsController extends Controller
                 }
             }
             $file = $request->file('login_logo');
-            $name = 'login_logo_' . time() . '.' . $file->getClientOriginalExtension();
+            $name = 'login_logo_' . Str::uuid() . '.' . $file->guessExtension();
             $file->move($dir, $name);
             $validated['login_logo_path'] = 'business/' . $name;
         }

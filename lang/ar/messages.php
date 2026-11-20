@@ -1,6 +1,17 @@
 <?php
 
 return [
+    'branch_branding' => 'شعارات وأختام الفواتير حسب الفرع',
+    'branch_logo' => 'شعار الفاتورة',
+    'branch_stamp' => 'ختم الفاتورة',
+    'branding_shared' => 'استخدام الصورة المشتركة',
+    'branding_custom' => 'استخدام صورة الفرع',
+    'branding_none' => 'بدون ختم',
+    'upload_branch_logo' => 'رفع شعار الفرع',
+    'upload_branch_stamp' => 'رفع ختم الفرع',
+    'save_branch_branding' => 'حفظ إعدادات الفرع',
+    'select_custom_upload' => 'اختر استخدام صورة الفرع لحفظ الملف.',
+    'choose_branch_image' => 'اختر صورة لهذا الفرع.',
     'verify_invoice' => 'التحقق من الفاتورة',
     'verify_compare' => 'قارن البيانات الحالية أدناه بالفاتورة التي استلمتها.',
     'issuing_branch' => 'الفرع المُصدِر',

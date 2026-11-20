@@ -462,6 +462,25 @@ body.print-body {
 [dir="rtl"] .invoice-print-stamp { margin-left: 0.5rem; margin-right: auto; }
 [dir="rtl"] .print-toolbar { flex-direction: row-reverse; }
 
-.verification { text-align: center; break-inside: avoid; margin: 4mm 0; }
-.verification a { color: inherit; font-size: 10pt; }
-#verification-qr svg { display: block; margin: auto; width: 34mm; height: 34mm; }
+.invoice-print-footer.with-verification {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  text-align: start;
+}
+#verify-invoice {
+  flex: none;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  color: #475569;
+  font-size: 8pt;
+  text-underline-offset: 2px;
+}
+#verification-qr svg {
+  display: block;
+  width: 26mm;
+  height: 26mm;
+  shape-rendering: crispEdges;
+}
