@@ -80,7 +80,7 @@ class InvoiceController extends Controller
     {
         return $request->validate([
             'branch' => [
-                $request->isMethod('post') || $request->route('invoice')?->branch ? 'required' : 'nullable',
+                'nullable',
                 Rule::in(Invoice::BRANCHES),
             ],
             'customer_name' => 'required|string|max:255',

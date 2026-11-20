@@ -41,14 +41,15 @@ class InvoiceWorkflowTest extends TestCase
     public function test_branch_artwork_on_printed_invoices(): void
     {
         $settings = \App\Models\BusinessSetting::get();
-        $settings->update(['logo_path' => 'business/group.png', 'stamp_path' => 'business/stamp.png']);
+        $settings->update(['company_name' => 'Original issuer', 'address' => 'Port Sudan office', 'logo_path' => 'business/group.png', 'stamp_path' => 'business/stamp.png']);
         \App\Models\BusinessSetting::clearCache();
         $admin = User::where('role', 'admin')->firstOrFail();
         $invoice = Invoice::firstOrFail();
         $print = route('invoices.print', $invoice);
         $settingsUrl = route('settings.branch.update', 'AE');
         $this->actingAs($admin)->get(route('settings.business.edit'))->assertOk()->assertSee($settingsUrl);
-        $this->get($print)->assertOk()->assertSee('business/stamp.png');
+        $this->get($print)->assertOk()->assertSee('business/stamp.png')->assertSee('business/group.png')
+            ->assertSee('Original issuer')->assertSee('Port Sudan office')->assertDontSee(__('messages.branch_SD'));
         $invoice->update(['branch' => 'AE']);
         $this->get($print)->assertOk()->assertSee('business/group.png')->assertDontSee('business/stamp.png');
         $this->put($settingsUrl, ['logo_mode' => 'shared', 'stamp_mode' => 'shared'])->assertSessionHasNoErrors();
@@ -162,7 +163,18 @@ class InvoiceWorkflowTest extends TestCase
         }
         $this->post(route('invoices.store'), array_merge($payload, ['branch' => 'XX']))->assertSessionHasErrors('branch');
         unset($payload['branch']);
-        $this->post(route('invoices.store'), $payload)->assertSessionHasErrors('branch');
+        $this->put(route('invoices.update', $invoice), $payload)->assertSessionHasNoErrors();
+        $this->assertSame('SD', $invoice->fresh()->branch);
+        $this->put(route('invoices.update', $invoice), ['branch' => ''] + $payload)->assertSessionHasNoErrors();
+        $this->assertNull($invoice->fresh()->branch);
+        $this->post(route('invoices.store'), ['customer_name' => 'Default issuer', 'status' => 'draft'] + $payload)
+            ->assertSessionHasNoErrors();
+        $default = Invoice::where('customer_name', 'Default issuer')->firstOrFail();
+        $this->assertNull($default->branch);
+        foreach (['show', 'print'] as $page) {
+            $this->get(route('invoices.'.$page, $default))->assertOk()
+                ->assertDontSee(__('messages.branch_SD'))->assertDontSee('verification-qr');
+        }
         $numbers = Invoice::where('customer_name', 'Test customer')->pluck('invoice_number');
         $this->assertCount(2, $numbers->unique());
         $this->get(route('dashboard'))->assertOk()->assertSee('USD 345.00')->assertSee('SDG 501.00');

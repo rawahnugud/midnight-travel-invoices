@@ -15,7 +15,7 @@ return [
     'verify_invoice' => 'التحقق من الفاتورة',
     'verify_compare' => 'قارن البيانات الحالية أدناه بالفاتورة التي استلمتها.',
     'issuing_branch' => 'الفرع المُصدِر',
-    'choose_branch' => 'اختر الفرع',
+    'choose_branch' => 'التصميم الافتراضي',
     'branch_SD' => 'ميدنايت ترافل للسفر والسياحة · السودان',
     'branch_AE' => 'Midnight Travel FZE · الإمارات',
     'branch_GB' => 'Midnight Travel LTD · المملكة المتحدة',
