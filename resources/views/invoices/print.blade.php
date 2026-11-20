@@ -1,5 +1,5 @@
 @php
-  $company = $invoice->branch ? __('messages.branch_'.$invoice->branch) : (optional($business)->company_name ?? __('messages.app_name'));
+  $company = $invoice->issuerName($business);
   $currencySym = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'][$invoice->currency ?? 'USD'] ?? ($invoice->currency ?? 'USD') . ' ';
   $invoiceHeaderColor = optional($business)->invoice_header_color ?? '#0f172a';
   $logoPath = $business?->invoiceLogoPath($invoice->branch);
@@ -158,7 +158,7 @@
     </div>
     @endif
 
-    <footer class="invoice-print-footer{{ $invoice->branch === 'AE' ? ' with-verification' : '' }}">
+    <footer class="invoice-print-footer with-verification">
       <div>
         <p class="thanks">{{ __('messages.thank_you') }}</p>
         <p class="company">{{ $company }}</p>
@@ -170,7 +170,6 @@
         </p>
         @endif
       </div>
-      @if($invoice->branch === 'AE')
       <a id="verify-invoice" href="{{ url(\Illuminate\Support\Facades\URL::signedRoute('invoice.verify', ['id' => $invoice->id], null, false)) }}">
         <span id="verification-qr" aria-hidden="true"></span>{{ __('messages.verify_invoice') }}
       </a>
@@ -181,7 +180,6 @@
         code.make();
         document.getElementById('verification-qr').innerHTML = code.createSvgTag(2, 8);
       </script>
-      @endif
     </footer>
   </div>
   @if($stampUrl)

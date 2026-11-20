@@ -22,6 +22,11 @@ class Invoice extends Model
         'discount_amount' => 'decimal:2',
     ];
 
+    public function issuerName(?BusinessSetting $business): string
+    {
+        return $this->branch ? __('messages.branch_'.$this->branch) : ($business?->company_name ?? __('messages.app_name'));
+    }
+
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by')->withTrashed();

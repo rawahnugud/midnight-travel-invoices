@@ -4,7 +4,7 @@
 @php
   $activePage = 'invoices';
   $pageTitle = __('messages.invoice') . ' ' . $invoice->invoice_number;
-  $companyName = $invoice->branch ? __('messages.branch_'.$invoice->branch) : (optional($business)->company_name ?? __('messages.app_name'));
+  $companyName = $invoice->issuerName($business);
   $currencySym = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'][$invoice->currency ?? 'USD'] ?? ($invoice->currency ?? 'USD') . ' ';
 @endphp
 <div class="card">

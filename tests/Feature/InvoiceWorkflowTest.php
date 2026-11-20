@@ -74,7 +74,7 @@ class InvoiceWorkflowTest extends TestCase
         }
     }
 
-    public function test_guest_can_verify_only_a_signed_uae_invoice(): void
+    public function test_guest_can_verify_signed_invoices_for_every_issuer(): void
     {
         $invoice = Invoice::firstOrFail();
         $invoice->update(['branch' => 'AE']);
@@ -92,9 +92,10 @@ class InvoiceWorkflowTest extends TestCase
         $this->get($link)->assertOk()->assertSee(__('messages.cancelled'));
         foreach (['SD', 'GB', null] as $branch) {
             $invoice->update(['branch' => $branch]);
-            $this->get($link)->assertNotFound();
+            $issuer = $branch ? __('messages.branch_'.$branch) : \App\Models\BusinessSetting::get()->company_name;
+            $this->get($link)->assertOk()->assertSee($issuer)->assertDontSee($invoice->customer_name);
             $this->actingAs($admin)->get(route('invoices.print', $invoice))
-                ->assertOk()->assertDontSee('verification-qr');
+                ->assertOk()->assertSee(url($link))->assertSee('verification-qr');
             auth()->logout();
         }
     }
@@ -173,7 +174,7 @@ class InvoiceWorkflowTest extends TestCase
         $this->assertNull($default->branch);
         foreach (['show', 'print'] as $page) {
             $this->get(route('invoices.'.$page, $default))->assertOk()
-                ->assertDontSee(__('messages.branch_SD'))->assertDontSee('verification-qr');
+                ->assertDontSee(__('messages.branch_SD'));
         }
         $numbers = Invoice::where('customer_name', 'Test customer')->pluck('invoice_number');
         $this->assertCount(2, $numbers->unique());
