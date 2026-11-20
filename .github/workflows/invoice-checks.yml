@@ -17,7 +17,7 @@ jobs:
         run: |
           composer require laravel/framework:10.50.2 --no-update --no-interaction
           composer require --dev mockery/mockery:^1.6 --no-update --no-interaction
-          php -r '$p = "composer.json"; $c = json_decode(file_get_contents($p), true, flags: JSON_THROW_ON_ERROR); foreach (["PKSA-yxbx-3c9s-cjt9","PKSA-b41t-wbzk-9q51","PKSA-d5tc-s1qs-h781","PKSA-3r5d-mb8f-1qw9","PKSA-m5cs-t1y6-qpcs","PKSA-mdq4-51ck-6kdq"] as $id) { $c["config"]["policy"]["advisories"]["ignore-id"][$id] = ["on-block" => false, "reason" => "Exact installed Laravel version in isolated compatibility tests only"]; } file_put_contents($p, json_encode($c, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));'
+          php -r '$p = "composer.json"; $c = json_decode(file_get_contents($p), true, flags: JSON_THROW_ON_ERROR); foreach (["PKSA-yxbx-3c9s-cjt9","PKSA-b41t-wbzk-9q51","PKSA-d5tc-s1qs-h781","PKSA-3r5d-mb8f-1qw9","PKSA-m5cs-t1y6-qpcs","PKSA-mdq4-51ck-6kdq"] as $id) { $c["config"]["policy"]["advisories"]["ignore-id"][$id] = ["on-block" => true, "on-audit" => false, "reason" => "Exact installed Laravel version in isolated compatibility tests only"]; } file_put_contents($p, json_encode($c, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));'
           composer update --no-audit --prefer-dist --no-scripts --no-interaction
           php artisan package:discover
       - name: Verify invoice workflows
