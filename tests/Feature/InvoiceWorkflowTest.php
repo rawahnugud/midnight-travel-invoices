@@ -23,6 +23,7 @@ class InvoiceWorkflowTest extends TestCase
             'database.connections.sqlite.url' => null,
             'session.driver' => 'array',
             'cache.default' => 'array',
+            'cache.stores.array' => ['driver' => 'array'],
         ]);
         return $app;
     }
