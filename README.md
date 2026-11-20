@@ -49,7 +49,7 @@ Open **http://localhost:8000**. Log in with **admin** / **admin123** (or **staff
 
 ## Release checks
 
-Run `composer audit` and `vendor/bin/phpunit tests/Feature/StaffOffboardingTest.php` from a development checkout. The test creates its own in-memory SQLite database.
+Run `composer audit` and `vendor/bin/phpunit tests/Feature` from a development checkout. The tests create their own in-memory SQLite database.
 
 Use [the cPanel deployment guide](CPANEL_DEPLOY.md) for hosting and backup instructions.
 

@@ -8,41 +8,19 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.2', '8.4']
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: ${{ matrix.php }}
           extensions: mbstring, pdo_sqlite, dom, xml, xmlwriter
           tools: composer:v2
           coverage: none
-      - run: composer validate --no-check-lock
+      - run: composer validate --strict
       - run: composer install --prefer-dist --no-interaction
       - run: composer audit
-      - run: vendor/bin/phpunit tests/Feature/StaffOffboardingTest.php
+      - run: vendor/bin/phpunit tests/Feature
       - run: php artisan view:cache
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tested-composer-lock
-          path: composer.lock
-  pin-tested-dependencies:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/fix/invoice-workflow'
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          run-id: 44747775641
-          name: tested-composer-lock
-          github-token: ${{ github.token }}
-      - name: Pin verified package versions on the draft branch
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- composer.lock
-          git diff --cached --quiet && exit 0
-          git commit -m 'Pin the audited Composer dependencies'
-          git push origin HEAD:refs/heads/fix/invoice-workflow
