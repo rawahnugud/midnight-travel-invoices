@@ -184,6 +184,9 @@
       @endif
     </footer>
   </div>
+  @if($stampUrl)
+  <script src="{{ asset('js/invoice-stamp.js') }}"></script>
+  @endif
   <script>
     (function() {
       var btn = document.getElementById('btn-print');

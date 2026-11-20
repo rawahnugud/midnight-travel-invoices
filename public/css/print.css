@@ -333,27 +333,25 @@ body.print-body {
 }
 
 .invoice-print-stamp {
-  flex-shrink: 0;
+  flex: none;
   order: -1;
+  position: relative;
+  overflow: hidden;
+  width: 32mm;
+  aspect-ratio: 1;
 }
 .invoice-print-stamp-img {
   display: block;
-  width: 90px;
-  max-width: 110px;
-  height: auto;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  image-rendering: auto;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
-
-/* Laptop / desktop screen preview only: slightly larger stamp.
-   Do not change mobile (see max-width: 480px above) — this starts at 1024px. */
-@media screen and (min-width: 1024px) {
-  .invoice-print-stamp-img {
-    width: 126px;
-    max-width: 100%;
-  }
+.stamp-fitted .invoice-print-stamp-img {
+  position: absolute;
+  height: auto;
+  max-width: none;
 }
 
 /* Notes / Terms */
@@ -478,7 +476,7 @@ body.print-body {
   .invoice-print-table th,
   .invoice-print-table td { padding: 0.4rem 0.5rem; }
   .invoice-print-totals-stamp-wrap { gap: 0.65rem; }
-  .invoice-print-stamp-img { width: 64px; }
+  .invoice-print-stamp { width: 24mm; }
   .invoice-print-totals { width: auto; }
   .invoice-print-totals td.num { padding-inline-start: 0.5rem; }
   .invoice-print-table td { overflow-wrap: anywhere; }
