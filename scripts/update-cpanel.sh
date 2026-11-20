@@ -7,8 +7,14 @@ php -r 'require "vendor/autoload.php"; if (PHP_VERSION_ID < 80100 || !extension_
 composer check-platform-reqs --no-dev
 composer dump-autoload --no-scripts --optimize --no-interaction
 php artisan config:clear
+php artisan route:clear
+php artisan view:clear
 php artisan clear-compiled
 php artisan package:discover
 php -r 'require "vendor/autoload.php"; $app = require "bootstrap/app.php"; $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap(); $db = $app["db"]->connection(); if ($db->getDriverName() !== "sqlite" || !is_file($db->getDatabaseName()) || !$db->getSchemaBuilder()->hasTable("invoices")) { fwrite(STDERR, "Expected the existing SQLite invoice database. Check the installation settings.\n"); exit(1); }'
+php artisan route:list --name=invoice.verify | grep -F 'invoice.verify' || {
+    echo "The UAE invoice verification route is missing. Check the deployed routes/web.php." >&2
+    exit 1
+}
 php artisan migrate --force
 php artisan config:cache

@@ -50,6 +50,11 @@ jobs:
                   }
               }'
           }
+          # Simulate a previous release with a cached route collection.
+          sed -i "s/name('invoice.verify')/name('previous.verify')/" routes/web.php
+          php artisan route:cache
+          git restore routes/web.php
+          php artisan route:list --name=previous.verify | grep -F previous.verify
           before=$(snapshot)
           sh scripts/update-cpanel.sh
           sh scripts/update-cpanel.sh
