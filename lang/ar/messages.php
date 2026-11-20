@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'deactivate_user' => 'تعطيل الحساب',
     'number_on_save' => 'يُحدّد عند الحفظ',
     'paid_revenue' => 'إجمالي الفواتير المدفوعة',
     'app_name' => 'ميدنايت ترافل',
@@ -150,7 +151,7 @@ return [
     'password_section_edit' => 'تغيير كلمة المرور',
     'password_keep_hint' => 'اتركها فارغة للإبقاء على كلمة المرور الحالية.',
     'new_password_placeholder' => 'كلمة مرور جديدة (اتركها فارغة للإبقاء على الحالية)',
-    'delete_user_confirm' => 'حذف هذا المستخدم؟',
+    'delete_user_confirm' => 'هل تريد تعطيل هذا الحساب والاحتفاظ بفواتيره؟',
     'you' => '(أنت)',
 
     // 404
@@ -171,8 +172,8 @@ return [
     'user_created' => 'تم إنشاء المستخدم.',
     'user_updated' => 'تم تحديث المستخدم.',
     'user_password_set' => 'تم تحديث كلمة المرور.',
-    'user_deleted' => 'تم حذف المستخدم.',
+    'user_deleted' => 'تم تعطيل الحساب.',
     'cannot_demote_self' => 'لا يمكنك تخفيض صلاحياتك.',
-    'cannot_delete_self' => 'لا يمكنك حذف نفسك.',
+    'cannot_delete_self' => 'لا يمكنك تعطيل حسابك الخاص.',
     'validation_line_item_required' => 'مطلوب بند واحد على الأقل مع اسم.',
 ];

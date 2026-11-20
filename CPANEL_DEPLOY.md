@@ -4,6 +4,16 @@ Follow these steps to get the app running on your cPanel hosting (e.g. **invoice
 
 ---
 
+## Updating a working installation
+
+This release targets Laravel 12 and PHP 8.2.30 or newer. Verify the domain and command-line PHP versions before updating. Run `composer check-platform-reqs --no-dev` on staging.
+
+Record the current branch, commit, web PHP version, and Terminal PHP version. Keep a private copy of the live application, including its existing `.env`, uploaded assets, and a consistent database backup. Restore that copy to an isolated staging installation and compare invoice counts, latest invoice number, and paid totals by currency.
+
+Test the pending release on staging before deploying it to the live domain. The staff deactivation migration adds a nullable column. Older releases do not check it and can grant access to disabled accounts. If reverting code after disabling any accounts, keep the site in maintenance until their access is secured and old sessions invalidated. Preserve invoices entered since the release.
+
+The steps below describe a **new installation**. Keep the existing application key, database, and administrator on an upgrade.
+
 ## Step 1: Get the code on the server
 
 ### Option A: Clone from GitHub (recommended)

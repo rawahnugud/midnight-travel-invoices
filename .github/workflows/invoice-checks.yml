@@ -1,0 +1,27 @@
+name: Invoice checks
+on:
+  pull_request:
+  push:
+    branches: [fix/invoice-workflow]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo_sqlite, dom, xml, xmlwriter
+          tools: composer:v2
+          coverage: none
+      - run: composer validate --no-check-lock
+      - run: composer install --prefer-dist --no-interaction
+      - run: composer audit
+      - run: vendor/bin/phpunit tests/Feature/StaffOffboardingTest.php
+      - run: php artisan view:cache
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tested-composer-lock
+          path: composer.lock
