@@ -6,7 +6,10 @@
   $pageTitle = __('messages.new_invoice_title');
   $defaultCurrency = optional($business)->default_currency ?? 'USD';
   $inv = $invoice ?? (object)['invoice_number' => '', 'invoice_date' => now()->format('Y-m-d'), 'currency' => $defaultCurrency, 'tax_rate' => 0, 'discount_amount' => 0, 'customer_name' => '', 'customer_email' => '', 'customer_phone' => '', 'customer_address' => '', 'notes' => '', 'terms' => ''];
-  $items = isset($invoice->items) ? $invoice->items : [(object)['item_name' => '', 'description' => '', 'quantity' => 1, 'unit_price' => 0]];
+  $items = isset($invoice->items) ? $invoice->items : [(object)['item_name' => '', 'description' => '', 'quantity' => 1, 'unit_price' => null]];
+  if (is_array(old('items'))) {
+    $items = collect(old('items'))->filter(fn ($item) => is_array($item))->values()->map(fn ($item) => (object) $item);
+  }
 @endphp
 <div class="card">
   <div class="card-body">
@@ -26,7 +29,7 @@
       <div class="form-row two-cols">
         <div class="form-group">
           <label for="invoice_number">{{ __('messages.invoice_number') }}</label>
-          <input type="text" id="invoice_number" name="invoice_number" value="{{ $inv->invoice_number }}" readonly class="readonly">
+          <input type="text" id="invoice_number" value="{{ __('messages.number_on_save') }}" readonly class="readonly">
         </div>
         <div class="form-group">
           <label for="invoice_date">{{ __('messages.invoice_date') }}</label>
@@ -77,11 +80,11 @@
           @foreach($items as $idx => $item)
           <tr class="line-item-row">
             <td data-label="{{ __('messages.item_description') }}">
-              <input type="text" name="items[{{ $idx }}][item_name]" placeholder="{{ __('messages.item_name_placeholder') }}" value="{{ $item->item_name ?? '' }}">
+              <input type="text" name="items[{{ $idx }}][item_name]" required placeholder="{{ __('messages.item_name_placeholder') }}" value="{{ $item->item_name ?? '' }}">
               <input type="text" name="items[{{ $idx }}][description]" placeholder="{{ __('messages.description_placeholder') }}" value="{{ $item->description ?? '' }}" class="input-desc">
             </td>
-            <td class="col-qty" data-label="{{ __('messages.qty') }}"><input type="number" name="items[{{ $idx }}][quantity]" min="0" step="0.01" value="{{ $item->quantity ?? 1 }}" class="input-qty"></td>
-            <td class="col-price" data-label="{{ __('messages.unit_price') }}"><input type="number" name="items[{{ $idx }}][unit_price]" min="0" step="0.01" value="{{ $item->unit_price ?? 0 }}" class="input-price"></td>
+            <td class="col-qty" data-label="{{ __('messages.qty') }}"><input type="number" name="items[{{ $idx }}][quantity]" required min="0.01" step="0.01" value="{{ $item->quantity ?? 1 }}" class="input-qty"></td>
+            <td class="col-price" data-label="{{ __('messages.unit_price') }}"><input type="number" name="items[{{ $idx }}][unit_price]" required min="0" step="0.01" value="{{ $item->unit_price ?? '' }}" class="input-price"></td>
             <td class="col-total" data-label="{{ __('messages.amount') }}"><span class="line-total">0</span></td>
             <td data-label=""><button type="button" class="btn btn-text btn-sm remove-line">{{ __('messages.remove') }}</button></td>
           </tr>

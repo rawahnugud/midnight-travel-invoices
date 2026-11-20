@@ -4,6 +4,16 @@ Follow these steps to get the app running on your cPanel hosting (e.g. **invoice
 
 ---
 
+## Updating a working installation
+
+This release targets Laravel 12 and PHP 8.2.30 or newer. Verify the domain and command-line PHP versions before updating. Run `composer check-platform-reqs --no-dev` on staging.
+
+Record the current branch, commit, web PHP version, and Terminal PHP version. Keep a private copy of the live application, including its existing `.env`, uploaded assets, and a consistent database backup. Restore that copy to an isolated staging installation and compare invoice counts, latest invoice number, and paid totals by currency.
+
+Test the pending release on staging before deploying it to the live domain. The staff deactivation migration adds a nullable column. Older releases do not check it and can grant access to disabled accounts. If reverting code after disabling any accounts, keep the site in maintenance until their access is secured and old sessions invalidated. Preserve invoices entered since the release.
+
+The steps below describe a **new installation**. Keep the existing application key, database, and administrator on an upgrade.
+
 ## Step 1: Get the code on the server
 
 ### Option A: Clone from GitHub (recommended)
@@ -64,7 +74,6 @@ Laravel must run with the **document root** set to the **`public`** folder insid
    - `APP_ENV=production`
    - `APP_DEBUG=false`
    - `APP_URL=https://invoice.midnighttravel.net` (your real URL)
-   - `SETUP_SECRET=your-secret-string-here` (for the one-time seed URL)
 
 4. In Terminal (from the app folder):
    ```bash
@@ -98,25 +107,9 @@ Laravel must run with the **document root** set to the **`public`** folder insid
 
 ---
 
-## Step 6: Seed data (admin, staff, sample invoices)
+## Step 6: Create the first administrator
 
-**Option A — In the browser (easiest)**  
-After the site loads, open:
-
-```text
-https://invoice.midnighttravel.net/setup/seed?token=midnight-travel-setup-change-me
-```
-
-If you set `SETUP_SECRET` in `.env`, use that value instead of `midnight-travel-setup-change-me`.
-
-**Option B — In Terminal**
-
-```bash
-cd ~/midnight-travel-invoices
-php artisan db:seed
-```
-
-Then log in with **admin** / **admin123**.
+On a fresh production installation run `php artisan invoices:create-admin admin` in Terminal. Enter and confirm a new password at the hidden prompts. Add staff and viewers from Users after signing in. Existing installations keep their users and invoices. If an older installation used demo accounts, rotate their passwords and review sample invoices before using revenue reports.
 
 ---
 
@@ -140,7 +133,7 @@ So that the app can create `public/business` and save the logo there, ensure `pu
 
 1. Open **https://invoice.midnighttravel.net** (or your URL).
 2. You should see the **login** page.
-3. After seeding, log in with **admin** / **admin123**.
+3. Sign in using the administrator account you created.
 
 If you see a blank page or 500 error:
 
@@ -159,7 +152,7 @@ If you see a blank page or 500 error:
 | 3 | `composer install --no-dev --optimize-autoloader` in app folder |
 | 4 | Copy `.env.example` to `.env`, set `APP_URL`, then `php artisan key:generate` |
 | 5 | `touch database/database.sqlite` then `php artisan migrate --force` |
-| 6 | Visit `/setup/seed?token=...` or run `php artisan db:seed` |
+| 6 | Create the first administrator from Terminal |
 | 7 | `chmod -R 775 storage bootstrap/cache` and `chmod 775 public` (for logo uploads to `public/business`) |
 | 8 | Open site and log in (admin can set **Business data & logo** under Settings) |
 

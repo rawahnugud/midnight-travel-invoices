@@ -4,11 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\BusinessSetting;
 use App\Models\Invoice;
-use App\Models\LineItem;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 class InvoiceController extends Controller
 {
@@ -37,25 +35,49 @@ class InvoiceController extends Controller
     {
         $business = BusinessSetting::get();
         $defaultCurrency = $business->default_currency ?? 'USD';
-        $nextNumber = 'INV-' . date('Y') . '-' . str_pad((string) (Invoice::max('id') + 1), 3, '0', STR_PAD_LEFT);
         $today = now()->format('Y-m-d');
         return view('invoices.new', [
             'invoice' => (object) [
-                'invoice_number' => $nextNumber,
                 'invoice_date' => $today,
                 'due_date' => $today,
                 'currency' => $defaultCurrency,
                 'tax_rate' => 0,
                 'discount_amount' => 0,
-                'items' => [(object) ['item_name' => '', 'description' => '', 'quantity' => 1, 'unit_price' => 0]],
+                'items' => [(object) ['item_name' => '', 'description' => '', 'quantity' => 1, 'unit_price' => null]],
             ],
         ]);
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'invoice_number' => 'required|string|max:64|unique:invoices,invoice_number',
+        $validated = $this->validatedInvoice($request);
+        $items = $validated['items'];
+        unset($validated['items']);
+        $validated['created_by'] = $request->user()->id;
+        $validated['status'] ??= 'draft';
+        $validated['tax_rate'] ??= 0;
+        $validated['discount_amount'] ??= 0;
+
+        $inv = DB::transaction(function () use ($validated, $items) {
+            // The insert allocates an independent ID for each writer.
+            $invoice = Invoice::create($validated + ['invoice_number' => (string) Str::uuid()]);
+            $base = sprintf('INV-%s-%03d', now()->year, $invoice->id);
+            $number = $base;
+            $suffix = 1;
+            while (Invoice::where('invoice_number', $number)->exists()) {
+                $number = $base . '-' . $suffix++;
+            }
+            $invoice->update(['invoice_number' => $number]);
+            $this->saveItems($invoice, $items);
+            return $invoice;
+        }, 5);
+
+        return redirect()->route('invoices.show', $inv)->with('success', __('messages.invoice_created'));
+    }
+
+    private function validatedInvoice(Request $request): array
+    {
+        return $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'nullable|email',
             'customer_phone' => 'nullable|string|max:64',
@@ -65,38 +87,23 @@ class InvoiceController extends Controller
             'currency' => 'required|string|max:10',
             'tax_rate' => 'nullable|numeric|min:0',
             'discount_amount' => 'nullable|numeric|min:0',
+            'terms' => 'nullable|string',
             'notes' => 'nullable|string',
             'status' => 'nullable|in:draft,pending,paid,cancelled',
+            'items' => 'required|array|min:1',
+            'items.*' => 'required|array:item_name,description,quantity,unit_price',
+            'items.*.item_name' => 'required|string|max:255',
+            'items.*.description' => 'nullable|string',
+            'items.*.quantity' => 'required|numeric|decimal:0,2|between:0.01,9999999999.99',
+            'items.*.unit_price' => 'required|numeric|decimal:0,2|between:0,9999999999.99',
         ]);
+    }
 
-        $validated['created_by'] = $request->user()->id;
-        $validated['tax_rate'] = (float) ($validated['tax_rate'] ?? 0);
-        $validated['discount_amount'] = (float) ($validated['discount_amount'] ?? 0);
-        $validated['status'] = $validated['status'] ?? 'draft';
-
-        $items = $request->input('items', []);
-        $hasItem = collect($items)->contains(fn ($row) => ! empty(trim($row['item_name'] ?? '')));
-        if (! $hasItem) {
-            return back()->withErrors(['items' => __('messages.validation_line_item_required')])->withInput();
+    private function saveItems(Invoice $invoice, array $items): void
+    {
+        foreach (array_values($items) as $position => $item) {
+            $invoice->lineItems()->create($item + ['sort_order' => $position]);
         }
-
-        $inv = Invoice::create($validated);
-        foreach ($items as $i => $row) {
-            if (empty($row['item_name'] ?? null)) {
-                continue;
-            }
-            LineItem::create([
-                'invoice_id' => $inv->id,
-                'item_name' => $row['item_name'],
-                'description' => $row['description'] ?? null,
-                'quantity' => (float) ($row['quantity'] ?? 1),
-                'unit_price' => (float) ($row['unit_price'] ?? 0),
-                'sort_order' => $i,
-            ]);
-        }
-
-        Cache::forget('dashboard.stats.' . $request->user()->id);
-        return redirect()->route('invoices.show', $inv)->with('success', __('messages.invoice_created'));
     }
 
     public function show(Request $request, Invoice $invoice)
@@ -115,7 +122,7 @@ class InvoiceController extends Controller
             abort(403);
         }
         $invoice->load('lineItems');
-        $invoice->items = $invoice->lineItems->isEmpty() ? [(object) ['item_name' => '', 'description' => '', 'quantity' => 1, 'unit_price' => 0]] : $invoice->lineItems;
+        $invoice->items = $invoice->lineItems->isEmpty() ? [(object) ['item_name' => '', 'description' => '', 'quantity' => 1, 'unit_price' => null]] : $invoice->lineItems;
         return view('invoices.edit', ['invoice' => $invoice]);
     }
 
@@ -125,49 +132,18 @@ class InvoiceController extends Controller
             abort(403);
         }
 
-        $items = $request->input('items', []);
-        $hasItem = collect($items)->contains(fn ($row) => ! empty(trim($row['item_name'] ?? '')));
-        if (! $hasItem) {
-            return back()->withErrors(['items' => __('messages.validation_line_item_required')])->withInput();
-        }
-
-        $validated = $request->validate([
-            'invoice_number' => ['required', 'string', 'max:64', Rule::unique('invoices', 'invoice_number')->ignore($invoice->id)],
-            'customer_name' => 'required|string|max:255',
-            'customer_email' => 'nullable|email',
-            'customer_phone' => 'nullable|string|max:64',
-            'customer_address' => 'nullable|string',
-            'invoice_date' => 'required|date',
-            'due_date' => 'nullable|date',
-            'currency' => 'required|string|max:10',
-            'tax_rate' => 'nullable|numeric|min:0',
-            'discount_amount' => 'nullable|numeric|min:0',
-            'notes' => 'nullable|string',
-            'status' => 'nullable|in:draft,pending,paid,cancelled',
-        ]);
-
-        $validated['tax_rate'] = (float) ($validated['tax_rate'] ?? 0);
-        $validated['discount_amount'] = (float) ($validated['discount_amount'] ?? 0);
+        $validated = $this->validatedInvoice($request);
+        $items = $validated['items'];
+        unset($validated['items']);
+        $validated['tax_rate'] ??= 0;
+        $validated['discount_amount'] ??= 0;
 
         DB::transaction(function () use ($invoice, $validated, $items) {
             $invoice->update($validated);
             $invoice->lineItems()->delete();
-            foreach ($items as $i => $row) {
-                if (empty(trim($row['item_name'] ?? ''))) {
-                    continue;
-                }
-                LineItem::create([
-                    'invoice_id' => $invoice->id,
-                    'item_name' => $row['item_name'],
-                    'description' => $row['description'] ?? null,
-                    'quantity' => (float) ($row['quantity'] ?? 1),
-                    'unit_price' => (float) ($row['unit_price'] ?? 0),
-                    'sort_order' => $i,
-                ]);
-            }
-        });
+            $this->saveItems($invoice, $items);
+        }, 5);
 
-        Cache::forget('dashboard.stats.' . $request->user()->id);
         return redirect()->route('invoices.show', $invoice)->with('success', __('messages.invoice_updated'));
     }
 
@@ -177,7 +153,6 @@ class InvoiceController extends Controller
             abort(403);
         }
         $invoice->delete();
-        Cache::forget('dashboard.stats.' . $request->user()->id);
         return redirect()->route('invoices.index')->with('success', __('messages.invoice_deleted'));
     }
 
