@@ -2,8 +2,6 @@
 
 Production-ready invoice web app built with **PHP Laravel 10**. Runs on any host with PHP 8.1+ and Composer (including cPanel shared hosting).
 
-**Project state:** App and mobile UX are in a complete, production-ready state. The only area not yet optimized is the **print page** (invoice print/PDF view). All other pages (dashboard, invoices, users, settings, forms, tables) are mobile-friendly with sidebar, FAB, card layouts, and single-column forms.
-
 ## Features
 
 - **Authentication:** Login with username/password, session-based
@@ -11,7 +9,6 @@ Production-ready invoice web app built with **PHP Laravel 10**. Runs on any host
 - **Dashboard:** Total/paid/pending invoices, revenue, recent list
 - **Invoices:** Create, edit, view, delete, print/PDF-ready
 - **Users:** Admin can manage users (create, edit, delete)
-- **Setup URL:** Seed database via browser: `/setup/seed?token=YOUR_SETUP_SECRET`
 
 ## Requirements
 
@@ -40,7 +37,6 @@ php artisan migrate
 
 # Seed users and sample invoices (optional)
 php artisan db:seed
-# Or use the setup URL in the browser after starting the server (see below)
 ```
 
 Then start the built-in server:
@@ -77,11 +73,7 @@ Open **http://localhost:8000**. Log in with **admin** / **admin123** (or **staff
    php artisan migrate --force
    ```
 
-6. **Seed data (one-time):** Either run `php artisan db:seed` or visit in the browser:
-   ```
-   https://your-domain.com/setup/seed?token=midnight-travel-setup-change-me
-   ```
-   Then set `SETUP_SECRET` in `.env` to a secret value and use that in the URL instead.
+6. **Create the first administrator** with `php artisan invoices:create-admin admin`. Use a new password at the hidden prompts. Demo seeding is restricted to local and testing environments.
 
 7. **Permissions:** Ensure `storage` and `bootstrap/cache` are writable:
    ```bash
@@ -109,14 +101,13 @@ Open **http://localhost:8000**. Log in with **admin** / **admin123** (or **staff
 | `/invoices/{id}/print` | Print view |
 | `/users` | User management (admin only) |
 | `/settings` | Settings page |
-| `/setup/seed?token=...` | One-time seed (admin, staff, sample invoices) |
 
-## Default logins (after seed)
+## Local demo logins
 
 - **Admin:** `admin` / `admin123`
 - **Staff:** `staff` / `staff123`
 
-Change these in production.
+Use the administrator setup command for production.
 
 ## Project structure (Laravel)
 

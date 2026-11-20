@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'number_on_save' => 'Assigned when saved',
+    'paid_revenue' => 'Paid invoice total',
     'app_name' => 'Midnight Travel',
     'invoice_system' => 'Invoice System',
 

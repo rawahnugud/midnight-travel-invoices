@@ -1,69 +1,7 @@
-# How to Load Seed Data (Admin, Staff, Sample Invoices)
+# Invoice accounts and sample data
 
-The seed creates:
-- **Admin user:** `admin` / `admin123`
-- **Staff user:** `staff` / `staff123`
-- **2 sample invoices** with line items
+For a fresh production database, run migrations and then `php artisan invoices:create-admin admin` in Terminal. Enter a new password at both hidden prompts. The command creates one administrator. Add staff and viewer accounts under Users.
 
----
+For an empty local demo database, `php artisan db:seed` creates sample users and invoices. Use the local demo logins in README.md. Production seeding skips demo records.
 
-## On the server (easiest – no terminal Node needed)
-
-1. Deploy the app and start it (e.g. via cPanel **Setup Node.js App**).
-2. In your browser, visit (use your real domain and token):
-   ```
-   https://invoice.midnighttravel.net/setup/seed?token=midnight-travel-setup-change-me
-   ```
-3. You should see “Seed complete” and login links. Then log in with **admin** / **admin123**.
-4. For security, set `SETUP_SECRET` in your server’s `.env` to a secret value and use that in the URL instead of `midnight-travel-setup-change-me`.
-
----
-
-## On your Windows PC (local)
-
-1. Open a terminal where **Node.js** is available (e.g. Command Prompt, PowerShell, or VS Code terminal with Node in PATH).
-2. Go to the project folder and run:
-
-```bash
-cd "d:\Web Development Projects\Inovice Project"
-npm run seed
-```
-
-Or:
-
-```bash
-node scripts/seed.js
-```
-
-3. You should see: `Users created: admin / admin123, staff / staff123` and `Sample invoices created.` then `Seed complete.`
-4. Start the app (`npm start`) and log in at http://localhost:3000 with `admin` / `admin123`.
-
----
-
-## On cPanel (production server)
-
-After you’ve cloned the repo and set up the Node.js app:
-
-1. **SSH:** If you have SSH access, go to the app directory and run:
-   ```bash
-   cd ~/midnight-travel-invoices
-   # or: cd ~/invoice.midnighttravel.net  (your actual path)
-   node scripts/seed.js
-   ```
-
-2. **No SSH:** Use cPanel’s **Terminal** (if available) and run the same commands in the app folder.
-
-3. **Application start script:** Some hosts let you run a one-off command when the app is first created; you can run `node scripts/seed.js` there once.
-
-The database file is created in the app’s `data/` folder. Running the seed **once** is enough; it skips creating users/invoices if they already exist.
-
----
-
-## Summary
-
-| Where   | Command              | When        |
-|---------|----------------------|-------------|
-| Local   | `npm run seed`       | Once, after first run |
-| cPanel  | `node scripts/seed.js` in app folder | Once, after deploy   |
-
-No need to “upload” the database file: the seed script **creates** the data on the machine where it runs (your PC or the server).
+Existing installations retain their accounts and invoices. Rotate any demo passwords still in use and review historical sample records with your accountant before changing them.

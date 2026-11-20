@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'number_on_save' => 'يُحدّد عند الحفظ',
+    'paid_revenue' => 'إجمالي الفواتير المدفوعة',
     'app_name' => 'ميدنايت ترافل',
     'invoice_system' => 'نظام الفواتير',
 

@@ -11,7 +11,6 @@ return [
     'locale' => 'en',
     'fallback_locale' => 'en',
     'key' => env('APP_KEY'),
-    'setup_secret' => env('SETUP_SECRET', 'midnight-travel-setup-change-me'),
     'cipher' => 'AES-256-CBC',
     'maintenance' => [
         'driver' => 'file',
