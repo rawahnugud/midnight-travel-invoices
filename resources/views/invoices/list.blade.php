@@ -31,6 +31,10 @@
         </thead>
         <tbody>
           @foreach($invoices as $inv)
+          @php
+            $editable = !$inv->payments_exists && $user && ($user->isAdmin() || ($user->isStaff() && $inv->created_by === $user->id));
+            $removable = $editable || ($user?->isAdmin() && $inv->status === 'cancelled' && !$inv->active_payments_exist);
+          @endphp
           <tr>
             <td class="col-number" data-label="{{ __('messages.number') }}">
               <a href="{{ route('invoices.show', $inv) }}" class="invoice-number-link">{{ $inv->invoice_number }}</a>
@@ -48,8 +52,10 @@
               <div class="actions-wrap">
                 <a href="{{ route('invoices.show', $inv) }}" class="btn btn-text btn-sm">{{ __('messages.view') }}</a>
                 <a href="{{ route('invoices.print', $inv) }}" target="_blank" class="btn btn-text btn-sm">{{ __('messages.print') }}</a>
-                @if(!$inv->payments_exists && $user && ($user->isAdmin() || ($user->isStaff() && $inv->created_by === $user->id)))
+                @if($editable)
                 <a href="{{ route('invoices.edit', $inv) }}" class="btn btn-text btn-sm">{{ __('messages.edit') }}</a>
+                @endif
+                @if($removable)
                 <form action="{{ route('invoices.destroy', $inv) }}" method="post" class="inline-form" data-confirm="{{ __('messages.delete_invoice_confirm') }}">
                   @csrf
                   @method('DELETE')

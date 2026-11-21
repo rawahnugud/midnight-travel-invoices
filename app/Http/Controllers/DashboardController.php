@@ -10,7 +10,7 @@ class DashboardController extends Controller
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        $query = Invoice::query();
+        $query = Invoice::listed();
         if ($user->isStaff()) {
             $query->where('created_by', $user->id);
         }

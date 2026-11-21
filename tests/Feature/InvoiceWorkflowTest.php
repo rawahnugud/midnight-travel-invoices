@@ -351,7 +351,19 @@ class InvoiceWorkflowTest extends TestCase
         $this->actingAs($admin)->post($cancel)->assertRedirect(route('invoices.show', $invoice));
         $this->assertSame('cancelled', $invoice->fresh()->status);
         $this->assertSame($receipt->id, $invoice->payments()->sole()->id);
-        $this->delete(route('invoices.destroy', $invoice))->assertStatus(409);
+        $this->actingAs($invoice->creator)->delete(route('invoices.destroy', $invoice))->assertForbidden();
+        $this->actingAs($admin)->get(route('invoices.index'))->assertOk()
+            ->assertSee('action="'.route('invoices.destroy', $invoice).'"', false);
+        $this->get(route('invoices.show', $invoice))->assertOk()
+            ->assertSee('action="'.route('invoices.destroy', $invoice).'"', false);
+        $this->delete(route('invoices.destroy', $invoice))->assertRedirect(route('invoices.index'));
+        $this->get(route('invoices.index'))->assertOk()->assertDontSeeText($invoice->invoice_number);
+        $this->get(route('reports.team'))->assertOk()->assertDontSeeText($invoice->invoice_number);
+        $this->get(route('dashboard'))->assertOk()->assertDontSeeText($invoice->invoice_number);
+        $this->delete(route('invoices.destroy', $invoice))->assertRedirect(route('invoices.index'));
+        $this->assertDatabaseHas('invoice_removals', ['invoice_id' => $invoice->id, 'removed_by' => $admin->id]);
+        $this->get(route('invoices.payments.show', [$invoice, $receipt]))->assertOk();
+        $this->assertSame('cancelled', $invoice->fresh()->status);
         $this->post(route('invoices.payments.store', $invoice), $this->paymentPayload('840.00'))
             ->assertSessionHasErrors();
     }

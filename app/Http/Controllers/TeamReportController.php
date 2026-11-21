@@ -22,7 +22,7 @@ class TeamReportController extends Controller
             'status' => ['nullable', Rule::in(['pending', 'paid', 'draft', 'cancelled'])],
         ]);
 
-        $issued = Invoice::query();
+        $issued = Invoice::listed();
         $currencies = (clone $issued)->distinct()->orderBy('currency')->pluck('currency');
         $users = User::withTrashed()->orderBy('username')->get(['id', 'username', 'deleted_at']);
         $filtered = $issued
