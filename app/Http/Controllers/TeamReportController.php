@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -26,7 +27,7 @@ class TeamReportController extends Controller
         $users = User::withTrashed()->orderBy('username')->get(['id', 'username', 'deleted_at']);
         $filtered = $issued
             ->when($filters['from'] ?? null, fn ($q, $from) => $q->where('invoice_date', '>=', $from))
-            ->when($filters['to'] ?? null, fn ($q, $to) => $q->where('invoice_date', '<=', $to))
+            ->when($filters['to'] ?? null, fn ($q, $to) => $q->where('invoice_date', '<', CarbonImmutable::parse($to)->addDay()->toDateString()))
             ->when($filters['user_id'] ?? null, fn ($q, $id) => $q->where('created_by', $id))
             ->when($filters['currency'] ?? null, fn ($q, $currency) => $q->where('currency', $currency))
             ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status));
