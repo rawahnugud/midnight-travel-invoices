@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'invoice_search' => 'Invoice number or customer name',
+    'search' => 'Search',
+    'finish_payment' => 'Invoice saved. Record the payment below to issue its receipt.',
     'branch_branding' => 'Invoice branding by branch',
     'branch_logo' => 'Invoice logo',
     'branch_stamp' => 'Invoice stamp',
