@@ -14,7 +14,9 @@ class InvoiceController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = Invoice::with(['creator', 'lineItems'])->withExists('payments');
+        $query = Invoice::listed()->with(['creator', 'lineItems'])->withExists([
+            'payments', 'payments as active_payments_exist' => fn ($query) => $query->active(),
+        ]);
 
         if ($user->isStaff()) {
             $query->where('created_by', $user->id);
@@ -118,7 +120,9 @@ class InvoiceController extends Controller
             abort(403);
         }
         $invoice->load(['lineItems', 'creator', $user->isAdmin() ? 'payments.reversedBy' : 'payments']);
-        return view('invoices.view', ['invoice' => $invoice]);
+        return view('invoices.view', ['invoice' => $invoice,
+            'removed' => DB::table('invoice_removals')->where('invoice_id', $invoice->id)->exists(),
+        ]);
     }
 
     public function edit(Request $request, Invoice $invoice)
@@ -160,10 +164,24 @@ class InvoiceController extends Controller
         if (! $request->user()->isAdmin() && $invoice->created_by !== $request->user()->id) {
             abort(403);
         }
-        DB::transaction(function () use ($invoice) {
-            $invoice = Invoice::lockForUpdate()->findOrFail($invoice->id);
-            $this->ensureEditable($invoice);
-            $invoice->delete();
+        DB::transaction(function () use ($invoice, $request) {
+            $locked = $invoice->lockForPaymentUpdate();
+            if (! $locked->payments()->exists()) {
+                $locked->delete();
+                return;
+            }
+
+            abort_unless($locked->status === 'cancelled' && ! $locked->payments()->active()->exists(),
+                409, __('messages.invoice_receipts_locked'));
+            abort_unless($request->user()->isAdmin(), 403);
+            $removals = DB::table('invoice_removals');
+            if (! (clone $removals)->where('invoice_id', $locked->id)->exists()) {
+                $removals->insert([
+                    'invoice_id' => $locked->id,
+                    'removed_by' => $request->user()->id,
+                    'removed_at' => now(),
+                ]);
+            }
         }, 5);
         return redirect()->route('invoices.index')->with('success', __('messages.invoice_deleted'));
     }

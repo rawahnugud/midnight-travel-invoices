@@ -23,6 +23,8 @@
       <a href="{{ route('invoices.print', $invoice) }}" target="_blank" class="btn btn-primary btn-sm">{{ __('messages.print_pdf') }}</a>
       @if($canEdit && $payments->isEmpty())
       <a href="{{ route('invoices.edit', $invoice) }}" class="btn btn-outline btn-sm">{{ __('messages.edit') }}</a>
+      @endif
+      @if(($canEdit && $payments->isEmpty()) || ($isAdmin && !$removed && $invoice->status === 'cancelled' && $activePayments->isEmpty()))
       <form action="{{ route('invoices.destroy', $invoice) }}" method="post" data-confirm="{{ __('messages.delete_invoice_confirm') }}">
         @csrf
         @method('DELETE')

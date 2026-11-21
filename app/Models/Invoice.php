@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -40,6 +41,12 @@ class Invoice extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function scopeListed(Builder $query): Builder
+    {
+        return $query->whereNotExists(fn ($removed) => $removed->selectRaw('1')
+            ->from('invoice_removals')->whereColumn('invoice_removals.invoice_id', 'invoices.id'));
     }
 
     public function lockForPaymentUpdate(): self
