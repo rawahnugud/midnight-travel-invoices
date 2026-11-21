@@ -32,6 +32,24 @@ class Invoice extends Model
         return $this->belongsTo(User::class, 'created_by')->withTrashed();
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function outstandingAmount(): float
+    {
+        if ($this->status === 'paid') {
+            return 0.0;
+        }
+
+        $latestPayment = $this->relationLoaded('payments')
+            ? $this->payments->sortByDesc('id')->first()
+            : $this->payments()->latest('id')->first();
+
+        return max(0.0, (float) ($latestPayment?->balance_after ?? $this->total));
+    }
+
     public function lineItems(): HasMany
     {
         return $this->hasMany(LineItem::class)->orderBy('sort_order');

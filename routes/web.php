@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BusinessSettingsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,7 +28,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings', fn () => view('settings'))->name('settings');
 
     Route::get('/invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
+    Route::get('/invoices/{invoice}/payments/{payment}', [PaymentController::class, 'show'])
+        ->scopeBindings()->name('invoices.payments.show');
     Route::middleware('role:admin,staff')->group(function () {
+        Route::post('/invoices/{invoice}/payments', [PaymentController::class, 'store'])
+            ->name('invoices.payments.store');
         Route::resource('invoices', InvoiceController::class)->except(['index', 'show']);
     });
     Route::resource('invoices', InvoiceController::class)->only(['index', 'show']);
