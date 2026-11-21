@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\Invoice;
+use App\Models\Payment;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Testing\TestCase;
+use Illuminate\Support\Str;
 
 class InvoiceWorkflowTest extends TestCase
 {
@@ -98,6 +100,97 @@ class InvoiceWorkflowTest extends TestCase
                 ->assertOk()->assertSee(url($link))->assertSee('verification-qr');
             auth()->logout();
         }
+    }
+
+    private function paymentPayload(string $amount): array
+    {
+        return [
+            'request_key' => (string) Str::uuid(),
+            'amount' => $amount,
+            'paid_on' => today()->toDateString(),
+            'method' => 'bank',
+            'reference' => 'TRANSFER-123',
+        ];
+    }
+
+    public function test_partial_payment_retry_and_final_payment_keep_the_correct_balance(): void
+    {
+        $invoice = Invoice::where('status', 'pending')->firstOrFail();
+        $this->actingAs($invoice->creator);
+        $store = route('invoices.payments.store', $invoice);
+        $partial = $this->paymentPayload('200.25');
+        $this->post($store, $partial)->assertSessionHasNoErrors()->assertRedirect();
+        $payment = Payment::where('invoice_id', $invoice->id)->sole();
+        $this->assertEquals('200.25', $payment->amount);
+        $this->assertEquals('639.75', $payment->balance_after);
+        $this->assertSame('pending', $invoice->fresh()->status);
+        $this->post($store, $partial)->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertSame($payment->id, Payment::sole()->id);
+        $this->get(route('invoices.edit', $invoice))->assertStatus(409);
+        $this->delete(route('invoices.destroy', $invoice))->assertStatus(409);
+        $this->get(route('invoices.show', $invoice))->assertOk()->assertSee($payment->receiptNumber());
+
+        $this->post($store, $this->paymentPayload('640.00'))->assertSessionHasErrors();
+        $this->assertSame(1, Payment::count());
+        $final = $this->paymentPayload('639.75');
+        $this->post($store, $final)->assertSessionHasNoErrors()->assertRedirect();
+        $this->post($store, $final)->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertSame(2, Payment::count());
+        $this->assertEquals(0, Payment::where('request_key', $final['request_key'])->sole()->balance_after);
+        $this->assertSame('paid', $invoice->fresh()->status);
+    }
+
+    public function test_historical_paid_invoice_can_only_receive_one_full_settlement_receipt(): void
+    {
+        $invoice = Invoice::where('status', 'paid')->firstOrFail();
+        $this->actingAs($invoice->creator);
+        $store = route('invoices.payments.store', $invoice);
+        $this->post($store, $this->paymentPayload('1.00'))->assertSessionHasErrors();
+        $this->assertSame(0, Payment::count());
+        $this->post($store, $this->paymentPayload('345.00'))->assertSessionHasNoErrors()->assertRedirect();
+        $this->post($store, $this->paymentPayload('345.00'))->assertSessionHasErrors();
+        $this->assertEquals(0, Payment::sole()->balance_after);
+        $this->assertSame('paid', $invoice->fresh()->status);
+        $this->get(route('dashboard'))->assertOk()->assertSee('USD 345.00');
+    }
+
+    public function test_draft_and_cancelled_invoices_reject_payment(): void
+    {
+        $invoice = Invoice::where('status', 'pending')->firstOrFail();
+        $this->actingAs($invoice->creator);
+        foreach (['draft', 'cancelled'] as $status) {
+            $invoice->update(['status' => $status]);
+            $this->post(route('invoices.payments.store', $invoice), $this->paymentPayload('1.00'))
+                ->assertSessionHasErrors();
+            $this->assertSame($status, $invoice->fresh()->status);
+        }
+        $this->assertSame(0, Payment::count());
+    }
+
+    public function test_receipt_access_matches_invoice_permissions_and_print_uses_issued_details(): void
+    {
+        $invoice = Invoice::where('status', 'paid')->firstOrFail();
+        $staff = User::where('role', 'staff')->firstOrFail();
+        $store = route('invoices.payments.store', $invoice);
+        $paymentForm = $this->paymentPayload('345.00');
+        $this->actingAs($staff)->post($store, $paymentForm)->assertForbidden();
+        $this->actingAs($invoice->creator)->post($store, $paymentForm)->assertSessionHasNoErrors();
+        $payment = Payment::sole();
+        $receipt = route('invoices.payments.show', [$invoice, $payment]);
+        $this->assertSame($invoice->customer_name, $payment->customer_name);
+        $this->assertNotEmpty($payment->issuer_name);
+        $invoice->update(['customer_name' => 'Renamed customer', 'branch' => 'GB']);
+        $this->get($receipt)->assertOk()->assertSee($payment->customer_name)->assertSee($payment->issuer_name)
+            ->assertSee('345.00')->assertSee('TRANSFER-123')->assertDontSee('Renamed customer');
+        $other = Invoice::whereKeyNot($invoice->id)->firstOrFail();
+        $this->get(route('invoices.payments.show', [$other, $payment]))->assertNotFound();
+        $this->actingAs($staff)->get($receipt)->assertForbidden();
+        $staff->update(['role' => 'viewer']);
+        $this->actingAs($staff)->get($receipt)->assertOk();
+        $this->post($store, $paymentForm)->assertForbidden();
+        $this->assertSame(1, Payment::count());
+        auth()->logout();
+        $this->get($receipt)->assertRedirect(route('login'));
     }
 
     public function test_admin_can_deactivate_staff_without_losing_invoice_history(): void

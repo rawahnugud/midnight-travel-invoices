@@ -4,6 +4,11 @@
 @php
   $activePage = 'invoices';
   $pageTitle = __('messages.invoice') . ' ' . $invoice->invoice_number;
+  $canEdit = $user && ($user->isAdmin() || ($user->isStaff() && $invoice->created_by === $user->id));
+  $payments = $invoice->payments;
+  $outstanding = $invoice->outstandingAmount();
+  $historicalPayment = $invoice->status === 'paid' && $payments->isEmpty();
+  $recordable = $historicalPayment ? $invoice->total : $outstanding;
   $companyName = $invoice->issuerName($business);
   $currencySym = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'][$invoice->currency ?? 'USD'] ?? ($invoice->currency ?? 'USD') . ' ';
 @endphp
@@ -13,7 +18,7 @@
     <p class="text-muted" style="margin:0.25rem 0 0 0; font-size:0.9rem;">{{ $companyName }}</p>
     <div class="header-actions">
       <a href="{{ route('invoices.print', $invoice) }}" target="_blank" class="btn btn-primary btn-sm">{{ __('messages.print_pdf') }}</a>
-      @if($user && ($user->isAdmin() || ($user->isStaff() && $invoice->created_by === $user->id)))
+      @if($canEdit && $payments->isEmpty())
       <a href="{{ route('invoices.edit', $invoice) }}" class="btn btn-outline btn-sm">{{ __('messages.edit') }}</a>
       @endif
     </div>
@@ -77,4 +82,81 @@
     @if($invoice->terms)<p><strong>{{ __('messages.terms') }}:</strong> {{ $invoice->terms }}</p>@endif
   </div>
 </div>
+<section class="card" aria-labelledby="payment-heading">
+  <div class="card-header">
+    <h2 id="payment-heading">{{ __('messages.payments') }}</h2>
+    @unless($historicalPayment || $invoice->status === 'cancelled')
+    <p>{{ __('messages.outstanding_balance') }} <strong><bdi>{{ $invoice->currency }} {{ number_format($outstanding, 2) }}</bdi></strong></p>
+    @endunless
+  </div>
+  <div class="card-body">
+    @if($payments->isNotEmpty())
+    <div class="table-responsive">
+      <table class="table">
+        <thead><tr>
+          <th>{{ __('messages.receipt_number') }}</th>
+          <th>{{ __('messages.paid_on') }}</th>
+          <th>{{ __('messages.payment_method') }}</th>
+          <th>{{ __('messages.payment_reference') }}</th>
+          <th class="num">{{ __('messages.amount_received') }}</th>
+        </tr></thead>
+        <tbody>
+          @foreach($payments as $payment)
+          <tr>
+            <td data-label="{{ __('messages.receipt_number') }}"><a href="{{ route('invoices.payments.show', [$invoice, $payment]) }}" aria-label="{{ __('messages.print_receipt') }} {{ $payment->receiptNumber() }}"><bdi>{{ $payment->receiptNumber() }}</bdi></a></td>
+            <td data-label="{{ __('messages.paid_on') }}"><bdi>{{ $payment->paid_on->format('Y-m-d') }}</bdi></td>
+            <td data-label="{{ __('messages.payment_method') }}">{{ __('messages.payment_method_'.$payment->method) }}</td>
+            <td data-label="{{ __('messages.payment_reference') }}"><bdi>{{ $payment->reference ?? '—' }}</bdi></td>
+            <td class="num" data-label="{{ __('messages.amount_received') }}"><bdi>{{ $payment->currency }} {{ number_format($payment->amount, 2) }}</bdi></td>
+          </tr>
+          @endforeach
+        </tbody>
+      </table>
+    </div>
+    @else
+    <p class="text-muted">{{ __('messages.no_payments') }}</p>
+    @endif
+    @if($errors->any())
+    <ul class="alert alert-error" role="alert">
+      @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+    </ul>
+    @endif
+    @if($canEdit && $invoice->status === 'draft')
+    <p>{{ __('messages.payment_draft_hint') }}</p>
+    @endif
+    @if($canEdit && ($invoice->status === 'pending' || $historicalPayment) && $recordable > 0)
+    <form method="post" action="{{ route('invoices.payments.store', $invoice) }}">
+      @csrf
+      <input type="hidden" name="request_key" value="{{ old('request_key', (string) \Illuminate\Support\Str::uuid()) }}">
+      @if($historicalPayment)<p>{{ __('messages.legacy_payment_notice') }}</p>@endif
+      <div class="form-row two-cols">
+        <div class="form-group">
+          <label for="payment-amount">{{ __('messages.amount_received') }} ({{ $invoice->currency }})</label>
+          <input id="payment-amount" name="amount" type="number" min="0.01" max="{{ $recordable }}" step="0.01" value="{{ old('amount', number_format($recordable, 2, '.', '')) }}" required @readonly($historicalPayment)>
+        </div>
+        <div class="form-group">
+          <label for="paid-on">{{ __('messages.paid_on') }}</label>
+          <input id="paid-on" name="paid_on" type="date" min="{{ $invoice->invoice_date->format('Y-m-d') }}" max="{{ now()->toDateString() }}" value="{{ old('paid_on', $historicalPayment ? '' : now()->toDateString()) }}" required>
+        </div>
+      </div>
+      <div class="form-row two-cols">
+        <div class="form-group">
+          <label for="payment-method">{{ __('messages.payment_method') }}</label>
+          <select id="payment-method" name="method" required>
+            <option value=""></option>
+            @foreach(\App\Models\Payment::METHODS as $method)
+            <option value="{{ $method }}" @selected(old('method') === $method)>{{ __('messages.payment_method_'.$method) }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="payment-reference">{{ __('messages.optional_reference') }}</label>
+          <input id="payment-reference" name="reference" value="{{ old('reference') }}">
+        </div>
+      </div>
+      <button class="btn btn-primary" type="submit">{{ __($historicalPayment ? 'messages.confirm_existing_payment' : 'messages.record_payment') }}</button>
+    </form>
+    @endif
+  </div>
+</section>
 @endsection

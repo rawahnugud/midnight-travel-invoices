@@ -44,7 +44,7 @@
               <div class="actions-wrap">
                 <a href="{{ route('invoices.show', $inv) }}" class="btn btn-text btn-sm">{{ __('messages.view') }}</a>
                 <a href="{{ route('invoices.print', $inv) }}" target="_blank" class="btn btn-text btn-sm">{{ __('messages.print') }}</a>
-                @if($user && ($user->isAdmin() || ($user->isStaff() && $inv->created_by === $user->id)))
+                @if(!$inv->payments_exists && $user && ($user->isAdmin() || ($user->isStaff() && $inv->created_by === $user->id)))
                 <a href="{{ route('invoices.edit', $inv) }}" class="btn btn-text btn-sm">{{ __('messages.edit') }}</a>
                 <form action="{{ route('invoices.destroy', $inv) }}" method="post" class="inline-form" data-confirm="{{ __('messages.delete_invoice_confirm') }}">
                   @csrf

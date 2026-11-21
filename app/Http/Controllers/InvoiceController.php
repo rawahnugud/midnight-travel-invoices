@@ -14,7 +14,7 @@ class InvoiceController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = Invoice::with('creator')->with('lineItems');
+        $query = Invoice::with(['creator', 'lineItems'])->withExists('payments');
 
         if ($user->isStaff()) {
             $query->where('created_by', $user->id);
@@ -117,7 +117,7 @@ class InvoiceController extends Controller
         if (! $user->isAdmin() && ! $user->isViewer() && $invoice->created_by !== $user->id) {
             abort(403);
         }
-        $invoice->load(['lineItems', 'creator']);
+        $invoice->load(['lineItems', 'creator', 'payments']);
         return view('invoices.view', ['invoice' => $invoice]);
     }
 
@@ -126,6 +126,7 @@ class InvoiceController extends Controller
         if (! $request->user()->isAdmin() && $invoice->created_by !== $request->user()->id) {
             abort(403);
         }
+        $this->ensureEditable($invoice);
         $invoice->load('lineItems');
         $invoice->items = $invoice->lineItems->isEmpty() ? [(object) ['item_name' => '', 'description' => '', 'quantity' => 1, 'unit_price' => null]] : $invoice->lineItems;
         return view('invoices.edit', ['invoice' => $invoice]);
@@ -144,6 +145,8 @@ class InvoiceController extends Controller
         $validated['discount_amount'] ??= 0;
 
         DB::transaction(function () use ($invoice, $validated, $items) {
+            $invoice = Invoice::lockForUpdate()->findOrFail($invoice->id);
+            $this->ensureEditable($invoice);
             $invoice->update($validated);
             $invoice->lineItems()->delete();
             $this->saveItems($invoice, $items);
@@ -157,8 +160,17 @@ class InvoiceController extends Controller
         if (! $request->user()->isAdmin() && $invoice->created_by !== $request->user()->id) {
             abort(403);
         }
-        $invoice->delete();
+        DB::transaction(function () use ($invoice) {
+            $invoice = Invoice::lockForUpdate()->findOrFail($invoice->id);
+            $this->ensureEditable($invoice);
+            $invoice->delete();
+        }, 5);
         return redirect()->route('invoices.index')->with('success', __('messages.invoice_deleted'));
+    }
+
+    private function ensureEditable(Invoice $invoice): void
+    {
+        abort_if($invoice->payments()->exists(), 409, __('messages.invoice_receipts_locked'));
     }
 
     public function print(Request $request, Invoice $invoice)
