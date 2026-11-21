@@ -39,6 +39,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('invoices', InvoiceController::class)->only(['index', 'show']);
 
     Route::middleware('role:admin')->group(function () {
+        Route::post('/invoices/{invoice}/payments/{payment}/reverse', [PaymentController::class, 'reverse'])
+            ->scopeBindings()->name('invoices.payments.reverse');
+        Route::post('/invoices/{invoice}/cancel', [InvoiceController::class, 'cancel'])->name('invoices.cancel');
         Route::get('/reports/team', TeamReportController::class)->name('reports.team');
         Route::resource('users', UserController::class)->except(['show', 'create', 'edit'])->names('users');
         Route::get('/settings/business', [BusinessSettingsController::class, 'edit'])->name('settings.business.edit');

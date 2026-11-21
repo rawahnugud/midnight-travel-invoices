@@ -117,7 +117,7 @@ class InvoiceController extends Controller
         if (! $user->isAdmin() && ! $user->isViewer() && $invoice->created_by !== $user->id) {
             abort(403);
         }
-        $invoice->load(['lineItems', 'creator', 'payments']);
+        $invoice->load(['lineItems', 'creator', $user->isAdmin() ? 'payments.reversedBy' : 'payments']);
         return view('invoices.view', ['invoice' => $invoice]);
     }
 
@@ -166,6 +166,23 @@ class InvoiceController extends Controller
             $invoice->delete();
         }, 5);
         return redirect()->route('invoices.index')->with('success', __('messages.invoice_deleted'));
+    }
+
+    public function cancel(Invoice $invoice)
+    {
+        DB::transaction(function () use ($invoice) {
+            $locked = $invoice->lockForPaymentUpdate();
+            abort_unless($locked->payments()->exists() && ! $locked->payments()->active()->exists(),
+                409, __('messages.cancel_after_reversal_only'));
+            if ($locked->status === 'cancelled') {
+                return;
+            }
+            abort_unless(in_array($locked->status, ['pending', 'paid'], true),
+                409, __('messages.cancel_after_reversal_only'));
+            $locked->update(['status' => 'cancelled']);
+        }, 5);
+
+        return redirect()->route('invoices.show', $invoice)->with('success', __('messages.invoice_cancelled'));
     }
 
     private function ensureEditable(Invoice $invoice): void

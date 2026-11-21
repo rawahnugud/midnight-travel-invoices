@@ -15,6 +15,7 @@
     .receipt .invoice-print-brand { flex-shrink: 1; min-width: 0; }
     .receipt .invoice-print-title { font-size: 1.4rem; }
     .receipt .invoice-print-doc { max-width: 100%; }
+    .receipt .reversal-notice { border: 2px solid currentColor; color: #70152b; padding: .75rem 1rem; }
     .receipt dt, .receipt dd, .receipt p { overflow-wrap: anywhere; }
     .receipt .amounts { display: flex; flex-wrap: wrap; gap: 1.25rem; margin: 1.5rem 0; border-block-start: 2px solid var(--invoice-header); padding-block-start: 1rem; }
     .receipt .amounts > div { flex: 1 1 10rem; }
@@ -26,6 +27,9 @@
 <body class="print-body">
   <nav class="print-toolbar no-print">
     <a class="back-link" href="{{ route('invoices.show', $invoice) }}">{{ __('messages.back_to_invoice') }}</a>
+    @if(auth()->user()?->isAdmin() && ! $payment->reversed_at)
+    <a class="back-link" href="{{ route('invoices.show', $invoice) }}#receipt-correction">{{ __('messages.correct_receipt') }}</a>
+    @endif
     <button class="btn-print" type="button" onclick="window.print()">{{ __('messages.print_save_pdf') }}</button>
   </nav>
   <main class="invoice-print receipt">
@@ -43,6 +47,9 @@
         </dl>
       </div>
     </header>
+    @if($payment->reversed_at)
+    <p class="reversal-notice"><strong>{{ __('messages.receipt_reversed_on', ['date' => $payment->reversed_at->format('Y-m-d')]) }}</strong><br>{{ __('messages.reversed_receipt_notice') }}</p>
+    @endif
     <div class="invoice-print-parties">
       <div class="invoice-print-from">
         <strong class="invoice-print-label">{{ __('messages.received_from') }}</strong>
