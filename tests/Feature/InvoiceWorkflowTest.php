@@ -249,6 +249,8 @@ class InvoiceWorkflowTest extends TestCase
         $reverseFirst = route('invoices.payments.reverse', [$invoice, $first]);
         $reverseFinal = route('invoices.payments.reverse', [$invoice, $final]);
         $reason = ['reason' => 'Bank transfer entered on the wrong invoice'];
+        $this->get(route('invoices.show', $invoice))->assertOk()
+            ->assertSee($reverseFinal)->assertDontSee($reverseFirst);
         $this->post($reverseFirst, $reason)->assertSessionHasErrors();
         $this->assertSame('paid', $invoice->fresh()->status);
 
@@ -262,7 +264,10 @@ class InvoiceWorkflowTest extends TestCase
         $this->assertEquals(auth()->id(), $final->fresh()->reversed_by);
         $this->assertNotNull($final->fresh()->reversed_at);
         $this->assertSame($final->receiptNumber(), $final->fresh()->receiptNumber());
-        $this->get(route('invoices.payments.show', [$invoice, $final]))->assertOk();
+        $this->get(route('invoices.payments.show', [$invoice, $final]))->assertOk()
+            ->assertSeeText(__('messages.reversed_receipt_notice'))->assertDontSeeText($reason['reason']);
+        $this->get(route('invoices.show', $invoice))->assertOk()
+            ->assertSeeText($reason['reason'])->assertSee(route('invoices.payments.store', $invoice));
         $this->post($reverseFinal, $reason)->assertSessionHasNoErrors();
         $this->post($store, $finalPayload);
         $this->assertEquals(639.75, $invoice->fresh()->outstandingAmount());
