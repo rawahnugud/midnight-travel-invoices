@@ -29,9 +29,7 @@ class PaymentController extends Controller
 
         try {
             $payment = DB::transaction(function () use ($invoice, $user, $data) {
-                // Acquire the SQLite writer lock before reading balances. This also locks the row on MySQL.
-                DB::table('invoices')->where('id', $invoice->id)->update(['id' => DB::raw('id')]);
-                $locked = Invoice::findOrFail($invoice->id);
+                $locked = $invoice->lockForPaymentUpdate();
                 $previous = Payment::where('request_key', $data['request_key'])->first();
                 if ($previous) {
                     return $this->matchingReceipt($previous, $locked, $user->id, $data);
@@ -41,7 +39,7 @@ class PaymentController extends Controller
                     throw ValidationException::withMessages(['paid_on' => __('messages.payment_before_invoice')]);
                 }
 
-                $latest = $locked->payments()->latest('id')->first();
+                $latest = $locked->latestActivePayment();
                 $historical = $locked->status === 'paid' && ! $latest;
                 if ($locked->status !== 'pending' && ! $historical) {
                     throw ValidationException::withMessages(['amount' => __('messages.payment_not_allowed')]);
@@ -75,6 +73,7 @@ class PaymentController extends Controller
                     'branch' => $locked->branch,
                     'request_key' => $data['request_key'],
                     'issued_by' => $user->id,
+                    'prior_invoice_status' => $locked->status,
                 ]);
                 if ($balanceCents === 0 && ! $historical) {
                     $locked->update(['status' => 'paid']);
@@ -92,6 +91,42 @@ class PaymentController extends Controller
         }
 
         return redirect()->route('invoices.payments.show', [$invoice, $payment]);
+    }
+
+    public function reverse(Request $request, Invoice $invoice, Payment $payment)
+    {
+        abort_unless($request->user()->isAdmin(), 403);
+        $data = $request->validate([
+            'reason' => ['required', 'string', 'max:500'],
+            'prior_status' => ['nullable', Rule::in(['pending', 'paid'])],
+        ]);
+
+        DB::transaction(function () use ($invoice, $payment, $request, $data) {
+            $locked = $invoice->lockForPaymentUpdate();
+            $receipt = $locked->payments()->findOrFail($payment->id);
+            if ($receipt->reversed_at !== null) {
+                return;
+            }
+            if ($locked->latestActivePayment()?->id !== $receipt->id) {
+                throw ValidationException::withMessages(['reason' => __('messages.reverse_latest_only')]);
+            }
+
+            $priorStatus = $receipt->prior_invoice_status ?? 'pending';
+            if ($receipt->requiresPriorStatus()) {
+                if (empty($data['prior_status'])) {
+                    throw ValidationException::withMessages(['prior_status' => __('messages.choose_prior_status')]);
+                }
+                $priorStatus = $data['prior_status'];
+            }
+            $receipt->prior_invoice_status = $priorStatus;
+            $receipt->reversed_at = now();
+            $receipt->reversed_by = $request->user()->id;
+            $receipt->reversal_reason = trim($data['reason']);
+            $receipt->save();
+            $locked->update(['status' => $priorStatus]);
+        }, 5);
+
+        return redirect()->route('invoices.show', $invoice)->with('success', __('messages.receipt_reversed_success'));
     }
 
     private function cents($amount): int

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class Invoice extends Model
 {
@@ -41,17 +42,29 @@ class Invoice extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function lockForPaymentUpdate(): self
+    {
+        // Acquire a writer lock on SQLite and a row lock on MySQL before reading the balance.
+        DB::table('invoices')->where('id', $this->id)->update(['id' => DB::raw('id')]);
+        return self::findOrFail($this->id);
+    }
+
+    public function latestActivePayment(): ?Payment
+    {
+        if ($this->relationLoaded('payments')) {
+            return $this->payments->whereNull('reversed_at')->sortByDesc('id')->first();
+        }
+
+        return $this->payments()->active()->latest('id')->first();
+    }
+
     public function outstandingAmount(): float
     {
         if ($this->status === 'paid') {
             return 0.0;
         }
 
-        $latestPayment = $this->relationLoaded('payments')
-            ? $this->payments->sortByDesc('id')->first()
-            : $this->payments()->latest('id')->first();
-
-        return max(0.0, (float) ($latestPayment?->balance_after ?? $this->total));
+        return max(0.0, (float) ($this->latestActivePayment()?->balance_after ?? $this->total));
     }
 
     public function lineItems(): HasMany

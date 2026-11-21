@@ -36,7 +36,7 @@ class TeamReportController extends Controller
         $amounts = (clone $filtered)->select(['created_by', 'currency', 'status', 'tax_rate', 'discount_amount'])
             ->selectSub(DB::table('line_items')->selectRaw('COALESCE(SUM(quantity * unit_price), 0)')
                 ->whereColumn('line_items.invoice_id', 'invoices.id'), 'subtotal')
-            ->selectSub(Payment::select('balance_after')->whereColumn('payments.invoice_id', 'invoices.id')
+            ->selectSub(Payment::active()->select('balance_after')->whereColumn('payments.invoice_id', 'invoices.id')
                 ->latest('id')->limit(1), 'receipt_balance');
 
         // Match Invoice::getTotalAttribute(), including separate rounding of the tax.

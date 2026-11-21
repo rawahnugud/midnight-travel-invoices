@@ -236,6 +236,126 @@ class InvoiceWorkflowTest extends TestCase
         $this->get(route('dashboard'))->assertOk()->assertSee('USD 345.00');
     }
 
+    public function test_reversing_receipts_restores_balances_and_keeps_numbered_history(): void
+    {
+        $invoice = Invoice::where('status', 'pending')->sole();
+        $this->actingAs(User::where('role', 'admin')->sole());
+        $store = route('invoices.payments.store', $invoice);
+        $this->post($store, $this->paymentPayload('200.25'))->assertSessionHasNoErrors();
+        $first = $invoice->payments()->sole();
+        $finalPayload = $this->paymentPayload('639.75');
+        $this->post($store, $finalPayload)->assertSessionHasNoErrors();
+        $final = $invoice->payments()->latest('id')->firstOrFail();
+        $reverseFirst = route('invoices.payments.reverse', [$invoice, $first]);
+        $reverseFinal = route('invoices.payments.reverse', [$invoice, $final]);
+        $reason = ['reason' => 'Bank transfer entered on the wrong invoice'];
+        $this->get(route('invoices.show', $invoice))->assertOk()
+            ->assertSee($reverseFinal)->assertDontSee($reverseFirst);
+        $this->post($reverseFirst, $reason)->assertSessionHasErrors();
+        $this->assertSame('paid', $invoice->fresh()->status);
+
+        $this->post($reverseFinal, $reason)->assertSessionHasNoErrors();
+        $this->assertSame('pending', $invoice->fresh()->status);
+        $this->assertEquals(639.75, $invoice->fresh()->outstandingAmount());
+        $this->assertEquals(639.75, $invoice->fresh(['payments'])->outstandingAmount());
+        $report = $this->get(route('reports.team', ['user_id' => $invoice->created_by]))->assertOk();
+        $this->assertEquals(639.75, $report->viewData('totals')->sole()->outstanding_amount);
+        $this->assertSame($reason['reason'], $final->fresh()->reversal_reason);
+        $this->assertEquals(auth()->id(), $final->fresh()->reversed_by);
+        $this->assertNotNull($final->fresh()->reversed_at);
+        $this->assertSame($final->receiptNumber(), $final->fresh()->receiptNumber());
+        $this->get(route('invoices.payments.show', [$invoice, $final]))->assertOk()
+            ->assertSeeText(__('messages.reversed_receipt_notice'))->assertDontSeeText($reason['reason']);
+        $this->get(route('invoices.show', $invoice))->assertOk()
+            ->assertSeeText($reason['reason'])->assertSee(route('invoices.payments.store', $invoice));
+        $this->post($reverseFinal, $reason)->assertSessionHasNoErrors();
+        $this->post($store, $finalPayload);
+        $this->assertEquals(639.75, $invoice->fresh()->outstandingAmount());
+        $this->assertSame(2, $invoice->payments()->count());
+
+        $this->post($reverseFirst, $reason)->assertSessionHasNoErrors();
+        $this->assertEquals(840, $invoice->fresh()->outstandingAmount());
+        $this->post($store, $this->paymentPayload('840.00'))->assertSessionHasNoErrors();
+        $this->assertSame('paid', $invoice->fresh()->status);
+        $this->assertSame(3, $invoice->payments()->count());
+        $this->assertSame(2, $invoice->payments()->whereNotNull('reversed_at')->count());
+    }
+
+    public function test_receipt_reversal_requires_admin_matching_invoice_and_reason(): void
+    {
+        $invoice = Invoice::where('status', 'pending')->sole();
+        $staff = $invoice->creator;
+        $this->actingAs($staff)->post(route('invoices.payments.store', $invoice), $this->paymentPayload('100.00'))
+            ->assertSessionHasNoErrors();
+        $payment = $invoice->payments()->sole();
+        $route = route('invoices.payments.reverse', [$invoice, $payment]);
+        $reason = ['reason' => 'Incorrect amount'];
+        $this->post($route, $reason)->assertForbidden();
+        $staff->update(['role' => 'viewer']);
+        $this->actingAs($staff)->post($route, $reason)->assertForbidden();
+        $this->actingAs(User::where('role', 'admin')->sole());
+        $other = Invoice::whereKeyNot($invoice->id)->firstOrFail();
+        $this->post(route('invoices.payments.reverse', [$other, $payment]), $reason)->assertNotFound();
+        $this->post($route)->assertSessionHasErrors('reason');
+        $this->assertNull($payment->fresh()->reversed_at);
+        $this->assertEquals(740, $invoice->fresh()->outstandingAmount());
+    }
+
+    public function test_replacing_a_receipt_for_a_previously_paid_invoice_keeps_it_settled(): void
+    {
+        $invoice = Invoice::where('status', 'paid')->sole();
+        $this->actingAs(User::where('role', 'admin')->sole());
+        $store = route('invoices.payments.store', $invoice);
+        $this->post($store, $this->paymentPayload('345.00'))->assertSessionHasNoErrors();
+        $receipt = $invoice->payments()->sole();
+        $this->post(route('invoices.payments.reverse', [$invoice, $receipt]), ['reason' => 'Incorrect method'])
+            ->assertSessionHasNoErrors();
+        $this->assertSame('paid', $invoice->fresh()->status);
+        $this->assertEquals(0, $invoice->fresh()->outstandingAmount());
+        $this->post($store, $this->paymentPayload('300.00'))->assertSessionHasErrors();
+        $this->post($store, $this->paymentPayload('345.00'))->assertSessionHasNoErrors();
+        $this->assertSame(2, $invoice->payments()->count());
+    }
+
+    public function test_ambiguous_legacy_full_receipt_requires_prior_status_before_reversal(): void
+    {
+        $invoice = Invoice::where('status', 'pending')->sole();
+        $this->actingAs(User::where('role', 'admin')->sole());
+        $this->post(route('invoices.payments.store', $invoice), $this->paymentPayload('840.00'))
+            ->assertSessionHasNoErrors();
+        $payment = $invoice->payments()->sole();
+        $payment->forceFill(['prior_invoice_status' => null])->save();
+        $reverse = route('invoices.payments.reverse', [$invoice, $payment]);
+        $reason = ['reason' => 'Incorrect settlement'];
+        $this->post($reverse, $reason)->assertSessionHasErrors('prior_status');
+        $this->assertNull($payment->fresh()->reversed_at);
+        $this->post($reverse, $reason + ['prior_status' => 'pending'])->assertSessionHasNoErrors();
+        $this->assertSame('pending', $invoice->fresh()->status);
+        $this->assertEquals(840, $invoice->fresh()->outstandingAmount());
+    }
+
+    public function test_admin_can_cancel_an_invoice_after_all_receipts_have_been_reversed(): void
+    {
+        $invoice = Invoice::where('status', 'pending')->sole();
+        $admin = User::where('role', 'admin')->sole();
+        $cancel = route('invoices.cancel', $invoice);
+        $this->actingAs($admin)->post($cancel)->assertStatus(409);
+        $this->post(route('invoices.payments.store', $invoice), $this->paymentPayload('840.00'))
+            ->assertSessionHasNoErrors();
+        $receipt = $invoice->payments()->sole();
+        $this->post($cancel)->assertStatus(409);
+        $this->assertSame('paid', $invoice->fresh()->status);
+        $this->post(route('invoices.payments.reverse', [$invoice, $receipt]), ['reason' => 'Wrong invoice'])
+            ->assertSessionHasNoErrors();
+        $this->actingAs($invoice->creator)->post($cancel)->assertForbidden();
+        $this->actingAs($admin)->post($cancel)->assertRedirect(route('invoices.show', $invoice));
+        $this->assertSame('cancelled', $invoice->fresh()->status);
+        $this->assertSame($receipt->id, $invoice->payments()->sole()->id);
+        $this->delete(route('invoices.destroy', $invoice))->assertStatus(409);
+        $this->post(route('invoices.payments.store', $invoice), $this->paymentPayload('840.00'))
+            ->assertSessionHasErrors();
+    }
+
     public function test_draft_and_cancelled_invoices_reject_payment(): void
     {
         $invoice = Invoice::where('status', 'pending')->firstOrFail();

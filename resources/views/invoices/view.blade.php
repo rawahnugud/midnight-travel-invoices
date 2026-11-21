@@ -6,8 +6,11 @@
   $pageTitle = __('messages.invoice') . ' ' . $invoice->invoice_number;
   $canEdit = $user && ($user->isAdmin() || ($user->isStaff() && $invoice->created_by === $user->id));
   $payments = $invoice->payments;
+  $activePayments = $payments->whereNull('reversed_at');
+  $latestActive = $invoice->latestActivePayment();
+  $isAdmin = $user?->isAdmin();
   $outstanding = $invoice->outstandingAmount();
-  $historicalPayment = $invoice->status === 'paid' && $payments->isEmpty();
+  $historicalPayment = $invoice->status === 'paid' && $activePayments->isEmpty();
   $recordable = $historicalPayment ? $invoice->total : $outstanding;
   $companyName = $invoice->issuerName($business);
   $currencySym = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'][$invoice->currency ?? 'USD'] ?? ($invoice->currency ?? 'USD') . ' ';
@@ -20,6 +23,16 @@
       <a href="{{ route('invoices.print', $invoice) }}" target="_blank" class="btn btn-primary btn-sm">{{ __('messages.print_pdf') }}</a>
       @if($canEdit && $payments->isEmpty())
       <a href="{{ route('invoices.edit', $invoice) }}" class="btn btn-outline btn-sm">{{ __('messages.edit') }}</a>
+      <form action="{{ route('invoices.destroy', $invoice) }}" method="post" data-confirm="{{ __('messages.delete_invoice_confirm') }}">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="btn btn-outline btn-sm">{{ __('messages.delete') }}</button>
+      </form>
+      @elseif($isAdmin && $payments->isNotEmpty() && $activePayments->isEmpty() && in_array($invoice->status, ['pending', 'paid'], true))
+      <form action="{{ route('invoices.cancel', $invoice) }}" method="post" data-confirm="{{ __('messages.cancel_reversed_invoice_confirm') }}">
+        @csrf
+        <button type="submit" class="btn btn-outline btn-sm">{{ __('messages.cancel_invoice') }}</button>
+      </form>
       @endif
     </div>
   </div>
@@ -102,9 +115,20 @@
           <th class="num">{{ __('messages.amount_received') }}</th>
         </tr></thead>
         <tbody>
-          @foreach($payments as $payment)
+          @foreach($payments->sortByDesc('id') as $payment)
           <tr>
-            <td data-label="{{ __('messages.receipt_number') }}"><a href="{{ route('invoices.payments.show', [$invoice, $payment]) }}" aria-label="{{ __('messages.print_receipt') }} {{ $payment->receiptNumber() }}"><bdi>{{ $payment->receiptNumber() }}</bdi></a></td>
+            <td data-label="{{ __('messages.receipt_number') }}"><a href="{{ route('invoices.payments.show', [$invoice, $payment]) }}" aria-label="{{ __('messages.print_receipt') }} {{ $payment->receiptNumber() }}"><bdi>{{ $payment->receiptNumber() }}</bdi></a>
+              @if($payment->reversed_at)
+              <span class="badge badge-cancelled">{{ __('messages.reversed') }}</span>
+              @if($isAdmin)
+              <details>
+                <summary>{{ __('messages.reversal_details') }}</summary>
+                <p>{{ $payment->reversedBy?->username }} · <bdi>{{ $payment->reversed_at->format('Y-m-d H:i') }}</bdi></p>
+                <p>{{ $payment->reversal_reason }}</p>
+              </details>
+              @endif
+              @endif
+            </td>
             <td data-label="{{ __('messages.paid_on') }}"><bdi>{{ $payment->paid_on->format('Y-m-d') }}</bdi></td>
             <td data-label="{{ __('messages.payment_method') }}">{{ __('messages.payment_method_'.$payment->method) }}</td>
             <td data-label="{{ __('messages.payment_reference') }}"><bdi>{{ $payment->reference ?? '—' }}</bdi></td>
@@ -121,6 +145,34 @@
     <ul class="alert alert-error" role="alert">
       @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
     </ul>
+    @endif
+    @if($isAdmin && $latestActive)
+    <details id="receipt-correction" @if($errors->has('reason') || $errors->has('prior_status')) open @endif>
+      <summary><strong>{{ __('messages.correct_receipt') }}</strong></summary>
+      <form method="post" action="{{ route('invoices.payments.reverse', [$invoice, $latestActive]) }}" data-confirm="{{ __('messages.reverse_receipt_confirm', ['number' => $latestActive->receiptNumber()]) }}">
+        @csrf
+        <p>{{ __('messages.receipt_to_reverse') }} <strong><bdi>{{ $latestActive->receiptNumber() }}</bdi></strong> · <bdi>{{ $latestActive->currency }} {{ number_format($latestActive->amount, 2) }}</bdi></p>
+        <p>{{ __('messages.reverse_receipt_hint') }}</p>
+        @if($activePayments->count() > 1)<p>{{ __('messages.reverse_earlier_receipt_hint') }}</p>@endif
+        <div class="form-group">
+          <label for="reversal-reason">{{ __('messages.reversal_reason') }}</label>
+          <textarea id="reversal-reason" name="reason" rows="2" maxlength="500" required>{{ old('reason') }}</textarea>
+        </div>
+        @if($latestActive->requiresPriorStatus())
+        <div class="form-group">
+          <label for="prior-status">{{ __('messages.status_before_receipt') }}</label>
+          <p id="prior-status-help">{{ __('messages.legacy_reversal_hint') }}</p>
+          <select name="prior_status" id="prior-status" aria-describedby="prior-status-help" required>
+            <option value="">{{ __('messages.choose_prior_status') }}</option>
+            @foreach(['pending', 'paid'] as $status)
+            <option value="{{ $status }}" @selected(old('prior_status') === $status)>{{ __('messages.'.$status) }}</option>
+            @endforeach
+          </select>
+        </div>
+        @endif
+        <button class="btn btn-outline" type="submit">{{ __('messages.reverse_receipt') }}</button>
+      </form>
+    </details>
     @endif
     @if($canEdit && $invoice->status === 'draft')
     <p>{{ __('messages.payment_draft_hint') }}</p>
