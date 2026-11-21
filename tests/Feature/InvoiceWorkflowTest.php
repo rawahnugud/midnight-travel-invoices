@@ -440,6 +440,59 @@ class InvoiceWorkflowTest extends TestCase
         $this->delete(route('invoices.destroy', $invoice))->assertForbidden();
     }
 
+    public function test_invoice_search_respects_staff_visibility_and_matches_literals(): void
+    {
+        $mine = Invoice::where('status', 'pending')->sole();
+        $other = Invoice::where('status', 'paid')->sole();
+        $mine->update(['customer_name' => 'Test_100%']);
+        $other->update(['customer_name' => 'Test_100%']);
+        $this->actingAs($mine->creator);
+        foreach (['Test_100%', $mine->invoice_number] as $term) {
+            $this->get(route('invoices.index', ['q' => $term]))->assertOk()
+                ->assertSeeText($mine->invoice_number)->assertDontSeeText($other->invoice_number);
+        }
+        $this->get(route('invoices.index', ['q' => 'Test%100']))
+            ->assertOk()->assertDontSeeText($mine->invoice_number);
+    }
+
+    public function test_invoice_form_retry_and_receipt_shortcuts(): void
+    {
+        $this->actingAs(User::where('role', 'admin')->sole());
+        $this->get(route('invoices.create'))->assertOk()->assertSee('name="request_key"', false);
+        $data = [
+            'request_key' => (string) Str::uuid(), 'currency' => 'SDG',
+            'invoice_date' => today()->toDateString(), 'customer_name' => 'Pilot',
+            'items' => [['item_name' => 'Ticket', 'quantity' => 1, 'unit_price' => '1000.00']],
+        ];
+        $this->post(route('invoices.store'), $data)->assertSessionHasNoErrors();
+        $invoice = Invoice::where('customer_name', 'Pilot')->sole();
+        $show = route('invoices.show', $invoice);
+        $this->post(route('invoices.store'), $data)->assertRedirect($show);
+        $this->assertSame(1, Invoice::where('customer_name', 'Pilot')->count());
+        $this->post(route('invoices.store'), ['customer_name' => 'Changed'] + $data)->assertStatus(409);
+        $this->put(route('invoices.update', $invoice), ['status' => 'paid'] + $data)
+            ->assertRedirect($show.'#record-payment');
+        $this->assertSame('pending', $invoice->fresh()->status);
+        foreach (['en', 'ar'] as $locale) {
+            $this->withSession(['locale' => $locale])->get($show)->assertOk()
+                ->assertSee('href="#record-payment"', false);
+        }
+        $store = route('invoices.payments.store', $invoice);
+        $this->post($store, $this->paymentPayload('400.00'))->assertSessionHasNoErrors();
+        $this->post($store, $this->paymentPayload('600.00'))->assertSessionHasNoErrors();
+        $receipt = $invoice->payments()->latest('id')->firstOrFail();
+        $this->get($show)->assertOk()->assertSee('correct=1#receipt-correction');
+        $this->get($show.'?correct=1')->assertOk()->assertSee($receipt->receiptNumber());
+        $this->post(route('invoices.payments.reverse', [$invoice, $receipt]), ['reason' => 'Amount correction'])
+            ->assertSessionHasNoErrors();
+        $this->assertSame('pending', $invoice->fresh()->status);
+        $this->assertEquals(600, $invoice->fresh()->outstandingAmount());
+        $report = $this->get(route('reports.team', ['currency' => 'SDG']))->assertOk();
+        $this->assertEquals(600, $report->viewData('totals')->sole()->outstanding_amount);
+        $this->get(route('invoices.payments.show', [$invoice, $receipt]))
+            ->assertOk()->assertSeeText(__('messages.reversed_receipt_notice'));
+    }
+
     public function test_paid_invoices_keep_separate_currency_totals_and_unique_numbers(): void
     {
         $admin = User::where('role', 'admin')->firstOrFail();

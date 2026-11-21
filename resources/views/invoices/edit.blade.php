@@ -42,7 +42,7 @@
           <select id="status" name="status">
             <option value="draft" {{ $inv->status === 'draft' ? 'selected' : '' }}>{{ __('messages.draft') }}</option>
             <option value="pending" {{ $inv->status === 'pending' ? 'selected' : '' }}>{{ __('messages.pending') }}</option>
-            <option value="paid" {{ $inv->status === 'paid' ? 'selected' : '' }}>{{ __('messages.paid') }}</option>
+            <option value="paid" {{ $inv->status === 'paid' ? 'selected' : '' }}>{{ __($inv->status === 'paid' ? 'messages.paid' : 'messages.record_payment') }}</option>
             <option value="cancelled" {{ $inv->status === 'cancelled' ? 'selected' : '' }}>{{ __('messages.cancelled') }}</option>
           </select>
         </div>

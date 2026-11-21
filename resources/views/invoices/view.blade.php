@@ -12,6 +12,7 @@
   $outstanding = $invoice->outstandingAmount();
   $historicalPayment = $invoice->status === 'paid' && $activePayments->isEmpty();
   $recordable = $historicalPayment ? $invoice->total : $outstanding;
+  $canRecord = $canEdit && ($invoice->status === 'pending' || $historicalPayment) && $recordable > 0;
   $companyName = $invoice->issuerName($business);
   $currencySym = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'][$invoice->currency ?? 'USD'] ?? ($invoice->currency ?? 'USD') . ' ';
 @endphp
@@ -21,6 +22,11 @@
     <p class="text-muted" style="margin:0.25rem 0 0 0; font-size:0.9rem;">{{ $companyName }}</p>
     <div class="header-actions">
       <a href="{{ route('invoices.print', $invoice) }}" target="_blank" class="btn btn-primary btn-sm">{{ __('messages.print_pdf') }}</a>
+      @if($canRecord)
+      <a href="#record-payment" class="btn btn-outline btn-sm">{{ __($historicalPayment ? 'messages.confirm_existing_payment' : 'messages.record_payment') }}</a>
+      @elseif($isAdmin && $latestActive && $invoice->status === 'paid')
+      <a href="{{ route('invoices.show', ['invoice' => $invoice, 'correct' => 1]) }}#receipt-correction" class="btn btn-outline btn-sm">{{ __('messages.correct_receipt') }}</a>
+      @endif
       @if($canEdit && $payments->isEmpty())
       <a href="{{ route('invoices.edit', $invoice) }}" class="btn btn-outline btn-sm">{{ __('messages.edit') }}</a>
       @endif
@@ -149,7 +155,7 @@
     </ul>
     @endif
     @if($isAdmin && $latestActive)
-    <details id="receipt-correction" @if($errors->has('reason') || $errors->has('prior_status')) open @endif>
+    <details id="receipt-correction" @if(request()->boolean('correct') || $errors->has('reason') || $errors->has('prior_status')) open @endif>
       <summary><strong>{{ __('messages.correct_receipt') }}</strong></summary>
       <form method="post" action="{{ route('invoices.payments.reverse', [$invoice, $latestActive]) }}" data-confirm="{{ __('messages.reverse_receipt_confirm', ['number' => $latestActive->receiptNumber()]) }}">
         @csrf
@@ -179,8 +185,8 @@
     @if($canEdit && $invoice->status === 'draft')
     <p>{{ __('messages.payment_draft_hint') }}</p>
     @endif
-    @if($canEdit && ($invoice->status === 'pending' || $historicalPayment) && $recordable > 0)
-    <form method="post" action="{{ route('invoices.payments.store', $invoice) }}">
+    @if($canRecord)
+    <form id="record-payment" method="post" action="{{ route('invoices.payments.store', $invoice) }}">
       @csrf
       <input type="hidden" name="request_key" value="{{ old('request_key', (string) \Illuminate\Support\Str::uuid()) }}">
       @if($historicalPayment)<p>{{ __('messages.legacy_payment_notice') }}</p>@endif

@@ -22,6 +22,7 @@
   data-label-amount="{{ e(__('messages.amount')) }}"
   data-remove="{{ e(__('messages.remove')) }}">
       @csrf
+      <input type="hidden" name="request_key" value="{{ old('request_key', (string) \Illuminate\Support\Str::uuid()) }}">
       @if($errors->any())
       <div class="alert alert-error">{{ $errors->first() }}</div>
       @endif

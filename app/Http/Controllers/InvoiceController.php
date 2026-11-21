@@ -22,8 +22,16 @@ class InvoiceController extends Controller
             $query->where('created_by', $user->id);
         }
 
+        $search = trim($request->validate(['q' => 'nullable|string|max:255'])['q'] ?? '');
+        if ($search !== '') {
+            $pattern = '%' . strtr($search, ['!' => '!!', '%' => '!%', '_' => '!_']) . '%';
+            $query->where(fn ($match) => $match
+                ->whereRaw("invoice_number LIKE ? ESCAPE '!'", [$pattern])
+                ->orWhereRaw("customer_name LIKE ? ESCAPE '!'", [$pattern]));
+        }
+
         $symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'];
-        $invoices = $query->latest()->paginate(20);
+        $invoices = $query->latest()->orderByDesc('id')->paginate(20)->appends(['q' => $search]);
         $invoices->getCollection()->transform(function ($inv) use ($symbols) {
             $sub = $inv->lineItems->sum(fn ($li) => $li->quantity * $li->unit_price);
             $inv->total = round($sub + ($sub * $inv->tax_rate / 100) - $inv->discount_amount, 2);
@@ -31,7 +39,7 @@ class InvoiceController extends Controller
             return $inv;
         });
 
-        return view('invoices.list', ['invoices' => $invoices]);
+        return view('invoices.list', compact('invoices', 'search'));
     }
 
     public function create()
@@ -61,7 +69,21 @@ class InvoiceController extends Controller
         $validated['tax_rate'] ??= 0;
         $validated['discount_amount'] ??= 0;
 
-        $inv = DB::transaction(function () use ($validated, $items) {
+        $key = $request->validate(['request_key' => 'sometimes|required|uuid'])['request_key'] ?? null;
+        $inv = DB::transaction(function () use ($validated, $items, $key) {
+            if ($key !== null) {
+                $key = strtolower($key);
+                $fingerprint = hash('sha256', serialize([$validated, $items]));
+                $submission = DB::table('invoice_submissions')->where('request_key', $key);
+                $reserved = DB::table('invoice_submissions')->insertOrIgnore([
+                    'request_key' => $key, 'fingerprint' => $fingerprint,
+                ]);
+                if (! $reserved) {
+                    $existing = $submission->lockForUpdate()->first();
+                    abort_unless($existing && hash_equals($existing->fingerprint, $fingerprint), 409);
+                    return Invoice::listed()->where('created_by', $validated['created_by'])->findOrFail($existing->invoice_id);
+                }
+            }
             // The insert allocates an independent ID for each writer.
             $invoice = Invoice::create($validated + ['invoice_number' => (string) Str::uuid()]);
             $base = sprintf('INV-%s-%03d', now()->year, $invoice->id);
@@ -72,6 +94,9 @@ class InvoiceController extends Controller
             }
             $invoice->update(['invoice_number' => $number]);
             $this->saveItems($invoice, $items);
+            if ($key !== null) {
+                $submission->update(['invoice_id' => $invoice->id]);
+            }
             return $invoice;
         }, 5);
 
@@ -148,14 +173,26 @@ class InvoiceController extends Controller
         $validated['tax_rate'] ??= 0;
         $validated['discount_amount'] ??= 0;
 
-        DB::transaction(function () use ($invoice, $validated, $items) {
-            $invoice = Invoice::lockForUpdate()->findOrFail($invoice->id);
+        $needsReceipt = DB::transaction(function () use ($invoice, $validated, $items) {
+            $invoice = $invoice->lockForPaymentUpdate();
             $this->ensureEditable($invoice);
+            $needsReceipt = ($validated['status'] ?? null) === 'paid' && $invoice->status !== 'paid';
+            if ($needsReceipt) {
+                $validated['status'] = 'pending';
+            }
             $invoice->update($validated);
             $invoice->lineItems()->delete();
             $this->saveItems($invoice, $items);
+            if ($needsReceipt && $invoice->total <= 0) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['status' => __('messages.payment_not_allowed')]);
+            }
+            return $needsReceipt;
         }, 5);
 
+        if ($needsReceipt) {
+            return redirect(route('invoices.show', $invoice).'#record-payment')
+                ->with('success', __('messages.finish_payment'));
+        }
         return redirect()->route('invoices.show', $invoice)->with('success', __('messages.invoice_updated'));
     }
 

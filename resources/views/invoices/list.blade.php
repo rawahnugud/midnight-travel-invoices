@@ -13,6 +13,14 @@
     @if(session('success'))
     <div class="alert alert-success" role="alert">{{ session('success') }}</div>
     @endif
+    <form method="get" action="{{ route('invoices.index') }}" role="search">
+      <div class="form-group">
+        <label for="invoice-search">{{ __('messages.invoice_search') }}</label>
+        <input type="search" id="invoice-search" name="q" maxlength="255" value="{{ $search }}">
+      </div>
+      <button type="submit" class="btn btn-outline">{{ __('messages.search') }}</button>
+      @if($search !== '')<a href="{{ route('invoices.index') }}" class="btn btn-text">{{ __('reports.reset') }}</a>@endif
+    </form>
     @if($invoices->count())
     <div class="table-responsive table-mobile-cards">
       <table class="table table-invoices">
@@ -76,7 +84,9 @@
     @endif
     @else
     <p class="empty-state">
-      @if($user && in_array($user->role, ['admin', 'staff']))
+      @if($search !== '')
+      {{ __('reports.no_matches') }}
+      @elseif($user && in_array($user->role, ['admin', 'staff']))
       {{ __('messages.no_invoices_yet') }} <a href="{{ route('invoices.create') }}">{{ __('messages.create_first_invoice') }}</a>.
       @else
       {{ __('messages.no_invoices_yet') }}
