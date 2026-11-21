@@ -62,6 +62,8 @@
           <dd>{{ $invoice->invoice_number }}</dd>
           <dt>{{ __('messages.date') }}</dt>
           <dd>{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('M j, Y') }}</dd>
+          <dt>{{ __('messages.payment_status') }}</dt>
+          <dd><strong>{{ __('messages.'.$invoice->status) }}</strong></dd>
         </dl>
       </div>
     </header>

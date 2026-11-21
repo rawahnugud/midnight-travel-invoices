@@ -21,6 +21,7 @@
             <th class="col-number">{{ __('messages.number') }}</th>
             <th class="col-customer">{{ __('messages.customer') }}</th>
             <th class="col-date">{{ __('messages.date') }}</th>
+            <th class="col-status">{{ __('messages.payment_status') }}</th>
             <th class="col-total num">{{ __('messages.total') }}</th>
             @if($user && $user->role === 'admin')
             <th class="col-author">{{ __('messages.author') }}</th>
@@ -36,6 +37,9 @@
             </td>
             <td class="col-customer" data-label="{{ __('messages.customer') }}">{{ $inv->customer_name }}</td>
             <td class="col-date" data-label="{{ __('messages.date') }}">{{ \Carbon\Carbon::parse($inv->invoice_date)->format('M j, Y') }}</td>
+            <td class="col-status" data-label="{{ __('messages.payment_status') }}">
+              <span class="badge badge-{{ $inv->status }}">{{ __('messages.'.$inv->status) }}</span>
+            </td>
             <td class="col-total num" data-label="{{ __('messages.total') }}">{{ $inv->currency_symbol }}{{ number_format($inv->total ?? 0, 2) }}</td>
             @if($user && $user->role === 'admin')
             <td class="col-author" data-label="{{ __('messages.author') }}">{{ $inv->creator?->username ?? '—' }}</td>

@@ -5,6 +5,7 @@ use App\Http\Controllers\BusinessSettingsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\TeamReportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('invoices', InvoiceController::class)->only(['index', 'show']);
 
     Route::middleware('role:admin')->group(function () {
+        Route::get('/reports/team', TeamReportController::class)->name('reports.team');
         Route::resource('users', UserController::class)->except(['show', 'create', 'edit'])->names('users');
         Route::get('/settings/business', [BusinessSettingsController::class, 'edit'])->name('settings.business.edit');
         Route::put('/settings/business/branches/{branch}', [BusinessSettingsController::class, 'updateBranch'])

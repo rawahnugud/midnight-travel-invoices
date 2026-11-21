@@ -113,6 +113,88 @@ class InvoiceWorkflowTest extends TestCase
         ];
     }
 
+    public function test_new_invoice_starts_pending_and_print_tracks_settlement(): void
+    {
+        $staff = User::where('role', 'staff')->firstOrFail();
+        $this->actingAs($staff)->get(route('invoices.create'))->assertOk()
+            ->assertDontSee('name="status" value="draft"', false);
+        $this->post(route('invoices.store'), [
+            'customer_name' => 'Invoice status fixture',
+            'invoice_date' => today()->toDateString(),
+            'currency' => 'USD',
+            'items' => [['item_name' => 'Ticket', 'quantity' => 1, 'unit_price' => '100.00']],
+        ])->assertSessionHasNoErrors();
+        $invoice = Invoice::where('customer_name', 'Invoice status fixture')->sole();
+        $this->assertSame('pending', $invoice->status);
+        foreach (['show', 'print'] as $page) {
+            $this->get(route('invoices.'.$page, $invoice))->assertOk()->assertSeeText(__('messages.pending'));
+        }
+        $store = route('invoices.payments.store', $invoice);
+        $this->post($store, $this->paymentPayload('40.00'))->assertSessionHasNoErrors();
+        $this->get(route('invoices.print', $invoice))->assertOk()->assertSeeText(__('messages.pending'));
+        $this->post($store, $this->paymentPayload('60.00'))->assertSessionHasNoErrors();
+        foreach (['show', 'print'] as $page) {
+            $this->get(route('invoices.'.$page, $invoice))->assertOk()->assertSeeText(__('messages.paid'));
+        }
+    }
+
+    public function test_team_report_requires_an_admin(): void
+    {
+        $report = route('reports.team');
+        $this->get($report)->assertRedirect(route('login'));
+        $staff = User::where('role', 'staff')->firstOrFail();
+        $this->actingAs($staff)->get($report)->assertForbidden();
+        $staff->update(['role' => 'viewer']);
+        $this->actingAs($staff)->get($report)->assertForbidden();
+        $this->actingAs(User::where('role', 'admin')->firstOrFail())->get($report)->assertOk();
+    }
+
+    public function test_team_report_reconciles_partial_and_historical_payments_by_issuer_and_currency(): void
+    {
+        $admin = User::where('role', 'admin')->firstOrFail();
+        $pending = Invoice::where('status', 'pending')->sole();
+        $historical = Invoice::where('status', 'paid')->sole();
+        $historical->update(['currency' => 'GBP']);
+        $staff = $pending->creator;
+        $this->actingAs($admin);
+        $store = route('invoices.payments.store', $pending);
+        $this->post($store, $this->paymentPayload('100.00'))->assertSessionHasNoErrors();
+        $this->post($store, $this->paymentPayload('100.25'))->assertSessionHasNoErrors();
+        $staff->delete();
+
+        $report = $this->get(route('reports.team'))->assertOk()
+            ->assertSeeText($historical->invoice_number)->assertSeeText($pending->invoice_number);
+        $totals = collect($report->viewData('totals'))->keyBy('currency');
+        $this->assertCount(2, $totals);
+        $this->assertEquals(1, data_get($totals['USD'], 'pending_count'));
+        $this->assertEquals(840, data_get($totals['USD'], 'invoiced_amount'));
+        $this->assertEquals(639.75, data_get($totals['USD'], 'outstanding_amount'));
+        $this->assertEquals(1, data_get($totals['GBP'], 'paid_count'));
+        $this->assertEquals(0, data_get($totals['GBP'], 'outstanding_amount'));
+
+        $filters = [
+            'user_id' => $staff->id,
+            'from' => today()->toDateString(),
+            'to' => today()->toDateString(),
+            'currency' => 'USD',
+            'status' => 'pending',
+        ];
+        $filtered = $this->get(route('reports.team', $filters))->assertOk()
+            ->assertSeeText($pending->invoice_number)->assertDontSeeText($historical->invoice_number);
+        $this->assertEquals(1, $filtered->viewData('invoices')->total());
+        foreach (['user_id' => $admin->id, 'currency' => 'GBP', 'status' => 'paid',
+                  'from' => today()->addDay()->toDateString(), 'to' => today()->subDay()->toDateString()] as $key => $value) {
+            $other = $filters;
+            if ($key === 'to') {
+                unset($other['from']);
+            } elseif ($key === 'from') {
+                unset($other['to']);
+            }
+            $other[$key] = $value;
+            $this->get(route('reports.team', $other))->assertOk()->assertDontSeeText($pending->invoice_number);
+        }
+    }
+
     public function test_partial_payment_retry_and_final_payment_keep_the_correct_balance(): void
     {
         $invoice = Invoice::where('status', 'pending')->firstOrFail();

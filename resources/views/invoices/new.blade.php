@@ -22,7 +22,6 @@
   data-label-amount="{{ e(__('messages.amount')) }}"
   data-remove="{{ e(__('messages.remove')) }}">
       @csrf
-      <input type="hidden" name="status" value="draft">
       @if($errors->any())
       <div class="alert alert-error">{{ $errors->first() }}</div>
       @endif
