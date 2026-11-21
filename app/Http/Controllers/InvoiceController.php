@@ -55,7 +55,7 @@ class InvoiceController extends Controller
         $items = $validated['items'];
         unset($validated['items']);
         $validated['created_by'] = $request->user()->id;
-        $validated['status'] ??= 'draft';
+        $validated['status'] ??= Invoice::DEFAULT_STATUS;
         $validated['tax_rate'] ??= 0;
         $validated['discount_amount'] ??= 0;
 

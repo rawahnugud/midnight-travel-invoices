@@ -92,6 +92,7 @@ return [
     'save_invoice' => 'Save Invoice',
     'update_invoice' => 'Update Invoice',
     'cancel' => 'Cancel',
+    'payment_status' => 'Payment status',
     'status' => 'Status',
     'draft' => 'Draft',
     'pending' => 'Pending',

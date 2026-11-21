@@ -10,6 +10,10 @@ class Invoice extends Model
 {
     public const BRANCHES = ['SD', 'AE', 'GB'];
 
+    public const DEFAULT_STATUS = 'pending';
+
+    protected $attributes = ['status' => self::DEFAULT_STATUS];
+
     protected $fillable = [
         'branch', 'invoice_number', 'status', 'customer_name', 'customer_email', 'customer_phone', 'customer_address',
         'invoice_date', 'due_date', 'currency', 'tax_rate', 'discount_amount', 'notes', 'terms', 'created_by',

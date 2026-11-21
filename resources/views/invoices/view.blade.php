@@ -47,6 +47,7 @@
       </div>
       <div>
         <p><strong>{{ __('messages.date_label') }}</strong> {{ \Carbon\Carbon::parse($invoice->invoice_date)->format('Y-m-d') }}</p>
+        <p><strong>{{ __('messages.payment_status') }}</strong> <span class="badge badge-{{ $invoice->status }}">{{ __('messages.'.$invoice->status) }}</span></p>
         <p><strong>{{ __('messages.created_by') }}</strong> {{ $invoice->creator?->username ?? '—' }}</p>
       </div>
     </div>

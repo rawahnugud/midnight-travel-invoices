@@ -92,6 +92,7 @@ return [
     'save_invoice' => 'حفظ الفاتورة',
     'update_invoice' => 'تحديث الفاتورة',
     'cancel' => 'إلغاء',
+    'payment_status' => 'حالة السداد',
     'status' => 'الحالة',
     'draft' => 'مسودة',
     'pending' => 'قيد الانتظار',

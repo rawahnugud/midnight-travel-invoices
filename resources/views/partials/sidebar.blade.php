@@ -14,6 +14,7 @@
     <a href="{{ route('dashboard') }}" class="sidebar-link {{ ($activePage ?? '') === 'dashboard' ? 'active' : '' }}">{{ __('messages.nav_dashboard') }}</a>
     <a href="{{ route('invoices.index') }}" class="sidebar-link {{ ($activePage ?? '') === 'invoices' ? 'active' : '' }}">{{ __('messages.nav_invoices') }}</a>
     @if($user && $user->role === 'admin')
+    <a href="{{ route('reports.team') }}" class="sidebar-link {{ request()->routeIs('reports.team') ? 'active' : '' }}">{{ __('reports.title') }}</a>
     <a href="{{ route('users.index') }}" class="sidebar-link {{ ($activePage ?? '') === 'users' ? 'active' : '' }}">{{ __('messages.nav_users') }}</a>
     @endif
     <a href="{{ route('settings') }}" class="sidebar-link {{ ($activePage ?? '') === 'settings' ? 'active' : '' }}">{{ __('messages.nav_settings') }}</a>
