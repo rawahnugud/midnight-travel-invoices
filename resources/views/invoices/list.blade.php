@@ -13,13 +13,29 @@
     @if(session('success'))
     <div class="alert alert-success" role="alert">{{ session('success') }}</div>
     @endif
-    <form method="get" action="{{ route('invoices.index') }}" role="search">
-      <div class="form-group">
-        <label for="invoice-search">{{ __('messages.invoice_search') }}</label>
-        <input type="search" id="invoice-search" name="q" maxlength="255" value="{{ $search }}">
+    <form method="get" action="{{ route('invoices.index') }}" role="search" class="invoice-filters">
+      <div class="invoice-search-row">
+        <div class="form-group">
+          <label for="invoice-search">{{ __('messages.invoice_search') }}</label>
+          <input type="search" id="invoice-search" name="q" maxlength="255" value="{{ $search }}">
+        </div>
+        <button type="submit" name="filter" value="{{ $filter }}" class="btn btn-outline">{{ __('messages.search') }}</button>
       </div>
-      <button type="submit" class="btn btn-outline">{{ __('messages.search') }}</button>
-      @if($search !== '')<a href="{{ route('invoices.index') }}" class="btn btn-text">{{ __('reports.reset') }}</a>@endif
+      <div class="invoice-filter-row" role="group" aria-label="{{ __('messages.status') }}">
+        @foreach(['all' => 'all_invoices', 'pending' => 'pending', 'draft' => 'draft', 'paid' => 'paid', 'cancelled' => 'cancelled'] as $value => $label)
+        <button type="submit" name="filter" value="{{ $value }}" aria-pressed="{{ $status === $value ? 'true' : 'false' }}">{{ __('messages.'.$label) }}</button>
+        @endforeach
+      </div>
+      @if($status === 'pending')
+      <div class="invoice-filter-row" role="group" aria-label="{{ __('messages.payment_status') }}">
+        @foreach(['pending' => 'all_pending', 'unpaid' => 'unpaid', 'partially_paid' => 'partially_paid'] as $value => $label)
+        <button type="submit" name="filter" value="{{ $value }}" aria-pressed="{{ $filter === $value ? 'true' : 'false' }}">{{ __('messages.'.$label) }}</button>
+        @endforeach
+      </div>
+      @endif
+      @if($search !== '' || $filter !== 'all')
+      <a href="{{ route('invoices.index') }}">{{ __('messages.clear_filters') }}</a>
+      @endif
     </form>
     @if($invoices->count())
     <div class="table-responsive table-mobile-cards">
@@ -61,18 +77,22 @@
             <td class="col-author" data-label="{{ __('messages.author') }}">{{ $inv->creator?->username ?? '—' }}</td>
             @endif
             <td class="col-actions" data-label="{{ __('messages.actions') }}">
-              <div class="actions-wrap">
-                <a href="{{ route('invoices.show', $inv) }}" class="btn btn-text btn-sm">{{ __('messages.view') }}</a>
+              <div class="invoice-row-actions">
                 <a href="{{ route('invoices.print', $inv) }}" target="_blank" class="btn btn-text btn-sm">{{ __('messages.print') }}</a>
-                @if($editable)
-                <a href="{{ route('invoices.edit', $inv) }}" class="btn btn-text btn-sm">{{ __('messages.edit') }}</a>
-                @endif
-                @if($removable)
-                <form action="{{ route('invoices.destroy', $inv) }}" method="post" class="inline-form" data-confirm="{{ __('messages.delete_invoice_confirm') }}">
-                  @csrf
-                  @method('DELETE')
-                  <button type="submit" class="btn btn-text btn-sm btn-danger">{{ __('messages.delete') }}</button>
-                </form>
+                @if($editable || $removable)
+                <details>
+                  <summary>{{ __('messages.more_actions') }}</summary>
+                  @if($editable)
+                  <a href="{{ route('invoices.edit', $inv) }}" class="btn btn-text btn-sm">{{ __('messages.edit') }}</a>
+                  @endif
+                  @if($removable)
+                  <form action="{{ route('invoices.destroy', $inv) }}" method="post" class="inline-form" data-confirm="{{ __('messages.delete_invoice_confirm') }}">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-text btn-sm btn-danger">{{ __('messages.delete') }}</button>
+                  </form>
+                  @endif
+                </details>
                 @endif
               </div>
             </td>
@@ -88,7 +108,7 @@
     @endif
     @else
     <p class="empty-state">
-      @if($search !== '')
+      @if($search !== '' || $filter !== 'all')
       {{ __('reports.no_matches') }}
       @elseif($user && in_array($user->role, ['admin', 'staff']))
       {{ __('messages.no_invoices_yet') }} <a href="{{ route('invoices.create') }}">{{ __('messages.create_first_invoice') }}</a>.

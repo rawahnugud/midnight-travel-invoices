@@ -499,6 +499,36 @@ class InvoiceWorkflowTest extends TestCase
         }
     }
 
+    public function test_pending_filters_follow_active_receipts_and_respect_search_and_staff_visibility(): void
+    {
+        $admin = User::where('role', 'admin')->firstOrFail();
+        $pending = Invoice::where('status', 'pending')->sole();
+        $paid = Invoice::where('status', 'paid')->sole();
+        $this->actingAs($admin);
+        $list = fn ($filter, $q = '') => $this->get(route('invoices.index', compact('filter', 'q')))->assertOk();
+        $list('unpaid')->assertSeeText($pending->invoice_number)->assertDontSeeText($paid->invoice_number);
+        $this->post(route('invoices.payments.store', $pending), $this->paymentPayload('10.00'))->assertSessionHasNoErrors();
+        $list('pending')->assertSeeText($pending->invoice_number);
+        $list('partially_paid', $pending->customer_name)->assertSeeText($pending->invoice_number);
+        $list('partially_paid', 'no matching customer')->assertSeeText(__('reports.no_matches'));
+        $list('unpaid')->assertDontSeeText($pending->invoice_number);
+        $this->post(route('invoices.payments.reverse', [$pending, $pending->payments()->sole()]), ['reason' => 'Correction'])
+            ->assertSessionHasNoErrors();
+        $list('unpaid')->assertSeeText($pending->invoice_number);
+        $list('partially_paid')->assertDontSeeText($pending->invoice_number);
+        $this->actingAs($pending->creator);
+        $list('paid')->assertDontSeeText($paid->invoice_number);
+        foreach (['draft', 'cancelled'] as $status) {
+            $pending->update(['status' => $status]);
+            $list($status)->assertSeeText($pending->invoice_number);
+            $list('pending')->assertDontSeeText($pending->invoice_number);
+        }
+        $pages = $list('cancelled', $pending->customer_name)->viewData('invoices');
+        parse_str(parse_url($pages->url(2), PHP_URL_QUERY), $params);
+        $this->assertSame('cancelled', $params['filter']);
+        $this->assertSame($pending->customer_name, $params['q']);
+    }
+
     public function test_invoice_search_respects_staff_visibility_and_matches_literals(): void
     {
         $mine = Invoice::where('status', 'pending')->sole();
