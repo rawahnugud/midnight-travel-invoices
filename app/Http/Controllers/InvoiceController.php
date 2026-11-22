@@ -27,6 +27,20 @@ class InvoiceController extends Controller
         }
 
         $search = trim($request->validate(['q' => 'nullable|string|max:255'])['q'] ?? '');
+        $filter = $request->query('filter', 'all');
+        if (!in_array($filter, ['all', 'pending', 'draft', 'paid', 'cancelled', 'unpaid', 'partially_paid'], true)) {
+            $filter = 'all';
+        }
+        $status = in_array($filter, ['unpaid', 'partially_paid'], true) ? 'pending' : $filter;
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+        if ($filter === 'unpaid') {
+            $query->whereDoesntHave('payments', fn ($payments) => $payments->active());
+        } elseif ($filter === 'partially_paid') {
+            $query->whereHas('payments', fn ($payments) => $payments->active());
+        }
+
         if ($search !== '') {
             $pattern = '%' . strtr($search, ['!' => '!!', '%' => '!%', '_' => '!_']) . '%';
             $query->where(fn ($match) => $match
@@ -35,7 +49,7 @@ class InvoiceController extends Controller
         }
 
         $symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'];
-        $invoices = $query->latest()->orderByDesc('id')->paginate(20)->appends(['q' => $search]);
+        $invoices = $query->latest()->orderByDesc('id')->paginate(20)->appends(['q' => $search, 'filter' => $filter]);
         $invoices->getCollection()->transform(function ($inv) use ($symbols) {
             $sub = $inv->lineItems->sum(fn ($li) => $li->quantity * $li->unit_price);
             $inv->total = round($sub + ($sub * $inv->tax_rate / 100) - $inv->discount_amount, 2);
@@ -43,7 +57,7 @@ class InvoiceController extends Controller
             return $inv;
         });
 
-        return view('invoices.list', compact('invoices', 'search'));
+        return view('invoices.list', compact('invoices', 'search', 'filter', 'status'));
     }
 
     public function create()
