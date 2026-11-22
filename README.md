@@ -8,7 +8,7 @@ The Laravel application serves English and Arabic invoices. Start here for local
 - **Roles:** Admin (full access), Staff (create & edit own invoices), Viewer (read-only)
 - **Dashboard:** Total/paid/pending invoices, revenue, recent list
 - **Team reports:** Admins can review invoices by issuing user and see outstanding balances in each invoice currency.
-- **Invoices:** New invoices default to pending. The invoice and print/PDF view show the current status. Partial payments leave an invoice pending until the balance is settled.
+- **Invoices:** New invoices default to pending. The invoice list shows the current status and pending balance. Customer print/PDF copies flag cancelled invoices. Partial payments leave an invoice pending until the balance is settled.
 - **Users:** Admin can manage users (create, edit, deactivate). Deactivation keeps the original invoice author and all line items.
 
 ## Requirements

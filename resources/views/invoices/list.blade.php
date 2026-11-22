@@ -52,7 +52,11 @@
             <td class="col-status" data-label="{{ __('messages.payment_status') }}">
               <span class="badge badge-{{ $inv->status }}">{{ __('messages.'.$inv->status) }}</span>
             </td>
-            <td class="col-total num" data-label="{{ __('messages.total') }}">{{ $inv->currency_symbol }}{{ number_format($inv->total ?? 0, 2) }}</td>
+            <td class="col-total num" data-label="{{ __('messages.total') }}">{{ $inv->currency_symbol }}{{ number_format($inv->total ?? 0, 2) }}
+              @if($inv->status === 'pending')
+              <div><small>{{ __('messages.outstanding_balance') }} <bdi>{{ $inv->currency }} {{ number_format(max(0, $inv->receipt_balance ?? $inv->total), 2) }}</bdi></small></div>
+              @endif
+            </td>
             @if($user && $user->role === 'admin')
             <td class="col-author" data-label="{{ __('messages.author') }}">{{ $inv->creator?->username ?? '—' }}</td>
             @endif
