@@ -13,7 +13,7 @@
 @endphp
 <div class="card">
   <div class="card-body">
-    <form method="post" action="{{ route('invoices.store') }}" id="invoice-form"
+    <form method="post" action="{{ route('invoices.store') }}" id="invoice-form" data-branch-currency
   data-label-item-desc="{{ e(__('messages.item_description')) }}"
   data-placeholder-item="{{ e(__('messages.item_name_placeholder')) }}"
   data-placeholder-desc="{{ e(__('messages.description_placeholder')) }}"
@@ -39,10 +39,9 @@
         <div class="form-group">
           <label for="currency">{{ __('messages.currency') }}</label>
           <select id="currency" name="currency">
-            <option value="USD" {{ ($inv->currency ?? '') === 'USD' ? 'selected' : '' }}>USD</option>
-            <option value="EUR" {{ ($inv->currency ?? '') === 'EUR' ? 'selected' : '' }}>EUR</option>
-            <option value="GBP" {{ ($inv->currency ?? '') === 'GBP' ? 'selected' : '' }}>GBP</option>
-            <option value="SDG" {{ ($inv->currency ?? '') === 'SDG' ? 'selected' : '' }}>SDG</option>
+            @foreach(array_unique(array_merge(\App\Models\BusinessSetting::CURRENCIES, [$inv->currency ?? 'USD'])) as $currency)
+            <option value="{{ $currency }}" @selected(old('currency', $inv->currency) === $currency)>{{ $currency }}</option>
+            @endforeach
           </select>
         </div>
       </div>

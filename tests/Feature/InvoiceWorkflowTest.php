@@ -76,6 +76,46 @@ class InvoiceWorkflowTest extends TestCase
         }
     }
 
+    public function test_branch_details_and_tax_numbers_are_isolated_on_invoices(): void
+    {
+        $this->actingAs(User::where('role', 'admin')->firstOrFail());
+        $this->put(route('settings.business.update'), [
+            'company_name' => 'Default Sudan', 'tax_id' => '001-SD',
+        ])->assertSessionHasNoErrors();
+        $this->get(route('settings.business.edit'))->assertOk()
+            ->assertSee('id="AE-tax_id"', false)->assertSee('id="GB-tax_id"', false)
+            ->assertDontSeeText(__('messages.branch_SD'));
+        $branding = ['logo_mode' => 'shared', 'stamp_mode' => 'none'];
+        $invoice = Invoice::firstOrFail();
+        $print = route('invoices.print', $invoice);
+        foreach (['AE' => 'AED', 'GB' => 'GBP'] as $branch => $currency) {
+            $invoice->update(['branch' => $branch]);
+            $this->get($print)->assertOk()->assertDontSeeText('001-SD');
+            $this->put(route('settings.branch.update', $branch), $branding + [
+                'details' => ['company_name' => 'Issuer '.$branch, 'address' => 'Office '.$branch,
+                    'default_currency' => $currency, 'tax_id' => '002-'.$branch],
+            ])->assertSessionHasNoErrors();
+        }
+        foreach (['AE', 'GB'] as $branch) {
+            $invoice->update(['branch' => $branch]);
+            foreach (['show', 'print'] as $page) {
+                $this->get(route('invoices.'.$page, $invoice))->assertOk()
+                    ->assertSeeText('Issuer '.$branch)->assertSeeText('Office '.$branch)
+                    ->assertSeeText('002-'.$branch)->assertDontSeeText('001-SD')
+                    ->assertDontSeeText($branch === 'GB' ? '002-AE' : '002-GB');
+            }
+        }
+        foreach (['SD', null] as $branch) {
+            $invoice->update(['branch' => $branch]);
+            $this->get($print)->assertOk()->assertSeeText('001-SD')->assertDontSeeText('002-AE');
+        }
+        $this->get(route('invoices.create'))->assertOk()->assertSee('data-currency="AED"', false);
+        $this->put(route('settings.branch.update', 'AE'), $branding + ['details' => ['tax_id' => '']])
+            ->assertSessionHasNoErrors();
+        $invoice->update(['branch' => 'AE']);
+        $this->get($print)->assertOk()->assertDontSeeText('002-AE')->assertDontSeeText('001-SD');
+    }
+
     public function test_guest_can_verify_signed_invoices_for_every_issuer(): void
     {
         $invoice = Invoice::firstOrFail();

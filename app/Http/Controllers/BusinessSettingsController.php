@@ -83,6 +83,15 @@ class BusinessSettingsController extends Controller
     {
         $imageRule = 'nullable|image|mimes:jpeg,png,gif,webp|max:2048';
         $data = $request->validate([
+            'details' => 'sometimes|array:'.implode(',', BusinessSetting::PROFILE_FIELDS),
+            'details.company_name' => 'nullable|string|max:255',
+            'details.tagline' => 'nullable|string|max:255',
+            'details.address' => 'nullable|string|max:500',
+            'details.phone' => 'nullable|string|max:64',
+            'details.email' => 'nullable|email|max:255',
+            'details.website' => 'nullable|url|max:255',
+            'details.tax_id' => 'nullable|string|max:64',
+            'details.default_currency' => 'nullable|in:'.implode(',', BusinessSetting::CURRENCIES),
             'logo_mode' => 'required|in:shared,custom',
             'stamp_mode' => 'required|in:none,shared,custom',
             'logo' => $imageRule,
@@ -119,6 +128,9 @@ class BusinessSettingsController extends Controller
                         $profile[$pathKey] = 'business/'.$name;
                     }
                     $profile[$type.'_mode'] = $mode;
+                }
+                if (isset($data['details'])) {
+                    $profile['details'] = array_replace($profile['details'] ?? [], $data['details']);
                 }
                 $profiles[$branch] = $profile;
                 $business->branch_branding = $profiles;

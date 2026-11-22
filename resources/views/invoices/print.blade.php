@@ -1,4 +1,5 @@
 @php
+  $details = $business->invoiceDetails($invoice->branch);
   $company = $invoice->issuerName($business);
   $currencySym = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'SDG' => 'SDG'][$invoice->currency ?? 'USD'] ?? ($invoice->currency ?? 'USD') . ' ';
   $invoiceHeaderColor = optional($business)->invoice_header_color ?? '#0f172a';
@@ -51,8 +52,8 @@
         @else
         <span class="invoice-print-logo">{{ $company }}</span>
         @endif
-        @if(optional($business)->tagline)
-        <p class="invoice-print-tagline">{{ $business->tagline }}</p>
+        @if($details->tagline)
+        <p class="invoice-print-tagline">{{ $details->tagline }}</p>
         @endif
       </div>
       <div class="invoice-print-doc">
@@ -74,13 +75,11 @@
       <div class="invoice-print-from">
         <strong class="invoice-print-label">{{ __('messages.from') }}</strong>
         <p class="invoice-print-company">{{ $company }}</p>
-        @unless($invoice->branch)
-        @if(optional($business)->address)<p>{{ $business->address }}</p>@endif
-        @if(optional($business)->phone)<p>{{ $business->phone }}</p>@endif
-        @if(optional($business)->email)<p>{{ $business->email }}</p>@endif
-        @if(optional($business)->website)<p>{{ $business->website }}</p>@endif
-        @if(optional($business)->tax_id)<p>{{ __('messages.tax_id') }}: {{ $business->tax_id }}</p>@endif
-        @endunless
+        @if($details->address)<p>{{ $details->address }}</p>@endif
+        @if($details->phone)<p>{{ $details->phone }}</p>@endif
+        @if($details->email)<p>{{ $details->email }}</p>@endif
+        @if($details->website)<p>{{ $details->website }}</p>@endif
+        @if($details->tax_id)<p>{{ __('messages.tax_id') }}: {{ $details->tax_id }}</p>@endif
       </div>
       <div class="invoice-print-to">
         <strong class="invoice-print-label">{{ __('messages.bill_to') }}</strong>
@@ -166,11 +165,11 @@
       <div>
         <p class="thanks">{{ __('messages.thank_you') }}</p>
         <p class="company">{{ $company }}</p>
-        @if(!$invoice->branch && (optional($business)->address || optional($business)->phone || optional($business)->email))
+        @if($details->address || $details->phone || $details->email)
         <p class="contact">
-          @if(optional($business)->address){{ $business->address }}@endif
-          @if(optional($business)->phone) · {{ $business->phone }}@endif
-          @if(optional($business)->email) · {{ $business->email }}@endif
+          @if($details->address){{ $details->address }}@endif
+          @if($details->phone) · {{ $details->phone }}@endif
+          @if($details->email) · {{ $details->email }}@endif
         </p>
         @endif
       </div>

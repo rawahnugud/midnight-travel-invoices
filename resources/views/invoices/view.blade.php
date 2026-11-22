@@ -2,6 +2,7 @@
 @section('title', __('messages.invoice') . ' ' . $invoice->invoice_number)
 @section('content')
 @php
+  $details = $business->invoiceDetails($invoice->branch);
   $activePage = 'invoices';
   $pageTitle = __('messages.invoice') . ' ' . $invoice->invoice_number;
   $canEdit = $user && ($user->isAdmin() || ($user->isStaff() && $invoice->created_by === $user->id));
@@ -51,12 +52,11 @@
     <div class="invoice-from-row" style="margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--border);">
       <strong style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">{{ __('messages.from') }}</strong>
       <p style="margin:0.25rem 0 0 0; font-weight:600;">{{ $companyName }}</p>
-      @unless($invoice->branch)
-      @if(optional($business)->address)<p style="margin:0.15rem 0 0 0; font-size:0.9rem; color:var(--text-muted);">{{ $business->address }}</p>@endif
-      @if(optional($business)->phone || optional($business)->email)
-      <p style="margin:0.15rem 0 0 0; font-size:0.9rem; color:var(--text-muted);">@if($business->phone){{ $business->phone }}@endif @if($business->phone && $business->email) · @endif @if($business->email){{ $business->email }}@endif</p>
+      @if($details->address)<p style="margin:0.15rem 0 0 0; font-size:0.9rem; color:var(--text-muted);">{{ $details->address }}</p>@endif
+      @if($details->phone || $details->email)
+      <p style="margin:0.15rem 0 0 0; font-size:0.9rem; color:var(--text-muted);">@if($details->phone){{ $details->phone }}@endif @if($details->phone && $details->email) · @endif @if($details->email){{ $details->email }}@endif</p>
       @endif
-      @endunless
+      @if($details->tax_id)<p>{{ __('messages.tax_id') }}: {{ $details->tax_id }}</p>@endif
     </div>
     <div class="invoice-meta-row">
       <div>
