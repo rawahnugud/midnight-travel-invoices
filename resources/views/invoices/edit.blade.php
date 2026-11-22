@@ -49,10 +49,9 @@
         <div class="form-group">
           <label for="currency">{{ __('messages.currency') }}</label>
           <select id="currency" name="currency">
-            <option value="USD" {{ $inv->currency === 'USD' ? 'selected' : '' }}>USD</option>
-            <option value="EUR" {{ $inv->currency === 'EUR' ? 'selected' : '' }}>EUR</option>
-            <option value="GBP" {{ $inv->currency === 'GBP' ? 'selected' : '' }}>GBP</option>
-            <option value="SDG" {{ $inv->currency === 'SDG' ? 'selected' : '' }}>SDG</option>
+            @foreach(array_unique(array_merge(\App\Models\BusinessSetting::CURRENCIES, [$inv->currency ?? 'USD'])) as $currency)
+            <option value="{{ $currency }}" @selected(old('currency', $inv->currency) === $currency)>{{ $currency }}</option>
+            @endforeach
           </select>
         </div>
       </div>

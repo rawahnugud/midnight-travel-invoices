@@ -13,6 +13,7 @@
     @if($errors->any())
     <div class="alert alert-error" role="alert">{{ $errors->first() }}</div>
     @endif
+    <h3>{{ __('messages.default_sudan') }}</h3>
     <form method="post" action="{{ route('settings.business.update') }}" enctype="multipart/form-data">
       @csrf
       @method('PUT')
@@ -49,6 +50,7 @@
           <label for="default_currency">{{ __('messages.default_currency') }}</label>
           <select id="default_currency" name="default_currency">
             <option value="USD" {{ ($business->default_currency ?? 'USD') === 'USD' ? 'selected' : '' }}>USD</option>
+            <option value="AED" @selected($business->default_currency === 'AED')>AED</option>
             <option value="EUR" {{ ($business->default_currency ?? '') === 'EUR' ? 'selected' : '' }}>EUR</option>
             <option value="GBP" {{ ($business->default_currency ?? '') === 'GBP' ? 'selected' : '' }}>GBP</option>
             <option value="SDG" {{ ($business->default_currency ?? '') === 'SDG' ? 'selected' : '' }}>SDG</option>
@@ -89,7 +91,7 @@
       </div>
     </form>
     <h3>{{ __('messages.branch_branding') }}</h3>
-    @foreach(\App\Models\Invoice::BRANCHES as $branch)
+    @foreach(['AE', 'GB'] as $branch)
       @php
         $profile = $business->branch_branding[$branch] ?? [];
         $retry = old('editing_branch') === $branch;
@@ -100,6 +102,29 @@
           @csrf
           @method('PUT')
           <input type="hidden" name="editing_branch" value="{{ $branch }}">
+          <div class="form-row two-cols">
+            @foreach(\App\Models\BusinessSetting::PROFILE_FIELDS as $field)
+              @php
+                $savedValue = $profile['details'][$field] ?? '';
+                $value = $retry ? old('details.'.$field, $savedValue) : $savedValue;
+              @endphp
+              <div class="form-group">
+                <label for="{{ $branch }}-{{ $field }}">{{ __('messages.'.($field === 'tax_id' ? 'tax_id_optional' : $field)) }}</label>
+                @if($field === 'address')
+                <textarea id="{{ $branch }}-address" name="details[address]" rows="2">{{ $value }}</textarea>
+                @elseif($field === 'default_currency')
+                <select id="{{ $branch }}-default_currency" name="details[default_currency]">
+                  <option value="">{{ __('messages.default_currency') }} ({{ $business->default_currency }})</option>
+                  @foreach(\App\Models\BusinessSetting::CURRENCIES as $code)
+                  <option value="{{ $code }}" @selected($value === $code)>{{ $code }}</option>
+                  @endforeach
+                </select>
+                @else
+                <input id="{{ $branch }}-{{ $field }}" name="details[{{ $field }}]" type="{{ ['email' => 'email', 'website' => 'url', 'phone' => 'tel'][$field] ?? 'text' }}" value="{{ $value }}" @if($field === 'company_name') placeholder="{{ __('messages.branch_'.$branch) }}" @endif>
+                @endif
+              </div>
+            @endforeach
+          </div>
           <div class="form-row two-cols">
             @foreach(['logo', 'stamp'] as $type)
               @php

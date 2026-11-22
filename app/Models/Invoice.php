@@ -30,6 +30,9 @@ class Invoice extends Model
 
     public function issuerName(?BusinessSetting $business): string
     {
+        if (in_array($this->branch, ['AE', 'GB'], true) && $business) {
+            return $business->invoiceDetails($this->branch)->company_name;
+        }
         return $this->branch ? __('messages.branch_'.$this->branch) : ($business?->company_name ?? __('messages.app_name'));
     }
 

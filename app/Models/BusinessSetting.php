@@ -16,6 +16,22 @@ class BusinessSetting extends Model
 
     protected $casts = ['branch_branding' => 'array'];
 
+    public const PROFILE_FIELDS = ['company_name', 'tagline', 'address', 'phone', 'email', 'website', 'tax_id', 'default_currency'];
+    public const CURRENCIES = ['USD', 'EUR', 'GBP', 'SDG', 'AED'];
+
+    public function invoiceDetails(?string $branch): object
+    {
+        if ($branch === null || $branch === 'SD') {
+            return (object) $this->only(self::PROFILE_FIELDS);
+        }
+
+        $details = $this->branch_branding[$branch]['details'] ?? [];
+        $details += array_fill_keys(self::PROFILE_FIELDS, null);
+        $details['company_name'] ??= __('messages.branch_'.$branch);
+        $details['default_currency'] ??= $this->default_currency;
+        return (object) $details;
+    }
+
     public function invoiceLogoPath(?string $branch): ?string
     {
         $profile = $this->branch_branding[$branch] ?? [];

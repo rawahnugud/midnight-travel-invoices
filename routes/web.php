@@ -46,7 +46,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', UserController::class)->except(['show', 'create', 'edit'])->names('users');
         Route::get('/settings/business', [BusinessSettingsController::class, 'edit'])->name('settings.business.edit');
         Route::put('/settings/business/branches/{branch}', [BusinessSettingsController::class, 'updateBranch'])
-            ->whereIn('branch', \App\Models\Invoice::BRANCHES)->name('settings.branch.update');
+            ->whereIn('branch', ['AE', 'GB'])->name('settings.branch.update');
         Route::put('/settings/business', [BusinessSettingsController::class, 'update'])->name('settings.business.update');
         Route::get('/settings/design', [BusinessSettingsController::class, 'editDesign'])->name('settings.design.edit');
         Route::put('/settings/design', [BusinessSettingsController::class, 'updateDesign'])->name('settings.design.update');

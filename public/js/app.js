@@ -36,6 +36,13 @@
 
   // Line items: add row, remove row, recalc totals
   var form = one('#invoice-form');
+  if (form && form.hasAttribute('data-branch-currency')) {
+    var branch = byId('branch');
+    branch.addEventListener('change', function () {
+      var currency = branch.selectedOptions[0].dataset.currency;
+      if (currency) byId('currency').value = currency;
+    });
+  }
   if (form) {
     var tbody = byId('line-items-tbody');
     var addBtn = byId('add-line');
