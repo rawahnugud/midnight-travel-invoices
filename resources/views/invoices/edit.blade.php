@@ -35,15 +35,15 @@
         </div>
         <div class="form-group">
           <label for="invoice_date">{{ __('messages.invoice_date') }}</label>
-          <input type="date" id="invoice_date" name="invoice_date" value="{{ \Carbon\Carbon::parse($inv->invoice_date)->format('Y-m-d') }}" required>
+          <input type="date" id="invoice_date" name="invoice_date" value="{{ old('invoice_date', \Carbon\Carbon::parse($inv->invoice_date)->format('Y-m-d')) }}" required>
         </div>
         <div class="form-group">
           <label for="status">{{ __('messages.status') }}</label>
           <select id="status" name="status">
-            <option value="draft" {{ $inv->status === 'draft' ? 'selected' : '' }}>{{ __('messages.draft') }}</option>
-            <option value="pending" {{ $inv->status === 'pending' ? 'selected' : '' }}>{{ __('messages.pending') }}</option>
-            <option value="paid" {{ $inv->status === 'paid' ? 'selected' : '' }}>{{ __($inv->status === 'paid' ? 'messages.paid' : 'messages.record_payment') }}</option>
-            <option value="cancelled" {{ $inv->status === 'cancelled' ? 'selected' : '' }}>{{ __('messages.cancelled') }}</option>
+            <option value="draft" {{ old('status', $inv->status) === 'draft' ? 'selected' : '' }}>{{ __('messages.draft') }}</option>
+            <option value="pending" {{ old('status', $inv->status) === 'pending' ? 'selected' : '' }}>{{ __('messages.pending') }}</option>
+            <option value="paid" {{ old('status', $inv->status) === 'paid' ? 'selected' : '' }}>{{ __($inv->status === 'paid' ? 'messages.paid' : 'messages.record_payment') }}</option>
+            <option value="cancelled" {{ old('status', $inv->status) === 'cancelled' ? 'selected' : '' }}>{{ __('messages.cancelled') }}</option>
           </select>
         </div>
         <div class="form-group">
@@ -106,11 +106,11 @@
       <div class="form-row two-cols totals-row">
         <div class="form-group">
           <label for="tax_rate">{{ __('messages.tax_percent') }}</label>
-          <input type="number" id="tax_rate" name="tax_rate" min="0" max="100" step="0.01" value="{{ $inv->tax_rate }}">
+          <input type="number" id="tax_rate" name="tax_rate" min="0" max="100" step="0.01" value="{{ old('tax_rate', $inv->tax_rate) }}">
         </div>
         <div class="form-group">
           <label for="discount_amount">{{ __('messages.discount_amount') }}</label>
-          <input type="number" id="discount_amount" name="discount_amount" min="0" step="0.01" value="{{ $inv->discount_amount }}">
+          <input type="number" id="discount_amount" name="discount_amount" min="0" step="0.01" value="{{ old('discount_amount', $inv->discount_amount) }}">
         </div>
       </div>
       <div class="form-group">

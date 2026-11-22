@@ -40,6 +40,108 @@ class InvoiceWorkflowTest extends TestCase
         $this->seed(DatabaseSeeder::class);
     }
 
+    public function test_validation_retry_preserves_invoice_fields_on_create_and_edit(): void
+    {
+        $this->actingAs(User::where('role', 'admin')->firstOrFail());
+        $invoice = Invoice::where('status', 'pending')->firstOrFail();
+        foreach (['create', 'edit'] as $action) {
+            $url = $action === 'create' ? route('invoices.create') : route('invoices.edit', $invoice);
+            $input = ['invoice_date' => '2026-08-14', 'discount_amount' => '12.35', 'tax_rate' => '3.75', 'status' => 'draft'];
+            $this->from($url);
+            $response = $action === 'create'
+                ? $this->post(route('invoices.store'), $input)
+                : $this->put(route('invoices.update', $invoice), $input);
+            $response->assertRedirect($url)->assertSessionHasErrors('customer_name');
+            $page = $this->get($url)->assertOk();
+            foreach (['2026-08-14', '12.35', '3.75'] as $value) {
+                $page->assertSee('value="'.$value.'"', false);
+            }
+            if ($action === 'edit') {
+                $page->assertSee('value="draft" selected', false);
+            }
+        }
+    }
+
+    public function test_login_logout_user_management_and_bilingual_admin_pages(): void
+    {
+        $admin = User::where('role', 'admin')->firstOrFail();
+        $admin->update(['password' => bcrypt('test-admin-password')]);
+        $this->get('/login')->assertOk();
+        $this->post('/login', ['username' => $admin->username, 'password' => 'incorrect'])->assertSessionHasErrors('username');
+        $this->post('/login', ['username' => $admin->username, 'password' => 'test-admin-password'])->assertRedirect('/dashboard');
+        $this->assertAuthenticatedAs($admin);
+        foreach (['ar' => 'rtl', 'en' => 'ltr'] as $locale => $direction) {
+            $this->get(route('locale.switch', $locale))->assertRedirect();
+            foreach (['dashboard', 'invoices.index', 'invoices.create', 'users.index', 'reports.team', 'settings', 'settings.business.edit', 'settings.design.edit'] as $route) {
+                $this->get(route($route))->assertOk()->assertSee('dir="'.$direction.'"', false);
+            }
+        }
+        $user = ['username' => 'workflow-test', 'role' => 'staff', 'password' => 'test-user-password', 'password_confirmation' => 'test-user-password'];
+        $this->post(route('users.store'), $user)->assertSessionHasNoErrors();
+        $staff = User::where('username', $user['username'])->sole();
+        $this->put(route('users.update', $staff), ['username' => 'workflow-renamed', 'role' => 'viewer'])->assertSessionHasNoErrors();
+        $this->assertSame('viewer', $staff->fresh()->role);
+        $this->put(route('settings.design.update'), ['primary_color' => '#123456'])->assertSessionHasNoErrors();
+        $this->get(route('dashboard'))->assertSee('#123456');
+        $this->post('/logout')->assertRedirect('/login');
+        $this->assertGuest();
+    }
+
+    public function test_new_invoice_controls_in_chrome(): void
+    {
+        $chrome = (new \Symfony\Component\Process\ExecutableFinder())->find('google-chrome');
+        if (!$chrome) {
+            $this->markTestSkipped('Chrome is required for the invoice form interaction test.');
+        }
+        $this->actingAs(User::where('role', 'admin')->firstOrFail());
+        $settings = \App\Models\BusinessSetting::get();
+        $settings->update(['default_currency' => 'SDG', 'branch_branding' => [
+            'AE' => ['details' => ['default_currency' => 'AED']],
+            'GB' => ['details' => ['default_currency' => 'GBP']],
+        ]]);
+        \App\Models\BusinessSetting::clearCache();
+        $html = $this->get(route('invoices.create'))->assertOk()->getContent();
+        $html = str_replace(asset('js/app.js'), 'file://'.public_path('js/app.js'), $html);
+        $script = <<<'HTML'
+<script>
+window.addEventListener('load', () => {
+    const form = document.querySelector('#invoice-form');
+    const {branch, currency} = form.elements;
+    for (const [code, expected] of [['AE','AED'], ['GB','GBP'], ['','SDG']]) {
+        branch.value = code;
+        branch.dispatchEvent(new Event('change'));
+        if (currency.value !== expected) return;
+    }
+    currency.value = 'USD';
+    document.querySelector('#add-line').click();
+    const rows = form.querySelectorAll('.line-item-row');
+    if (rows.length !== 2) return;
+    const row = rows[1];
+    row.querySelector('.input-qty').value = 2;
+    const price = row.querySelector('.input-price');
+    price.value = 12.25;
+    price.dispatchEvent(new Event('input'));
+    if (row.querySelector('.line-total').textContent !== '24.50') return;
+    row.querySelector('.remove-line').click();
+    if (form.querySelectorAll('.line-item-row').length === 1 && currency.value === 'USD') {
+        document.title = 'Invoice controls passed';
+    }
+});
+</script>
+HTML;
+        $path = tempnam(sys_get_temp_dir(), 'invoice-browser-');
+        $page = $path.'.html';
+        try {
+            rename($path, $page);
+            file_put_contents($page, str_replace('</body>', $script.'</body>', $html));
+            $browser = new \Symfony\Component\Process\Process([$chrome, '--headless', '--no-sandbox', '--disable-gpu', '--dump-dom', 'file://'.$page]);
+            $browser->mustRun();
+            $this->assertStringContainsString('<title>Invoice controls passed</title>', $browser->getOutput());
+        } finally {
+            unlink($page);
+        }
+    }
+
     public function test_branch_artwork_on_printed_invoices(): void
     {
         $settings = \App\Models\BusinessSetting::get();

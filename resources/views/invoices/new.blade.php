@@ -34,7 +34,7 @@
         </div>
         <div class="form-group">
           <label for="invoice_date">{{ __('messages.invoice_date') }}</label>
-          <input type="date" id="invoice_date" name="invoice_date" value="{{ $inv->invoice_date ?? '' }}" required>
+          <input type="date" id="invoice_date" name="invoice_date" value="{{ old('invoice_date', $inv->invoice_date ?? '') }}" required>
         </div>
         <div class="form-group">
           <label for="currency">{{ __('messages.currency') }}</label>
@@ -96,11 +96,11 @@
       <div class="form-row two-cols totals-row">
         <div class="form-group">
           <label for="tax_rate">{{ __('messages.tax_percent') }}</label>
-          <input type="number" id="tax_rate" name="tax_rate" min="0" max="100" step="0.01" value="{{ $inv->tax_rate ?? 0 }}">
+          <input type="number" id="tax_rate" name="tax_rate" min="0" max="100" step="0.01" value="{{ old('tax_rate', $inv->tax_rate ?? 0) }}">
         </div>
         <div class="form-group">
           <label for="discount_amount">{{ __('messages.discount_amount') }}</label>
-          <input type="number" id="discount_amount" name="discount_amount" min="0" step="0.01" value="{{ $inv->discount_amount ?? 0 }}">
+          <input type="number" id="discount_amount" name="discount_amount" min="0" step="0.01" value="{{ old('discount_amount', $inv->discount_amount ?? 0) }}">
         </div>
       </div>
       <div class="form-group">
