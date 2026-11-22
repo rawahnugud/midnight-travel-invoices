@@ -13,7 +13,7 @@
 @endphp
 <div class="card">
   <div class="card-body">
-    <form method="post" action="{{ route('invoices.store') }}" id="invoice-form" data-branch-currency
+    <form method="post" action="{{ route('invoices.store') }}" id="invoice-form"
   data-label-item-desc="{{ e(__('messages.item_description')) }}"
   data-placeholder-item="{{ e(__('messages.item_name_placeholder')) }}"
   data-placeholder-desc="{{ e(__('messages.description_placeholder')) }}"
@@ -27,7 +27,7 @@
       <div class="alert alert-error">{{ $errors->first() }}</div>
       @endif
       <div class="form-row two-cols">
-        @include('invoices.branch-field')
+        @include('invoices.branch-field', ['useBranchCurrency' => true])
         <div class="form-group">
           <label for="invoice_number">{{ __('messages.invoice_number') }}</label>
           <input type="text" id="invoice_number" value="{{ __('messages.number_on_save') }}" readonly class="readonly">
