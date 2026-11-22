@@ -94,12 +94,13 @@ class InvoiceWorkflowTest extends TestCase
             $this->markTestSkipped('Chrome is required for the invoice form interaction test.');
         }
         $this->actingAs(User::where('role', 'admin')->firstOrFail());
-        $settings = \App\Models\BusinessSetting::get();
-        $settings->update(['default_currency' => 'SDG', 'branch_branding' => [
-            'AE' => ['details' => ['default_currency' => 'AED']],
-            'GB' => ['details' => ['default_currency' => 'GBP']],
-        ]]);
-        \App\Models\BusinessSetting::clearCache();
+        $this->put(route('settings.business.update'), ['company_name' => 'Test issuer', 'default_currency' => 'SDG'])
+            ->assertSessionHasNoErrors();
+        foreach (['AE' => 'AED', 'GB' => 'GBP'] as $branch => $currency) {
+            $this->put(route('settings.branch.update', $branch), [
+                'logo_mode' => 'shared', 'stamp_mode' => 'none', 'details' => ['default_currency' => $currency],
+            ])->assertSessionHasNoErrors();
+        }
         $html = $this->get(route('invoices.create'))->assertOk()->getContent();
         $html = str_replace(asset('js/app.js'), 'file://'.public_path('js/app.js'), $html);
         $script = <<<'HTML'
