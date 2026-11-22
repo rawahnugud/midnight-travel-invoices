@@ -441,6 +441,24 @@ class InvoiceWorkflowTest extends TestCase
         $this->delete(route('invoices.destroy', $invoice))->assertForbidden();
     }
 
+    public function test_pagination_uses_plain_localized_labels_and_preserves_links(): void
+    {
+        foreach (['en' => ['Previous', 'Next'], 'ar' => ['السابق', 'التالي']] as $locale => $labels) {
+            app()->setLocale($locale);
+            foreach ([1, 2, 10] as $page) {
+                $pages = new \Illuminate\Pagination\LengthAwarePaginator([], 200, 20, $page, ['path' => '/invoices']);
+                $html = $pages->appends(['q' => 'ticket'])->links('pagination.default')->render();
+                $this->assertStringContainsString($labels[0], $html);
+                $this->assertStringContainsString($labels[1], $html);
+                $this->assertStringNotContainsString('&amp;laquo;', $html);
+                $this->assertStringNotContainsString('&amp;raquo;', $html);
+                $this->assertSame($page > 1, str_contains($html, 'rel="prev"'));
+                $this->assertSame($page < 10, str_contains($html, 'rel="next"'));
+                $this->assertStringContainsString('q=ticket', $html);
+            }
+        }
+    }
+
     public function test_invoice_search_respects_staff_visibility_and_matches_literals(): void
     {
         $mine = Invoice::where('status', 'pending')->sole();
