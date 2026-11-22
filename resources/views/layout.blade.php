@@ -7,8 +7,9 @@
   @if(optional($business)->primary_color ?? null)
   <style>:root { --mt-accent: {{ $business->primary_color }}; --mt-gold: {{ $business->accent_color }}; }</style>
   @endif
-  <link rel="preload" href="{{ asset('css/style.css') }}" as="style">
-  <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+  @php($stylesheetUrl = asset('css/style.css').'?v='.filemtime(public_path('css/style.css')))
+  <link rel="preload" href="{{ $stylesheetUrl }}" as="style">
+  <link rel="stylesheet" href="{{ $stylesheetUrl }}">
 </head>
 <body class="app">
   @unless(isset($noSidebar) && $noSidebar)

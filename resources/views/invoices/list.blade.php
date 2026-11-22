@@ -23,13 +23,13 @@
       </div>
       <div class="invoice-filter-row" role="group" aria-label="{{ __('messages.status') }}">
         @foreach(['all' => 'all_invoices', 'pending' => 'pending', 'draft' => 'draft', 'paid' => 'paid', 'cancelled' => 'cancelled'] as $value => $label)
-        <button type="submit" name="filter" value="{{ $value }}" aria-pressed="{{ $status === $value ? 'true' : 'false' }}">{{ __('messages.'.$label) }}</button>
+        <button type="submit" name="filter" value="{{ $value }}" class="btn btn-sm {{ $status === $value ? 'btn-primary' : 'btn-outline' }}" aria-pressed="{{ $status === $value ? 'true' : 'false' }}">{{ __('messages.'.$label) }}</button>
         @endforeach
       </div>
       @if($status === 'pending')
-      <div class="invoice-filter-row" role="group" aria-label="{{ __('messages.payment_status') }}">
+      <div class="invoice-filter-row invoice-payment-filters" role="group" aria-label="{{ __('messages.payment_status') }}">
         @foreach(['pending' => 'all_pending', 'unpaid' => 'unpaid', 'partially_paid' => 'partially_paid'] as $value => $label)
-        <button type="submit" name="filter" value="{{ $value }}" aria-pressed="{{ $filter === $value ? 'true' : 'false' }}">{{ __('messages.'.$label) }}</button>
+        <button type="submit" name="filter" value="{{ $value }}" class="btn btn-sm {{ $filter === $value ? 'btn-primary' : 'btn-outline' }}" aria-pressed="{{ $filter === $value ? 'true' : 'false' }}">{{ __('messages.'.$label) }}</button>
         @endforeach
       </div>
       @endif

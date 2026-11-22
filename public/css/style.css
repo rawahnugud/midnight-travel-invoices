@@ -612,7 +612,7 @@ a.pagination-link:hover { background: var(--mt-off-white); color: var(--mt-dark)
 .pagination-item.disabled .pagination-link { color: var(--text-muted); cursor: not-allowed; pointer-events: none; }
 
 .invoice-filters { display: grid; gap: .75rem; margin-bottom: 1.25rem; }
-.invoice-search-row { display: flex; align-items: end; gap: .5rem; }
+.invoice-search-row { width: 100%; max-width: 44rem; display: flex; align-items: end; gap: .5rem; }
 .invoice-search-row .form-group { flex: 1; min-width: 0; margin: 0; }
 .invoice-filter-row, .invoice-row-actions { display: flex; align-items: baseline; flex-wrap: wrap; gap: .4rem; }
 .invoice-filter-row button {
@@ -623,3 +623,16 @@ a.pagination-link:hover { background: var(--mt-off-white); color: var(--mt-dark)
 .invoice-row-actions { flex-wrap: nowrap; }
 .invoice-row-actions summary { color: var(--mt-accent); cursor: pointer; padding: .5rem .25rem; }
 .invoice-row-actions details[open] > .btn, .invoice-row-actions details[open] form { display: block; }
+
+.invoice-filter-row button:hover { border-color: var(--mt-accent); }
+.invoice-payment-filters {
+  border-inline-start: 2px solid var(--border);
+  padding-inline-start: .7rem;
+}
+.invoice-payment-filters button { font-size: .875rem; border-color: transparent; }
+.invoice-payment-filters button[aria-pressed="true"] {
+  color: var(--mt-accent); background: var(--mt-off-white); border-color: var(--mt-accent);
+}
+@media (max-width: 768px) {
+  .invoice-filter-row button { min-height: 44px; }
+}
