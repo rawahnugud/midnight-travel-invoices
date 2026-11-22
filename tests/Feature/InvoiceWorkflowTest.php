@@ -113,7 +113,7 @@ class InvoiceWorkflowTest extends TestCase
         ];
     }
 
-    public function test_new_invoice_starts_pending_and_print_tracks_settlement(): void
+    public function test_customer_print_omits_payment_status_and_staff_list_tracks_balance(): void
     {
         $staff = User::where('role', 'staff')->firstOrFail();
         $this->actingAs($staff)->get(route('invoices.create'))->assertOk()
@@ -126,16 +126,16 @@ class InvoiceWorkflowTest extends TestCase
         ])->assertSessionHasNoErrors();
         $invoice = Invoice::where('customer_name', 'Invoice status fixture')->sole();
         $this->assertSame('pending', $invoice->status);
-        foreach (['show', 'print'] as $page) {
-            $this->get(route('invoices.'.$page, $invoice))->assertOk()->assertSeeText(__('messages.pending'));
-        }
+        $this->get(route('invoices.show', $invoice))->assertOk()->assertSeeText(__('messages.pending'));
+        $this->get(route('invoices.print', $invoice))->assertOk()->assertDontSeeText(__('messages.pending'));
         $store = route('invoices.payments.store', $invoice);
         $this->post($store, $this->paymentPayload('40.00'))->assertSessionHasNoErrors();
-        $this->get(route('invoices.print', $invoice))->assertOk()->assertSeeText(__('messages.pending'));
+        $this->get(route('invoices.index', ['q' => $invoice->invoice_number]))->assertOk()
+            ->assertSeeText('USD 60.00')->assertSeeText(__('messages.pending'));
+        $this->get(route('invoices.print', $invoice))->assertOk()->assertDontSeeText(__('messages.payment_status'));
         $this->post($store, $this->paymentPayload('60.00'))->assertSessionHasNoErrors();
-        foreach (['show', 'print'] as $page) {
-            $this->get(route('invoices.'.$page, $invoice))->assertOk()->assertSeeText(__('messages.paid'));
-        }
+        $this->get(route('invoices.show', $invoice))->assertOk()->assertSeeText(__('messages.paid'));
+        $this->get(route('invoices.print', $invoice))->assertOk()->assertDontSeeText(__('messages.paid'));
     }
 
     public function test_team_report_requires_an_admin(): void
@@ -350,6 +350,7 @@ class InvoiceWorkflowTest extends TestCase
         $this->actingAs($invoice->creator)->post($cancel)->assertForbidden();
         $this->actingAs($admin)->post($cancel)->assertRedirect(route('invoices.show', $invoice));
         $this->assertSame('cancelled', $invoice->fresh()->status);
+        $this->get(route('invoices.print', $invoice))->assertOk()->assertSeeText(__('messages.cancelled'));
         $this->assertSame($receipt->id, $invoice->payments()->sole()->id);
         $this->actingAs($invoice->creator)->delete(route('invoices.destroy', $invoice))->assertForbidden();
         $this->actingAs($admin)->get(route('invoices.index'))->assertOk()

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BusinessSetting;
 use App\Models\Invoice;
+use App\Models\Payment;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
@@ -17,6 +18,9 @@ class InvoiceController extends Controller
         $query = Invoice::listed()->with(['creator', 'lineItems'])->withExists([
             'payments', 'payments as active_payments_exist' => fn ($query) => $query->active(),
         ]);
+
+        $query->addSelect(['receipt_balance' => Payment::active()->select('balance_after')
+            ->whereColumn('payments.invoice_id', 'invoices.id')->latest('id')->limit(1)]);
 
         if ($user->isStaff()) {
             $query->where('created_by', $user->id);

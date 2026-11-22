@@ -62,8 +62,10 @@
           <dd>{{ $invoice->invoice_number }}</dd>
           <dt>{{ __('messages.date') }}</dt>
           <dd>{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('M j, Y') }}</dd>
-          <dt>{{ __('messages.payment_status') }}</dt>
-          <dd><strong>{{ __('messages.'.$invoice->status) }}</strong></dd>
+          @if($invoice->status === 'cancelled')
+          <dt>{{ __('messages.status') }}</dt>
+          <dd><strong>{{ __('messages.cancelled') }}</strong></dd>
+          @endif
         </dl>
       </div>
     </header>
