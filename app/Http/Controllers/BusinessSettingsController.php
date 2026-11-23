@@ -154,11 +154,13 @@ class BusinessSettingsController extends Controller
 
     public function updateDesign(Request $request)
     {
-        $request->merge([
-            'primary_color' => trim($request->input('primary_color', '')) ?: null,
-            'accent_color' => trim($request->input('accent_color', '')) ?: null,
-            'invoice_header_color' => trim($request->input('invoice_header_color', '')) ?: null,
-        ]);
+        foreach (['primary_color' => '#85144b', 'accent_color' => '#c9a227', 'invoice_header_color' => null] as $field => $default) {
+            if ($request->has($field) && is_string($request->input($field))) {
+                $request->merge([$field => trim($request->input($field)) ?: $default]);
+            } elseif ($request->has($field) && $request->input($field) === null) {
+                $request->merge([$field => $default]);
+            }
+        }
         $validated = $request->validate([
             'primary_color' => 'nullable|string|max:20|regex:/^#[0-9A-Fa-f]{3,6}$/',
             'accent_color' => 'nullable|string|max:20|regex:/^#[0-9A-Fa-f]{3,6}$/',

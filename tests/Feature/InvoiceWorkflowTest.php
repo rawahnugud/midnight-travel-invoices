@@ -53,8 +53,9 @@ class InvoiceWorkflowTest extends TestCase
             foreach ([1, 2] as $upload) {
                 $this->put(route('settings.design.update'), [
                     'browser_icon' => \Illuminate\Http\UploadedFile::fake()->createWithContent('icon.png', $png),
-                ])->assertSessionHasNoErrors();
+                ])->assertRedirect(route('settings.design.edit'))->assertSessionHasNoErrors();
                 $settings->refresh();
+                $this->assertNotEmpty($settings->browser_icon_path);
                 $paths[] = public_path($settings->browser_icon_path);
                 $this->assertFileExists(end($paths));
                 $this->get(route('dashboard'))->assertSee('rel="icon" href="'.$settings->browser_icon_url.'"', false);
