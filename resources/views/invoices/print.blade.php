@@ -36,10 +36,11 @@
   <meta name="twitter:card" content="summary_large_image">
   <style>:root { --invoice-header: {{ $invoiceHeaderColor }}; }</style>
   <link rel="stylesheet" href="{{ asset('css/print.css') }}?v={{ filemtime(public_path('css/print.css')) }}">
+  <style media="print">@page { margin: 0; }</style>
   @if($logoUrl)<link rel="preload" as="image" href="{{ $logoUrl }}">@endif
   @if($stampUrl)<link rel="preload" as="image" href="{{ $stampUrl }}">@endif
 </head>
-<body class="print-body">
+<body class="print-body invoice-document">
   <div class="print-toolbar no-print">
     <a href="{{ route('invoices.show', $invoice) }}" class="back-link">{{ __('messages.back_to_invoice') }}</a>
     <button type="button" class="btn-print" id="btn-print">{{ __('messages.print_save_pdf') }}</button>

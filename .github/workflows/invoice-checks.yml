@@ -26,6 +26,8 @@ jobs:
             google-chrome --headless --no-sandbox --disable-gpu --dump-dom "file://$PWD/tests/browser/invoice-stamp.html?$background" > "$RUNNER_TEMP/stamp.html"
             grep -F '<title>Stamp fitted</title>' "$RUNNER_TEMP/stamp.html"
           done
+      - name: Install PDF text extraction for invoice print checks
+        run: sudo apt-get update -qq && sudo apt-get install -y poppler-utils
       - name: Verify invoice workflows
         run: vendor/bin/phpunit tests/Feature
       - name: Rehearse the cPanel update on disposable SQLite
