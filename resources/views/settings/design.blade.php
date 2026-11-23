@@ -44,6 +44,15 @@
         <small class="text-muted">{{ __('messages.login_logo_formats') }}</small>
       </div>
 
+      <div class="form-group">
+        <label for="browser_icon">{{ __('messages.browser_icon') }}</label>
+        @if($business->browser_icon_url)
+        <img src="{{ $business->browser_icon_url }}" alt="" width="32" height="32" style="display:block; object-fit:contain; margin-bottom:.5rem;">
+        @endif
+        <input type="file" id="browser_icon" name="browser_icon" accept="image/png" aria-describedby="browser-icon-hint">
+        <small id="browser-icon-hint" class="text-muted">{{ __('messages.browser_icon_hint') }}</small>
+      </div>
+
       <h3 style="margin-top:1.5rem;">{{ __('messages.printed_invoice') }}</h3>
       <div class="form-group">
         <label for="invoice_header_color">{{ __('messages.invoice_header_color') }}</label>

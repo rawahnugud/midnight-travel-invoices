@@ -40,6 +40,37 @@ class InvoiceWorkflowTest extends TestCase
         $this->seed(DatabaseSeeder::class);
     }
 
+    public function test_design_settings_can_replace_the_browser_icon(): void
+    {
+        $this->actingAs(User::where('role', 'admin')->firstOrFail());
+        $settings = \App\Models\BusinessSetting::get();
+        $settings->update(['login_logo_path' => 'business/example-login.png']);
+        \App\Models\BusinessSetting::clearCache();
+        $this->get(route('dashboard'))->assertSee('rel="icon" href="'.asset('business/example-login.png').'"', false);
+        $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/r0kAAAAASUVORK5CYII=');
+        $paths = [];
+        try {
+            foreach ([1, 2] as $upload) {
+                $this->put(route('settings.design.update'), [
+                    'browser_icon' => \Illuminate\Http\UploadedFile::fake()->createWithContent('icon.png', $png),
+                ])->assertRedirect(route('settings.design.edit'))->assertSessionHasNoErrors();
+                $settings->refresh();
+                $this->assertNotEmpty($settings->browser_icon_path);
+                $paths[] = public_path($settings->browser_icon_path);
+                $this->assertFileExists(end($paths));
+                $this->get(route('dashboard'))->assertSee('rel="icon" href="'.$settings->browser_icon_url.'"', false);
+            }
+            $this->assertFileDoesNotExist($paths[0]);
+            $this->assertSame('business/example-login.png', $settings->login_logo_path);
+            $this->put(route('settings.design.update'), [
+                'browser_icon' => \Illuminate\Http\UploadedFile::fake()->createWithContent('icon.png', 'invalid'),
+            ])->assertSessionHasErrors('browser_icon');
+            $this->assertFileExists($paths[1]);
+        } finally {
+            \Illuminate\Support\Facades\File::delete($paths);
+        }
+    }
+
     public function test_branch_artwork_on_printed_invoices(): void
     {
         $settings = \App\Models\BusinessSetting::get();

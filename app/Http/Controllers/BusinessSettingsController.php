@@ -154,39 +154,50 @@ class BusinessSettingsController extends Controller
 
     public function updateDesign(Request $request)
     {
-        $request->merge([
-            'primary_color' => trim($request->input('primary_color', '')) ?: null,
-            'accent_color' => trim($request->input('accent_color', '')) ?: null,
-            'invoice_header_color' => trim($request->input('invoice_header_color', '')) ?: null,
-        ]);
+        foreach (['primary_color' => '#85144b', 'accent_color' => '#c9a227', 'invoice_header_color' => null] as $field => $default) {
+            if ($request->has($field) && is_string($request->input($field))) {
+                $request->merge([$field => trim($request->input($field)) ?: $default]);
+            } elseif ($request->has($field) && $request->input($field) === null) {
+                $request->merge([$field => $default]);
+            }
+        }
         $validated = $request->validate([
             'primary_color' => 'nullable|string|max:20|regex:/^#[0-9A-Fa-f]{3,6}$/',
             'accent_color' => 'nullable|string|max:20|regex:/^#[0-9A-Fa-f]{3,6}$/',
             'invoice_header_color' => 'nullable|string|max:20|regex:/^#[0-9A-Fa-f]{3,6}$/',
+            'browser_icon' => 'nullable|image|mimes:png|max:2048|dimensions:ratio=1/1',
             'login_logo' => 'nullable|image|mimes:jpeg,png,gif,webp|max:2048',
         ]);
 
-        $business = BusinessSetting::get();
-
-        if ($request->hasFile('login_logo')) {
-            $dir = public_path('business');
-            if (! File::isDirectory($dir)) {
-                File::makeDirectory($dir, 0755, true);
-            }
-            if ($business->login_logo_path) {
-                $oldPath = public_path($business->login_logo_path);
-                if (File::exists($oldPath)) {
-                    File::delete($oldPath);
+        $id = BusinessSetting::get()->getKey();
+        $added = [];
+        $replaced = [];
+        try {
+            DB::transaction(function () use ($id, $validated, &$added, &$replaced) {
+                $business = BusinessSetting::lockForUpdate()->findOrFail($id);
+                foreach (['login_logo', 'browser_icon'] as $field) {
+                    $file = $validated[$field] ?? null;
+                    unset($validated[$field]);
+                    if (!$file) {
+                        continue;
+                    }
+                    $column = $field.'_path';
+                    $name = $field.'_'.Str::uuid().'.'.$file->guessExtension();
+                    File::ensureDirectoryExists(public_path('business'));
+                    $file->move(public_path('business'), $name);
+                    $added[] = public_path('business/'.$name);
+                    if ($business->$column) {
+                        $replaced[] = public_path($business->$column);
+                    }
+                    $validated[$column] = 'business/'.$name;
                 }
-            }
-            $file = $request->file('login_logo');
-            $name = 'login_logo_' . Str::uuid() . '.' . $file->guessExtension();
-            $file->move($dir, $name);
-            $validated['login_logo_path'] = 'business/' . $name;
+                $business->update($validated);
+            });
+        } catch (\Throwable $error) {
+            File::delete($added);
+            throw $error;
         }
-
-        unset($validated['login_logo']);
-        $business->update($validated);
+        File::delete($replaced);
         BusinessSetting::clearCache();
 
         return redirect()->route('settings.design.edit')

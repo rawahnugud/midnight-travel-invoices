@@ -154,6 +154,8 @@ return [
     'primary_color_hint' => 'Buttons, links, sidebar accent',
     'accent_color' => 'Accent colour',
     'accent_color_hint' => 'Secondary highlights',
+    'browser_icon' => 'Browser tab icon',
+    'browser_icon_hint' => 'Upload a square PNG up to 2 MB. A 64 × 64 image works well. The login logo is used until you upload an icon.',
     'login_logo' => 'Login page logo',
     'login_logo_hint' => 'Upload a new file to replace. If empty, company logo is used.',
     'login_logo_optional' => 'Optional. If not set, the company logo from Business settings is used on the login page.',
