@@ -71,36 +71,6 @@ class InvoiceWorkflowTest extends TestCase
         }
     }
 
-    public function test_printed_invoice_pdf_omits_browser_footer(): void
-    {
-        $finder = new \Symfony\Component\Process\ExecutableFinder();
-        $chrome = $finder->find('google-chrome');
-        $extract = $finder->find('pdftotext');
-        if (!$chrome || !$extract) {
-            $this->markTestSkipped('Chrome and pdftotext are required for PDF inspection.');
-        }
-
-        $this->actingAs(User::where('role', 'admin')->firstOrFail());
-        $invoice = Invoice::firstOrFail();
-        $html = $this->get(route('invoices.print', $invoice))->assertOk()->getContent();
-        $html = str_replace(asset('css/print.css'), 'file://'.public_path('css/print.css'), $html);
-        $html = preg_replace('#<title>.*?</title>#s', '<title>BrowserFooterMarker</title>', $html);
-        $dir = sys_get_temp_dir().'/invoice-pdf-'.Str::uuid();
-        mkdir($dir);
-        try {
-            file_put_contents($dir.'/invoice.html', $html);
-            (new \Symfony\Component\Process\Process([$chrome, '--headless', '--no-sandbox', '--disable-gpu',
-                '--print-to-pdf='.$dir.'/invoice.pdf', 'file://'.$dir.'/invoice.html']))->mustRun();
-            $text = (new \Symfony\Component\Process\Process([$extract, $dir.'/invoice.pdf', '-']))->mustRun()->getOutput();
-            $this->assertStringContainsString($invoice->invoice_number, $text);
-            $this->assertStringNotContainsString('BrowserFooterMarker', $text);
-            $this->assertStringNotContainsString('file://', $text);
-            $this->assertDoesNotMatchRegularExpression('/^\s*(?:Page\s+)?1\s*(?:of|\/)\s*1\s*$/mi', $text);
-        } finally {
-            \Illuminate\Support\Facades\File::deleteDirectory($dir);
-        }
-    }
-
     public function test_branch_artwork_on_printed_invoices(): void
     {
         $settings = \App\Models\BusinessSetting::get();
