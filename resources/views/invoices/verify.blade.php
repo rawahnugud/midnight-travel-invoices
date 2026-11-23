@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ __('messages.verify_invoice') }} · {{ $issuer }}</title>
+  @include('partials.favicon')
   <style>
     body { margin: 0; background: #faf7f8; color: #292228; font: 1rem/1.5 system-ui, sans-serif; }
     main { max-width: 28rem; margin: 8vh auto; padding: 2rem; background: white; border-top: 4px solid #85144b; }
