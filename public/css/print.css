@@ -82,11 +82,6 @@ body.print-body {
 }
 
 @media print {
-  .invoice-document .invoice-print {
-    padding: 12mm 14mm !important;
-    -webkit-box-decoration-break: clone;
-    box-decoration-break: clone;
-  }
   html, body.print-body { height: auto; min-height: 0; overflow: visible; }
   .no-print,
   .print-toolbar,
