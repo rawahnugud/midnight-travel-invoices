@@ -18,6 +18,7 @@
     $ogImageUrl = $logoUrl ?: $stampUrl;
   @endphp
   <title>{{ __('messages.invoice') }} {{ $invoice->invoice_number }} — {{ $company }}</title>
+  @include('partials.favicon')
   @if($ogImageUrl)
     <link rel="icon" href="{{ $ogImageUrl }}">
   @endif

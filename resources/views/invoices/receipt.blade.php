@@ -8,6 +8,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ __('messages.payment_receipt') }} {{ $payment->receiptNumber() }} — {{ $payment->issuer_name }}</title>
+  @include('partials.favicon')
   <link rel="stylesheet" href="{{ asset('css/print.css') }}?v={{ filemtime(public_path('css/print.css')) }}">
   <style>
     .receipt { --invoice-header: {{ $business?->invoice_header_color ?? '#631c36' }}; }
