@@ -10,7 +10,7 @@ class BusinessSetting extends Model
     protected $fillable = [
         'company_name', 'tagline', 'address', 'phone', 'email', 'website',
         'logo_path', 'default_currency', 'tax_id',
-        'primary_color', 'accent_color', 'login_logo_path', 'invoice_header_color',
+        'primary_color', 'accent_color', 'login_logo_path', 'browser_icon_path', 'invoice_header_color',
         'stamp_path',
     ];
 
@@ -102,6 +102,11 @@ class BusinessSetting extends Model
             return asset($this->login_logo_path);
         }
         return $this->logo_url;
+    }
+
+    public function getBrowserIconUrlAttribute(): ?string
+    {
+        return $this->browser_icon_path ? asset($this->browser_icon_path) : $this->login_logo_url;
     }
 
     /** Primary theme color for app and optionally invoice (hex). */
