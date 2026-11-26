@@ -18,7 +18,7 @@
       <div class="form-group"><label for="letter-date">{{ __('letters.date') }}</label><input id="letter-date" type="date" name="date" required value="{{ old('date', $data['date'] ?? today()->toDateString()) }}"></div>
       @foreach(['bank','holder','account','signer','role'] as $field)
       <div class="form-group"><label for="letter-{{ $field }}">{{ __('letters.'.$field) }}</label>
-        <input id="letter-{{ $field }}" name="{{ $field }}" value="{{ old($field, $data[$field] ?? '') }}" @if($field==='account') dir="ltr" inputmode="numeric" @endif>
+        <input id="letter-{{ $field }}" name="{{ $field }}" value="{{ old($field, isset($defaults) ? ($defaults[old('language', app()->getLocale())][$field] ?? '') : ($data[$field] ?? '')) }}" @if($field==='account') dir="ltr" inputmode="numeric" @endif>
       </div>
       @endforeach
     </div>
@@ -38,6 +38,20 @@
   </form>
 </div>
 <script>
+@isset($defaults)
+const senderDefaults = {{ Illuminate\Support\Js::from($defaults) }};
+const language = document.getElementById('letter-language');
+let previousLanguage = language.value;
+language.addEventListener('change', () => {
+    for (const field of ['holder', 'signer', 'role']) {
+        const input = document.getElementById('letter-' + field);
+        if (input.value === senderDefaults[previousLanguage][field]) {
+            input.value = senderDefaults[language.value][field];
+        }
+    }
+    previousLanguage = language.value;
+});
+@endisset
 const rows = document.getElementById('beneficiaries');
 function updateButtons() {
     for (const button of rows.querySelectorAll('button')) button.disabled = rows.children.length === 1;

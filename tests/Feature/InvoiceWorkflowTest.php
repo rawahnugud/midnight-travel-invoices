@@ -100,6 +100,16 @@ class InvoiceWorkflowTest extends TestCase
         $lookup(['customer' => 'Example Group East'])->assertSeeText(__('messages.no_pending_customer'));
     }
 
+    public function test_new_letters_prefill_the_sender_in_the_selected_language(): void
+    {
+        config(['bank_letters.ar' => ['holder' => 'شركة تجريبية', 'signer' => 'اسم تجريبي',
+            'role' => 'المدير العام', 'account' => '000123']]);
+        $this->actingAs(User::where('role', 'admin')->firstOrFail())->withSession(['locale' => 'ar'])
+            ->get(route('letters.create'))->assertOk()->assertSee('value="000123"', false)
+            ->assertSee('value="شركة تجريبية"', false)->assertSee('value="اسم تجريبي"', false)
+            ->assertSee('value="المدير العام"', false);
+    }
+
     public function test_bank_letter_drafts_can_be_amended_copied_and_printed_by_admin(): void
     {
         $this->actingAs(User::where('role', 'admin')->firstOrFail());

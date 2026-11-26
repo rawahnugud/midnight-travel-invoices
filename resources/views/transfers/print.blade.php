@@ -9,9 +9,9 @@
     body { background:#f4f5f7; color:#111; margin:0; font:12pt/1.35 "Times New Roman",serif }
     nav, article { max-width:210mm; margin:auto }
     nav { display:flex; gap:1rem; align-items:center; padding:1rem; font:1rem sans-serif }
-    article { background:white; min-height:285mm; padding:14mm 18mm }
+    article { background:white; min-height:297mm; padding:35mm 17mm 25mm }
     .opening, h1 { text-align:center }
-    .opening { margin:0 0 17mm }
+    .opening { margin:0 0 10mm }
     h1 { font-size:1em; margin:5mm 0 }
     p { margin:4mm 0 }
     table { border-collapse:collapse; width:100%; margin:10mm 0; table-layout:fixed }
@@ -19,7 +19,7 @@
     th:last-child { width:42% }
     tr, footer { break-inside:avoid }
     footer { margin-top:20mm }
-    @page { size:A4; margin:17mm }
+    @page { size:A4; margin:35mm 17mm 25mm }
     @media print { body { background:white } nav { display:none } article { padding:0; min-height:0; max-width:none } thead { display:table-header-group } }
     @media screen and (max-width:650px) { article { padding:16px } }
   </style>
