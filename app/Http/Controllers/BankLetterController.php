@@ -16,7 +16,9 @@ class BankLetterController extends Controller
 
     public function create()
     {
-        return view('transfers.form', ['letter' => new BankLetter(), 'data' => []]);
+        $defaults = config('bank_letters');
+        $data = $defaults[app()->getLocale()] ?? $defaults['en'];
+        return view('transfers.form', ['letter' => new BankLetter(), 'data' => $data, 'defaults' => $defaults]);
     }
 
     public function edit(BankLetter $letter)
