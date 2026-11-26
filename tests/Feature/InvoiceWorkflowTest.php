@@ -100,6 +100,38 @@ class InvoiceWorkflowTest extends TestCase
         $lookup(['customer' => 'Example Group East'])->assertSeeText(__('messages.no_pending_customer'));
     }
 
+    public function test_bank_letter_drafts_can_be_amended_copied_and_printed_by_admin(): void
+    {
+        $this->actingAs(User::where('role', 'admin')->firstOrFail());
+        $draft = ['language' => 'en', 'date' => '2026-11-13', 'rows' => [['name' => 'Example']]];
+        $this->post(route('letters.store'), $draft)->assertSessionHasNoErrors();
+        $letter = \App\Models\BankLetter::sole();
+        $this->get(route('letters.print', $letter))->assertRedirect(route('letters.edit', $letter));
+        $draft += ['bank' => 'Example Bank', 'holder' => 'Example Agency', 'account' => '000123',
+            'signer' => 'Example Signer', 'role' => 'Manager', 'action' => 'print'];
+        $draft['rows'] = [['name' => 'A', 'account' => '0012', 'amount' => '55079933.10'],
+            ['name' => 'B', 'account' => '0034', 'amount' => '75900162.95']];
+        $this->put(route('letters.update', $letter), $draft + ['revision' => 1])->assertRedirect(route('letters.print', $letter));
+        $this->put(route('letters.update', $letter), $draft + ['revision' => 1])->assertStatus(409);
+        $this->get(route('letters.print', $letter))->assertOk()->assertSeeText('130,980,096.05')
+            ->assertSeeText('one hundred and thirty million')->assertSeeText('five piastres')->assertSeeText('0012');
+        $this->get(route('letters.copy', $letter))->assertOk()->assertSee('0012');
+        $draft['language'] = 'ar';
+        $this->post(route('letters.store'), $draft)->assertSessionHasNoErrors();
+        $copy = \App\Models\BankLetter::latest('id')->first();
+        $this->assertNotEquals($letter->id, $copy->id);
+        $this->assertSame('en', $letter->fresh()->details['language']);
+        $this->get(route('letters.print', $copy))->assertOk()->assertSee('dir="rtl"', false)
+            ->assertSeeText('طلب تحويل داخلي')->assertSeeText('خمسة قروش');
+        $this->actingAs(User::where('role', 'staff')->firstOrFail());
+        foreach (['edit','copy','print'] as $page) {
+            $this->get(route('letters.'.$page, $letter))->assertForbidden();
+        }
+        $this->get(route('letters.index'))->assertForbidden();
+        $this->post(route('letters.store'), $draft)->assertForbidden();
+        $this->put(route('letters.update', $letter), $draft)->assertForbidden();
+    }
+
     public function test_branch_artwork_on_printed_invoices(): void
     {
         $settings = \App\Models\BusinessSetting::get();
