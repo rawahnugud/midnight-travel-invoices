@@ -5,9 +5,12 @@
 <div class="card">
   <div class="card-header">
     <h2>{{ __('messages.invoices') }}</h2>
-    @if($user && in_array($user->role, ['admin', 'staff']))
-    <a href="{{ route('invoices.create') }}" class="btn btn-primary btn-sm">{{ __('messages.new_invoice') }}</a>
-    @endif
+    <div class="header-actions">
+      <a href="{{ route('invoices.customer-balance') }}" class="btn btn-outline btn-sm">{{ __('messages.customer_balance') }}</a>
+      @if($user && in_array($user->role, ['admin', 'staff']))
+      <a href="{{ route('invoices.create') }}" class="btn btn-primary btn-sm">{{ __('messages.new_invoice') }}</a>
+      @endif
+    </div>
   </div>
   <div class="card-body">
     @if(session('success'))

@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'customer_balance' => 'رصيد العميل',
+    'total_due' => 'إجمالي المبلغ المستحق',
+    'select_balance_customer' => 'اختر العميل لعرض فواتيره المعلّقة.',
+    'no_pending_customer' => 'لا توجد فواتير معلّقة بهذا الاسم.',
+
     'invoice_search' => 'رقم الفاتورة أو اسم العميل',
     'search' => 'بحث',
     'finish_payment' => 'تم حفظ الفاتورة. سجّل الدفعة أدناه لإصدار الإيصال.',
