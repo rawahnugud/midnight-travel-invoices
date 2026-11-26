@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\BankLetterController;
 use App\Http\Controllers\BusinessSettingsController;
 use App\Http\Controllers\CustomerBalanceController;
 use App\Http\Controllers\DashboardController;
@@ -41,6 +42,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('invoices', InvoiceController::class)->only(['index', 'show']);
 
     Route::middleware('role:admin')->group(function () {
+        Route::get('/bank-letters/{letter}/copy', [BankLetterController::class, 'copy'])->name('letters.copy');
+        Route::get('/bank-letters/{letter}/print', [BankLetterController::class, 'print'])->name('letters.print');
+        Route::get('/bank-letters', [BankLetterController::class, 'index'])->name('letters.index');
+        Route::get('/bank-letters/create', [BankLetterController::class, 'create'])->name('letters.create');
+        Route::post('/bank-letters', [BankLetterController::class, 'store'])->name('letters.store');
+        Route::get('/bank-letters/{letter}/edit', [BankLetterController::class, 'edit'])->name('letters.edit');
+        Route::put('/bank-letters/{letter}', [BankLetterController::class, 'update'])->name('letters.update');
         Route::post('/invoices/{invoice}/payments/{payment}/reverse', [PaymentController::class, 'reverse'])
             ->scopeBindings()->name('invoices.payments.reverse');
         Route::post('/invoices/{invoice}/cancel', [InvoiceController::class, 'cancel'])->name('invoices.cancel');
