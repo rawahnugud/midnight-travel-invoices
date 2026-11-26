@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'customer_balance' => 'Customer balance',
+    'total_due' => 'Total due',
+    'select_balance_customer' => 'Select a customer to see their pending invoices.',
+    'no_pending_customer' => 'No pending invoices found for this name.',
+
     'invoice_search' => 'Invoice number or customer name',
     'search' => 'Search',
     'finish_payment' => 'Invoice saved. Record the payment below to issue its receipt.',

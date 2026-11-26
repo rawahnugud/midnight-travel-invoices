@@ -71,6 +71,35 @@ class InvoiceWorkflowTest extends TestCase
         }
     }
 
+    public function test_customer_balance_separates_names_currencies_and_staff_visibility(): void
+    {
+        $admin = User::where('role', 'admin')->firstOrFail();
+        $pending = Invoice::where('status', 'pending')->sole();
+        $staff = $pending->creator;
+        $pending->update(['customer_name' => 'Example Group', 'currency' => 'USD']);
+        $this->actingAs($admin);
+        $add = function (string $name, string $currency) {
+            $this->post(route('invoices.store'), [
+                'customer_name' => $name, 'currency' => $currency, 'invoice_date' => today()->toDateString(),
+                'items' => [['item_name' => 'Ticket', 'quantity' => 1, 'unit_price' => '25.00']],
+            ])->assertSessionHasNoErrors();
+        };
+        $add('Example Group', 'AED');
+        $add('Example Group East', 'USD');
+        $paid = Invoice::where('status', 'paid')->sole();
+        $paid->update(['customer_name' => 'Example Group']);
+        $this->post(route('invoices.payments.store', $pending), $this->paymentPayload('10.00'))->assertSessionHasNoErrors();
+        $lookup = fn ($params) => $this->get(route('invoices.customer-balance', $params))->assertOk();
+        $lookup(['q' => 'Example'])->assertSeeText('Example Group East')->assertDontSeeText($pending->invoice_number);
+        $report = $lookup(['customer' => ' example group '])->assertSeeText($pending->invoice_number)->assertDontSeeText($paid->invoice_number);
+        $this->assertCount(2, $report->viewData('invoices'));
+        $this->assertEquals(['AED' => 25, 'USD' => 830], $report->viewData('totals')->all());
+        $this->post(route('invoices.payments.reverse', [$pending, $pending->payments()->sole()]), ['reason' => 'Correction'])->assertSessionHasNoErrors();
+        $this->actingAs($staff);
+        $this->assertEquals(['USD' => 840], $lookup(['q' => 'Example'])->viewData('totals')->all());
+        $lookup(['customer' => 'Example Group East'])->assertSeeText(__('messages.no_pending_customer'));
+    }
+
     public function test_branch_artwork_on_printed_invoices(): void
     {
         $settings = \App\Models\BusinessSetting::get();

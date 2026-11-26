@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BusinessSettingsController;
+use App\Http\Controllers\CustomerBalanceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
@@ -28,6 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/settings', fn () => view('settings'))->name('settings');
 
+    Route::get('/invoices/customer-balance', CustomerBalanceController::class)->name('invoices.customer-balance');
     Route::get('/invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
     Route::get('/invoices/{invoice}/payments/{payment}', [PaymentController::class, 'show'])
         ->scopeBindings()->name('invoices.payments.show');
